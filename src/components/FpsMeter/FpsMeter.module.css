@@ -1,0 +1,39 @@
+.bar {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.pill {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  background: var(--paper);
+  border-radius: 4px;
+  box-shadow: var(--card-edge-pill);
+  padding: 6px 12px;
+}
+
+.value {
+  font: 600 14px/1 var(--mono);
+  color: var(--brass-deep);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.label {
+  font: 500 11px/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.divider {
+  width: 1px;
+  height: 12px;
+  align-self: center;
+  background: var(--border);
+  margin: 0 3px;
+}

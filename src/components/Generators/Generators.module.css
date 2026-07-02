@@ -1,0 +1,290 @@
+.wrap {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 24px;
+}
+
+.baseBlock {
+  align-self: center;
+}
+
+/* ===== Tela de escolha de modo ===== */
+.modeScreen {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modeCard {
+  background: var(--paper);
+  border: none;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 400px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  box-shadow: var(--card-edge-lg);
+}
+
+.modeTitle {
+  font: 500 22px/1.2 var(--serif);
+  font-variation-settings: 'opsz' 36;
+  color: var(--brass-deep);
+  letter-spacing: -0.01em;
+}
+
+.modeOptions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.modeBtn {
+  flex: 1;
+  background: var(--surface);
+  border: none;
+  box-shadow: var(--card-edge);
+  border-radius: 4px;
+  padding: 12px 0;
+  font: 500 13px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+.modeBtn:hover {
+  background: var(--surface-hover);
+  color: var(--ink);
+}
+
+.modeActive,
+.modeActive:hover {
+  background: var(--surface-deep);
+  color: var(--brass-deep);
+}
+
+.modeHint {
+  font: 400 12px/1.5 var(--mono);
+  color: var(--ink-muted);
+  text-align: center;
+  min-height: 36px;
+}
+
+
+/* Hub de cardzinhos no canto superior esquerdo, lado a lado */
+.corner {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.timePill {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  background: var(--paper);
+  border-radius: 4px;
+  box-shadow: var(--card-edge-pill);
+  padding: 6px 12px;
+}
+
+.exportBtn {
+  background: var(--paper);
+  border: none;
+  border-radius: 4px;
+  box-shadow: var(--card-edge-pill);
+  padding: 6px 12px;
+  font: 500 11px/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.exportBtn:hover {
+  background: var(--surface);
+  color: var(--brass-deep);
+}
+
+.toggleOn,
+.toggleOn:hover {
+  background: var(--surface-deep);
+  color: var(--brass-deep);
+}
+
+.timeValue {
+  font: 600 14px/1 var(--mono);
+  color: var(--brass-deep);
+  font-variant-numeric: tabular-nums;
+}
+
+.timeLabel {
+  font: 500 11px/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.baseBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.baseLabel {
+  font: 500 12px var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.baseValue {
+  font: 600 48px/1 var(--mono);
+  color: var(--brass-deep);
+  font-variant-numeric: tabular-nums;
+}
+
+.baseRate {
+  font: 500 13px var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+/* Única área rolável do app, com a barra invisível */
+.list {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.list::-webkit-scrollbar {
+  display: none;
+}
+
+/* Atalhos de navegação no topo e no fim da lista */
+.jumpBtn {
+  flex-shrink: 0;
+  background: var(--paper);
+  border: none;
+  border-radius: 4px;
+  box-shadow: var(--card-edge);
+  padding: 10px;
+  font: 500 11px var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.jumpBtn:hover {
+  background: var(--surface);
+  color: var(--brass-deep);
+}
+
+.row {
+  flex-shrink: 0;
+  display: grid;
+  /* Colunas de largura fixa + space-between = mesma distância entre todas */
+  grid-template-columns: 60px 140px 140px 240px 120px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background: var(--paper);
+  border: none;
+  border-radius: 4px;
+  box-shadow: var(--card-edge);
+  padding: 14px 18px;
+}
+
+.rowLocked {
+  display: flex;
+  justify-content: center;
+}
+
+/* Botão-barra de progresso: o preenchimento cresce conforme o recurso se
+   aproxima do custo (via --progress definido inline) */
+.progressBtn {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Parte vazia = visual padrão de botão primário desabilitado (cinza, texto
+   escuro), mantendo a identidade dos outros botões. */
+.progressBtn:disabled {
+  opacity: 1;
+  background: var(--ink-faint);
+  color: var(--paper);
+}
+
+/* Preenchimento semitransparente atrás do rótulo, na largura do progresso */
+.progressBtn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: var(--progress, 0%);
+  background: var(--brass-deep);
+  opacity: 0.6;
+  transition: width 0.1s linear;
+}
+
+.progressLabel {
+  position: relative;
+}
+
+.genName {
+  font: 600 20px var(--serif);
+  font-variation-settings: 'opsz' 36;
+  color: var(--brass-deep);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+}
+
+.statLabel {
+  font: 500 10px var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.statValue {
+  font: 500 14px var(--mono);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.row button {
+  width: 120px;
+  padding: 10px 0;
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}

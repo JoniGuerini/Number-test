@@ -1,0 +1,82 @@
+.frame {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 20px;
+  padding: 16px;
+  background: var(--bg);
+}
+
+/* Contador: centralizado na área restante */
+.contentCenter {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Geradores: ocupa toda a largura do app; min-height 0 permite a lista
+   interna rolar em vez de estourar a página */
+.contentFull {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.footer {
+  position: sticky;
+  bottom: 12px;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.tab {
+  background: var(--paper);
+  border: none;
+  box-shadow: var(--card-edge);
+  border-radius: 4px;
+  padding: 12px 28px;
+  font: 500 13px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s, transform 0.08s;
+}
+.tab:hover {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--card-edge-lg);
+}
+.tab:active {
+  box-shadow: var(--card-edge-press);
+  transform: scale(0.99);
+}
+
+.active,
+.active:hover {
+  background: var(--surface-deep);
+  color: var(--brass-deep);
+}
+
+/* Alinha o Zerar à altura das tabs do footer */
+.resetTab {
+  padding: 12px 28px;
+  font-size: 13px;
+  line-height: 1;
+}

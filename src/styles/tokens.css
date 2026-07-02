@@ -1,0 +1,88 @@
+:root {
+  /* ============================================================
+     FUNDOS — base graduada do mais profundo ao mais elevado
+     (portado do design system do Underdarkness)
+     ============================================================ */
+  --bg: #0c0e12;
+  --paper: #131620;
+  --surface: #1a1e2a;
+  --surface-hover: #232838;
+  --surface-deep: #2a3045;
+
+  /* ============================================================
+     LATÃO — UI primária, acentos, botões principais e títulos
+     ============================================================ */
+  --brass-light: #5a5040;
+  --brass: #7a7060;
+  --brass-deep: #bcb09a;
+  --brass-bright: #c2a878;
+
+  /* ============================================================
+     FOLHA — textos, do mais forte ao mais discreto
+     ============================================================ */
+  --ink: #d8dce2;
+  --ink-soft: #b0b6c0;
+  --ink-muted: #8b96a3;
+  --ink-faint: #545d6e;
+
+  /* ============================================================
+     ACENTO — destrutivo (vermelho)
+     ============================================================ */
+  --accent: #c45a4d;
+  --accent-deep: #9a3e34;
+
+  /* ============================================================
+     VITAIS — barras de recurso/progresso
+     ============================================================ */
+  --vital-vida: #d97766;
+  --vital-mana: #5a8aa8;
+  --vital-exp: #8a6f3e;
+
+  /* ============================================================
+     TIERS DE CONTRATO — porte do cliente, do freela ao unicórnio
+     (aplicar no nome/tag do contrato, nunca em bordas)
+     ============================================================ */
+  --tier-freela: #b0b6c0;       /* Cinza-folha — trabalho pequeno, neutro */
+  --tier-startup: #57c96a;      /* Verde — crescimento, garagem */
+  --tier-corporativo: #6495ED;  /* Azul corporativo clássico */
+  --tier-enterprise: #B57EDC;   /* Roxo — contratos enterprise premium */
+  --tier-unicornio: #e0669a;    /* Rosa-magenta — o mítico unicórnio */
+
+  /* ============================================================
+     BORDAS — visíveis sobre fundo escuro
+     ============================================================ */
+  --border: #2a3045;
+  --border-soft: #1d2230;
+  --border-faint: #14181f;
+
+  /* ============================================================
+     SOMBRAS — sistema layered (dark mode tuned)
+     ============================================================ */
+  --card-edge:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.6),
+    0 0 0 0.5px rgba(0, 0, 0, 0.7);
+
+  --card-edge-lg:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 6px 18px rgba(0, 0, 0, 0.5),
+    0 0 0 0.5px rgba(0, 0, 0, 0.7);
+
+  --card-edge-pill:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 1px 1px rgba(0, 0, 0, 0.4),
+    0 0 0 0.5px rgba(0, 0, 0, 0.7);
+
+  --card-edge-press:
+    inset 0 2px 4px rgba(0, 0, 0, 0.5),
+    0 0 0 0.5px rgba(0, 0, 0, 0.7);
+
+  --shadow-md: var(--card-edge-lg);
+  --shadow-lg: var(--card-edge-lg);
+
+  /* ============================================================
+     TIPOGRAFIA
+     ============================================================ */
+  --serif: 'Fraunces', Georgia, serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+}
