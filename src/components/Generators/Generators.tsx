@@ -21,8 +21,10 @@ interface Game {
   mode: Mode;
   /** false = ainda na tela de escolha de modo. */
   started: boolean;
-  /** Date.now() do clique em Iniciar — identifica quando o save nasceu. */
+  /** Date.now() do clique em Iniciar — âncora de toda a simulação. */
   startedAt?: number;
+  /** Passos fixos de simulação executados desde o início. */
+  steps: number;
   /** Tempo de jogo em segundos (conta a partir da 1ª compra do Gerador 1). */
   uptime: number;
 }
@@ -34,8 +36,8 @@ interface GenSave {
   mode?: Mode;
   started?: boolean;
   startedAt?: number;
-  /** Date.now() do momento do save — usado pra simular o tempo perdido
-      entre fechar/recarregar a página e o jogo voltar a rodar. */
+  steps?: number;
+  /** Date.now() do momento do save (informativo/migração de saves antigos). */
   savedAt?: number;
 }
 
@@ -54,10 +56,23 @@ function loadGame(): Game {
       gens: [newGen()],
       mode: 'manual',
       started: false,
+      steps: 0,
       uptime: 0,
     };
   }
-  const game: Game = {
+
+  const started = s.started ?? true;
+  // Migração de saves de antes do timestep fixo: aproxima a âncora e os passos
+  // já executados pelo que dá pra inferir (um Zerar dá partida limpa).
+  const startedAt =
+    s.startedAt ?? (started ? Date.now() - s.uptime * 1000 : undefined);
+  const steps =
+    s.steps ??
+    (started && startedAt !== undefined && s.savedAt !== undefined
+      ? Math.floor((s.savedAt - startedAt) / (SIM_STEP_S * 1000))
+      : Math.floor(s.uptime / SIM_STEP_S));
+
+  return {
     base: new Decimal(s.base),
     gens: s.gens.map((g) => ({
       amount: new Decimal(g.amount),
@@ -65,19 +80,13 @@ function loadGame(): Game {
       unlockedAt: g.unlockedAt,
     })),
     mode: s.mode ?? 'manual',
-    // Saves antigos (sem o campo) já estavam em jogo.
-    started: s.started ?? true,
-    startedAt: s.startedAt,
+    started,
+    startedAt,
+    steps,
     uptime: s.uptime,
   };
-
-  // Recupera o tempo decorrido entre o último save e agora (refresh, aba
-  // fechada...) — a simulação fica ancorada no relógio de parede e nada se perde.
-  if (game.started && s.savedAt !== undefined) {
-    const elapsed = (Date.now() - s.savedAt) / 1000;
-    if (elapsed > 0.05) return advance(game, elapsed);
-  }
-  return game;
+  // O tempo fechado/oculto é recuperado pelo próprio loop: o alvo de passos
+  // vem do relógio de parede, então o jogo corre atrás sozinho ao carregar.
 }
 
 /** Agressividade da curva de custos: cada tier custa 10^(2c) a mais que o
@@ -95,33 +104,33 @@ function costOf(i: number, bought: number): Decimal {
     .round();
 }
 
-/** Resolução máxima de cada passo de simulação. Frames normais (~16ms) rodam
-    em passo único; um dt gigante (aba que ficou oculta) é dividido em subpassos
-    para o crescimento composto e as compras automáticas saírem corretos. */
-const MAX_STEP_S = 0.25;
-/** Teto de subpassos por frame (~83min de ausência em resolução plena; além
-    disso o passo cresce para não travar a UI no retorno). */
-const MAX_STEPS_PER_TICK = 20_000;
+/** Timestep FIXO da simulação. O jogo avança sempre em passos de exatamente
+    0.25s, ancorados no startedAt — o estado é função pura do nº de passos,
+    então duas máquinas com o mesmo save executam a mesma sequência de contas
+    e ficam idênticas, não importa se a aba ficou aberta, oculta ou fechada.
+    (Passo variável causava drift: o erro de integração do crescimento composto
+    depende do tamanho do passo e compõe ao longo das horas.) */
+const SIM_STEP_S = 0.25;
+/** Produção por unidade em um passo (0.1/s × 0.25s). */
+const PROD_PER_STEP = PROD_PER_UNIT.mul(SIM_STEP_S);
+/** Teto de passos executados por frame durante o catch-up, pra não travar a
+    UI ao reabrir (2h fechada ≈ 29k passos → alcança em ~15 frames). */
+const MAX_STEPS_PER_FRAME = 2_000;
 
-/** Avança a simulação em dt segundos. Função pura: não muta o estado anterior. */
-function advance(g: Game, dt: number): Game {
+/** Executa nSteps passos fixos de simulação. Função pura e determinística. */
+function advance(g: Game, nSteps: number): Game {
   const gens = g.gens.map((x) => ({ ...x }));
   let base = g.base;
   let uptime = g.uptime;
 
-  const steps = Math.min(Math.max(1, Math.ceil(dt / MAX_STEP_S)), MAX_STEPS_PER_TICK);
-  const stepDt = dt / steps;
-
-  for (let s = 0; s < steps; s++) {
-    if (gens[0].bought > 0) uptime += stepDt;
+  for (let s = 0; s < nSteps; s++) {
+    if (gens[0].bought > 0) uptime += SIM_STEP_S;
 
     // Cada unidade do gerador N produz 0.1 do gerador N-1 por segundo.
     for (let i = gens.length - 1; i >= 1; i--) {
-      gens[i - 1].amount = gens[i - 1].amount.add(
-        gens[i].amount.mul(PROD_PER_UNIT).mul(stepDt)
-      );
+      gens[i - 1].amount = gens[i - 1].amount.add(gens[i].amount.mul(PROD_PER_STEP));
     }
-    base = base.add(gens[0].amount.mul(PROD_PER_UNIT).mul(stepDt));
+    base = base.add(gens[0].amount.mul(PROD_PER_STEP));
 
     // Modo automático: compra 1x o próximo gerador assim que alcançar o custo.
     if (g.mode === 'auto') {
@@ -137,7 +146,7 @@ function advance(g: Game, dt: number): Game {
     }
   }
 
-  return { ...g, base, gens, uptime };
+  return { ...g, base, gens, uptime, steps: g.steps + nSteps };
 }
 
 export default function Generators() {
@@ -216,6 +225,7 @@ export default function Generators() {
         mode: g.mode,
         started: g.started,
         startedAt: g.startedAt,
+        steps: g.steps,
         savedAt: Date.now(),
       } satisfies GenSave);
     };
@@ -229,13 +239,17 @@ export default function Generators() {
 
   useEffect(() => {
     let rafId: number;
-    let last = performance.now();
 
-    const tick = (now: number) => {
-      const dt = (now - last) / 1000;
-      last = now;
-
-      setGame((g) => (g.started ? advance(g, dt) : g));
+    // O relógio de parede dita quantos passos fixos já deveriam ter sido
+    // executados desde o startedAt; o frame só corre atrás da diferença.
+    // Estado = f(nº de passos) → determinístico entre máquinas e sessões.
+    const tick = () => {
+      setGame((g) => {
+        if (!g.started || g.startedAt === undefined) return g;
+        const target = Math.floor((Date.now() - g.startedAt) / (SIM_STEP_S * 1000));
+        const todo = Math.min(target - g.steps, MAX_STEPS_PER_FRAME);
+        return todo > 0 ? advance(g, todo) : g;
+      });
 
       rafId = requestAnimationFrame(tick);
     };
@@ -354,7 +368,7 @@ export default function Generators() {
           <button
             className="btn-primary"
             onClick={() =>
-              setGame((g) => ({ ...g, started: true, startedAt: Date.now() }))
+              setGame((g) => ({ ...g, started: true, startedAt: Date.now(), steps: 0 }))
             }
           >
             Iniciar
