@@ -31,6 +31,9 @@ interface GenSave {
   uptime: number;
   mode?: Mode;
   started?: boolean;
+  /** Date.now() do momento do save — usado pra simular o tempo perdido
+      entre fechar/recarregar a página e o jogo voltar a rodar. */
+  savedAt?: number;
 }
 
 const START_BASE = new Decimal(1);
@@ -51,7 +54,7 @@ function loadGame(): Game {
       uptime: 0,
     };
   }
-  return {
+  const game: Game = {
     base: new Decimal(s.base),
     gens: s.gens.map((g) => ({
       amount: new Decimal(g.amount),
@@ -63,6 +66,14 @@ function loadGame(): Game {
     started: s.started ?? true,
     uptime: s.uptime,
   };
+
+  // Recupera o tempo decorrido entre o último save e agora (refresh, aba
+  // fechada...) — a simulação fica ancorada no relógio de parede e nada se perde.
+  if (game.started && s.savedAt !== undefined) {
+    const elapsed = (Date.now() - s.savedAt) / 1000;
+    if (elapsed > 0.05) return advance(game, elapsed);
+  }
+  return game;
 }
 
 /** Agressividade da curva de custos: cada tier custa 10^(2c) a mais que o
@@ -200,6 +211,7 @@ export default function Generators() {
         uptime: g.uptime,
         mode: g.mode,
         started: g.started,
+        savedAt: Date.now(),
       } satisfies GenSave);
     };
     const id = setInterval(persist, 1000);

@@ -14,25 +14,44 @@ interface CounterSave {
   value: string;
   rate: string;
   uptime: number;
+  running?: boolean;
+  /** Date.now() do momento do save — para recuperar o tempo do refresh. */
+  savedAt?: number;
+}
+
+function loadCounter() {
+  const s = loadSave<CounterSave>(COUNTER_SAVE_KEY);
+  if (!s) {
+    return { value: new Decimal(0), rate: BASE_RATE, uptime: 0, running: false };
+  }
+
+  let value = new Decimal(s.value);
+  let uptime = s.uptime;
+  const rate = new Decimal(s.rate);
+  const running = s.running ?? false;
+
+  // Se estava rodando, recupera o tempo decorrido desde o último save
+  // (refresh, aba fechada) — nada se perde.
+  if (running && s.savedAt !== undefined) {
+    const elapsed = (Date.now() - s.savedAt) / 1000;
+    if (elapsed > 0) {
+      value = value.add(rate.mul(elapsed));
+      uptime += elapsed;
+    }
+  }
+  return { value, rate, uptime, running };
 }
 
 export default function Counter() {
-  const [value, setValue] = useState<Decimal>(() => {
-    const s = loadSave<CounterSave>(COUNTER_SAVE_KEY);
-    return s ? new Decimal(s.value) : new Decimal(0);
-  });
-  const [rate, setRate] = useState<Decimal>(() => {
-    const s = loadSave<CounterSave>(COUNTER_SAVE_KEY);
-    return s ? new Decimal(s.rate) : BASE_RATE;
-  });
-  const [uptime, setUptime] = useState(
-    () => loadSave<CounterSave>(COUNTER_SAVE_KEY)?.uptime ?? 0
-  );
-  const [running, setRunning] = useState(false);
+  const [initial] = useState(loadCounter);
+  const [value, setValue] = useState<Decimal>(initial.value);
+  const [rate, setRate] = useState<Decimal>(initial.rate);
+  const [uptime, setUptime] = useState(initial.uptime);
+  const [running, setRunning] = useState(initial.running);
 
   // Save automático: 1x por segundo e ao fechar/recarregar a página.
-  const saveRef = useRef({ value, rate, uptime });
-  saveRef.current = { value, rate, uptime };
+  const saveRef = useRef({ value, rate, uptime, running });
+  saveRef.current = { value, rate, uptime, running };
   useEffect(() => {
     const persist = () => {
       const s = saveRef.current;
@@ -40,6 +59,8 @@ export default function Counter() {
         value: s.value.toString(),
         rate: s.rate.toString(),
         uptime: s.uptime,
+        running: s.running,
+        savedAt: Date.now(),
       } satisfies CounterSave);
     };
     const id = setInterval(persist, 1000);
