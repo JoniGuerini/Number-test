@@ -83,6 +83,6 @@
   /* ============================================================
      TIPOGRAFIA
      ============================================================ */
-  --serif: 'Fraunces', Georgia, serif;
-  --mono: 'JetBrains Mono', 'Courier New', monospace;
+  --serif: 'Fraunces Variable', 'Fraunces', Georgia, serif;
+  --mono: 'JetBrains Mono Variable', 'JetBrains Mono', 'Courier New', monospace;
 }
