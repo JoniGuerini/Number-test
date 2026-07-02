@@ -21,6 +21,8 @@ interface Game {
   mode: Mode;
   /** false = ainda na tela de escolha de modo. */
   started: boolean;
+  /** Date.now() do clique em Iniciar — identifica quando o save nasceu. */
+  startedAt?: number;
   /** Tempo de jogo em segundos (conta a partir da 1ª compra do Gerador 1). */
   uptime: number;
 }
@@ -31,6 +33,7 @@ interface GenSave {
   uptime: number;
   mode?: Mode;
   started?: boolean;
+  startedAt?: number;
   /** Date.now() do momento do save — usado pra simular o tempo perdido
       entre fechar/recarregar a página e o jogo voltar a rodar. */
   savedAt?: number;
@@ -64,6 +67,7 @@ function loadGame(): Game {
     mode: s.mode ?? 'manual',
     // Saves antigos (sem o campo) já estavam em jogo.
     started: s.started ?? true,
+    startedAt: s.startedAt,
     uptime: s.uptime,
   };
 
@@ -211,6 +215,7 @@ export default function Generators() {
         uptime: g.uptime,
         mode: g.mode,
         started: g.started,
+        startedAt: g.startedAt,
         savedAt: Date.now(),
       } satisfies GenSave);
     };
@@ -263,6 +268,9 @@ export default function Generators() {
     const lines: string[] = [];
 
     lines.push('chave,valor');
+    lines.push(
+      `inicio_do_save,${game.startedAt !== undefined ? new Date(game.startedAt).toISOString() : ''}`
+    );
     lines.push(`tempo_de_jogo_s,${game.uptime.toFixed(1)}`);
     lines.push(`tempo_de_jogo_fmt,${fmtTime(game.uptime)}`);
     lines.push(`modo,${game.mode}`);
@@ -345,7 +353,9 @@ export default function Generators() {
           </p>
           <button
             className="btn-primary"
-            onClick={() => setGame((g) => ({ ...g, started: true }))}
+            onClick={() =>
+              setGame((g) => ({ ...g, started: true, startedAt: Date.now() }))
+            }
           >
             Iniciar
           </button>
@@ -357,6 +367,20 @@ export default function Generators() {
   return (
     <div className={styles.wrap}>
       <div className={styles.corner}>
+        <div className={styles.timePill}>
+          <span className={styles.timeValue}>
+            {game.startedAt !== undefined
+              ? new Date(game.startedAt).toLocaleString('pt-BR', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                })
+              : '—'}
+          </span>
+          <span className={styles.timeLabel}>início</span>
+        </div>
         <div className={styles.timePill}>
           <span className={styles.timeValue}>{fmtTime(game.uptime)}</span>
           <span className={styles.timeLabel}>tempo</span>
