@@ -164,6 +164,14 @@
   color: var(--ink-muted);
 }
 
+.listWrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Única área rolável do app, com a barra invisível */
 .list {
   width: 100%;
@@ -179,24 +187,35 @@
   display: none;
 }
 
-/* Atalhos de navegação no topo e no fim da lista */
-.jumpBtn {
-  flex-shrink: 0;
-  background: var(--paper);
+/* Áreas esmaecidas nas bordas: indicam mais conteúdo e levam ao topo/fim */
+.fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 56px;
+  z-index: 2;
   border: none;
-  border-radius: 4px;
-  box-shadow: var(--card-edge);
-  padding: 10px;
-  font: 500 11px var(--mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-muted);
+  padding: 0;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 500 18px var(--mono);
+  color: var(--ink-muted);
+  transition: color 0.15s;
 }
-.jumpBtn:hover {
-  background: var(--surface);
+.fade:hover {
   color: var(--brass-deep);
+}
+
+.fadeTop {
+  top: 0;
+  background: linear-gradient(to bottom, var(--bg) 25%, rgba(12, 14, 18, 0));
+}
+
+.fadeBottom {
+  bottom: 0;
+  background: linear-gradient(to top, var(--bg) 25%, rgba(12, 14, 18, 0));
 }
 
 .row {

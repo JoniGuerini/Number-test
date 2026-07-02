@@ -30,6 +30,20 @@
   color: var(--ink-muted);
 }
 
+/* Indicador de ambiente: vermelho = dev local, verde = produção */
+.envDev,
+.envProd {
+  font: 600 11px/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.envDev {
+  color: var(--accent);
+}
+.envProd {
+  color: var(--tier-startup);
+}
+
 .divider {
   width: 1px;
   height: 12px;

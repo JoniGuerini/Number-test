@@ -143,18 +143,23 @@ export default function Generators() {
     scrollToEnd();
   }, [genCount]);
 
-  // Atalhos de ir ao começo/fim só aparecem quando a lista realmente rola.
-  const [overflowing, setOverflowing] = useState(false);
-  useEffect(() => {
+  // Indica se há conteúdo além das bordas visíveis da lista (acima/abaixo).
+  const [edges, setEdges] = useState({ above: false, below: false });
+  const updateEdges = () => {
     const el = listRef.current;
     if (!el) return;
-
-    const check = () => setOverflowing(el.scrollHeight > el.clientHeight);
-    check();
-
-    const observer = new ResizeObserver(check);
+    const above = el.scrollTop > 4;
+    const below = el.scrollTop + el.clientHeight < el.scrollHeight - 4;
+    setEdges((e) => (e.above === above && e.below === below ? e : { above, below }));
+  };
+  useEffect(() => {
+    updateEdges();
+    const el = listRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(updateEdges);
     observer.observe(el);
     return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [genCount, game.started]);
 
   // Save automático: 1x por segundo e ao fechar/recarregar a página.
@@ -343,14 +348,19 @@ export default function Generators() {
         </span>
       </div>
 
-      <div className={styles.list} ref={listRef}>
-        {overflowing && (
-          <button className={styles.jumpBtn} onClick={scrollToEnd}>
-            ↓ ir para o fim
+      <div className={styles.listWrap}>
+        {edges.above && (
+          <button
+            className={`${styles.fade} ${styles.fadeTop}`}
+            onClick={scrollToStart}
+            aria-label="Ir para o começo"
+          >
+            ↑
           </button>
         )}
 
-        {game.gens.map((gen, i) => {
+        <div className={styles.list} ref={listRef} onScroll={updateEdges}>
+          {game.gens.map((gen, i) => {
           const cost = costOf(i, gen.bought);
           const target = i === 0 ? 'base' : `${i}`;
 
@@ -431,11 +441,16 @@ export default function Generators() {
               </button>
             </div>
           );
-        })}
+          })}
+        </div>
 
-        {overflowing && (
-          <button className={styles.jumpBtn} onClick={scrollToStart}>
-            ↑ ir para o começo
+        {edges.below && (
+          <button
+            className={`${styles.fade} ${styles.fadeBottom}`}
+            onClick={scrollToEnd}
+            aria-label="Ir para o fim"
+          >
+            ↓
           </button>
         )}
       </div>

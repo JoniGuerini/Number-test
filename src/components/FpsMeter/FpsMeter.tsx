@@ -44,6 +44,11 @@ export default function FpsMeter() {
   return (
     <div className={styles.bar}>
       <div className={styles.pill}>
+        <span className={import.meta.env.DEV ? styles.envDev : styles.envProd}>
+          {import.meta.env.DEV ? 'localhost' : 'produção'}
+        </span>
+      </div>
+      <div className={styles.pill}>
         <span className={styles.value}>{stats.fps}</span>
         <span className={styles.label}>fps</span>
       </div>
