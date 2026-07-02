@@ -129,28 +129,39 @@ export default function Generators() {
   const [game, setGame] = useState<Game>(loadGame);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const scrollToStart = () =>
-    listRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  // Animação de scroll própria: o smooth nativo congela o alvo na chamada e o
+  // Chrome/macOS encerra a animação quando o layout muda no meio (nossa lista
+  // re-renderiza todo frame). Aqui o alvo é recalculado a cada frame, então a
+  // rolagem sempre aterrissa no fim/começo reais, em qualquer navegador.
+  const scrollAnimRef = useRef(0);
+  const animateScroll = (getTarget: (el: HTMLDivElement) => number) => {
+    const el = listRef.current;
+    if (!el) return;
+    const token = ++scrollAnimRef.current;
+    const from = el.scrollTop;
+    const start = performance.now();
+    const DURATION_MS = 400;
+
+    const step = (now: number) => {
+      const list = listRef.current;
+      if (!list || scrollAnimRef.current !== token) return;
+      const t = Math.min((now - start) / DURATION_MS, 1);
+      const ease = 1 - Math.pow(1 - t, 3);
+      list.scrollTop = from + (getTarget(list) - from) * ease;
+      if (t < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+
+  const scrollToStart = () => animateScroll(() => 0);
   const scrollToEnd = () =>
-    listRef.current?.scrollTo({
-      top: listRef.current.scrollHeight,
-      behavior: 'smooth',
-    });
+    animateScroll((el) => el.scrollHeight - el.clientHeight);
 
   // Um gerador novo apareceu → rola a lista até o fim de verdade, incluindo o
-  // card bloqueado do próximo. O duplo rAF espera o layout assentar (a linha
-  // comprada vira linha completa + o card novo entra) antes de medir a altura,
-  // senão o scroll para antes do fim.
+  // card bloqueado do próximo (o alvo vivo acompanha o layout assentando).
   const genCount = game.gens.length;
   useEffect(() => {
-    let raf2: number;
-    const raf1 = requestAnimationFrame(() => {
-      raf2 = requestAnimationFrame(scrollToEnd);
-    });
-    return () => {
-      cancelAnimationFrame(raf1);
-      if (raf2 !== undefined) cancelAnimationFrame(raf2);
-    };
+    scrollToEnd();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [genCount]);
 
