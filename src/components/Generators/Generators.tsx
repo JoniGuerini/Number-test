@@ -137,10 +137,21 @@ export default function Generators() {
       behavior: 'smooth',
     });
 
-  // Um gerador novo apareceu → rola a lista até ele para não perder a referência.
+  // Um gerador novo apareceu → rola a lista até o fim de verdade, incluindo o
+  // card bloqueado do próximo. O duplo rAF espera o layout assentar (a linha
+  // comprada vira linha completa + o card novo entra) antes de medir a altura,
+  // senão o scroll para antes do fim.
   const genCount = game.gens.length;
   useEffect(() => {
-    scrollToEnd();
+    let raf2: number;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(scrollToEnd);
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      if (raf2 !== undefined) cancelAnimationFrame(raf2);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [genCount]);
 
   // Indica se há conteúdo além das bordas visíveis da lista (acima/abaixo).
