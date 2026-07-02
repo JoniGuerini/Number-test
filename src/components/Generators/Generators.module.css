@@ -218,6 +218,68 @@
   background: linear-gradient(to top, var(--bg) 25%, rgba(12, 14, 18, 0));
 }
 
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+  /* Hub de pills entra no fluxo da página, centralizado e com quebra */
+  .corner {
+    position: static;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .timePill,
+  .exportBtn {
+    white-space: nowrap;
+  }
+
+  .wrap {
+    gap: 14px;
+  }
+
+  .baseValue {
+    font-size: 40px;
+  }
+
+  /* Card do gerador em duas linhas: número + botão em cima, stats embaixo */
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 12px;
+    padding: 12px 14px;
+  }
+  .genName {
+    order: 0;
+    font-size: 18px;
+  }
+  .row > button {
+    order: 1;
+    margin-left: auto;
+    width: 104px;
+  }
+  .statsRow {
+    order: 2;
+    display: flex;
+    width: 100%;
+    gap: 8px;
+  }
+  .stat {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .statValue {
+    font-size: 12px;
+  }
+  .statLabel {
+    font-size: 9px;
+  }
+
+  /* Card bloqueado: botão-barra ocupa a largura toda */
+  .rowLocked > button {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
 .row {
   flex-shrink: 0;
   display: grid;
@@ -275,6 +337,11 @@
   color: var(--brass-deep);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
+}
+
+/* No desktop o wrapper é transparente: os 3 stats viram células do grid */
+.statsRow {
+  display: contents;
 }
 
 .stat {

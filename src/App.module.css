@@ -1,5 +1,7 @@
 .frame {
   height: 100vh;
+  /* Mobile: 100vh ignora a barra de endereço; dvh acompanha o viewport real */
+  height: 100dvh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -79,4 +81,26 @@
   padding: 12px 28px;
   font-size: 13px;
   line-height: 1;
+}
+
+@media (max-width: 640px) {
+  .frame {
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .footer {
+    bottom: 8px;
+  }
+  .tabs {
+    width: 100%;
+    padding: 0 4px;
+  }
+  .tab {
+    flex: 1;
+    padding: 12px 8px;
+  }
+  .resetTab {
+    padding: 12px 14px;
+  }
 }

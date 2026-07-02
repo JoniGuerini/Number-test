@@ -487,21 +487,23 @@ export default function Generators() {
             <div key={i} className={styles.row}>
               <span className={styles.genName}>{i + 1}</span>
 
-              <div className={styles.stat}>
-                <span className={styles.statLabel}>possui</span>
-                <span className={styles.statValue}>{fmt(gen.amount)}</span>
-              </div>
+              <div className={styles.statsRow}>
+                <div className={styles.stat}>
+                  <span className={styles.statLabel}>possui</span>
+                  <span className={styles.statValue}>{fmt(gen.amount)}</span>
+                </div>
 
-              <div className={styles.stat}>
-                <span className={styles.statLabel}>produz {target}</span>
-                <span className={styles.statValue}>
-                  +{fmtRate(gen.amount.mul(PROD_PER_UNIT))} / s
-                </span>
-              </div>
+                <div className={styles.stat}>
+                  <span className={styles.statLabel}>produz {target}</span>
+                  <span className={styles.statValue}>
+                    +{fmtRate(gen.amount.mul(PROD_PER_UNIT))} / s
+                  </span>
+                </div>
 
-              <div className={styles.stat}>
-                <span className={styles.statLabel}>desbloqueio</span>
-                <span className={styles.statValue}>{unlockText}</span>
+                <div className={styles.stat}>
+                  <span className={styles.statLabel}>desbloqueio</span>
+                  <span className={styles.statValue}>{unlockText}</span>
+                </div>
               </div>
 
               <button

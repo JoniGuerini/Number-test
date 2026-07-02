@@ -6,6 +6,18 @@
   gap: 8px;
 }
 
+/* Mobile: entra no fluxo, no topo da página */
+@media (max-width: 640px) {
+  .bar {
+    position: static;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .pill {
+    white-space: nowrap;
+  }
+}
+
 .pill {
   display: flex;
   align-items: baseline;

@@ -30,6 +30,16 @@
   margin-top: 20px;
 }
 
+@media (max-width: 640px) {
+  .number {
+    font-size: 44px;
+  }
+  .actions {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
 /* Botões com a mesma altura, independente da variação primary/secondary */
 .actions button {
   padding: 11px 22px;
