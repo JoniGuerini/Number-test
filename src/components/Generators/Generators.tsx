@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Decimal from 'break_eternity.js';
 import { fmt, fmtRate, fmtTime } from '../../lib/format';
 import { GENERATORS_SAVE_KEY, loadSave, writeSave } from '../../lib/storage';
@@ -362,10 +362,14 @@ export default function Generators() {
               <div key={i} className={`${styles.row} ${styles.rowLocked}`}>
                 <button
                   className={`btn-primary ${styles.progressBtn}`}
-                  style={{ '--progress': `${progress * 100}%` } as CSSProperties}
                   disabled={isAuto || progress < 1}
                   onClick={() => buy(i)}
                 >
+                  <span
+                    className={styles.progressFill}
+                    style={{ width: `${progress * 100}%` }}
+                    aria-hidden="true"
+                  />
                   <span className={styles.progressLabel}>{fmt(cost)}</span>
                 </button>
               </div>
