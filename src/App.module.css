@@ -44,10 +44,12 @@
 .tabs {
   display: flex;
   gap: 8px;
+  width: 100%;
   pointer-events: auto;
 }
 
 .tab {
+  flex: 1;
   background: var(--paper);
   border: none;
   box-shadow: var(--card-edge);
@@ -78,6 +80,7 @@
 
 /* Alinha o Zerar à altura das tabs do footer */
 .resetTab {
+  flex: 1;
   padding: 12px 28px;
   font-size: 13px;
   line-height: 1;
