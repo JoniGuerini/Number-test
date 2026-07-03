@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Counter from './components/Counter/Counter';
 import Generators from './components/Generators/Generators';
 import Cycles from './components/Cycles/Cycles';
+import SoundLab from './components/SoundLab/SoundLab';
 import FpsMeter from './components/FpsMeter/FpsMeter';
 import { useWakeLock } from './hooks/useWakeLock';
 import { playClick } from './lib/sound';
@@ -13,13 +14,14 @@ import {
 } from './lib/storage';
 import styles from './App.module.css';
 
-const SAVE_KEYS: Record<Page, string> = {
+/** Abas com save (podem ser zeradas). A aba Sons não tem estado. */
+const SAVE_KEYS: Partial<Record<Page, string>> = {
   contador: COUNTER_SAVE_KEY,
   geradores: GENERATORS_SAVE_KEY,
   ciclos: CYCLES_SAVE_KEY,
 };
 
-type Page = 'contador' | 'geradores' | 'ciclos';
+type Page = 'contador' | 'geradores' | 'ciclos' | 'sons';
 
 export default function App() {
   useWakeLock();
@@ -29,7 +31,7 @@ export default function App() {
   useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
       const btn = (e.target as HTMLElement | null)?.closest?.('button');
-      if (btn && !btn.disabled) playClick();
+      if (btn && !btn.disabled && !btn.hasAttribute('data-nosound')) playClick();
     };
     document.addEventListener('pointerdown', onPointerDown);
     return () => document.removeEventListener('pointerdown', onPointerDown);
@@ -37,14 +39,16 @@ export default function App() {
 
   const [page, setPage] = useState<Page>('ciclos');
   // Trocar a key remonta o componente da aba, zerando só aquele jogo.
-  const [resetKeys, setResetKeys] = useState<Record<Page, number>>({
+  const [resetKeys, setResetKeys] = useState({
     contador: 0,
     geradores: 0,
     ciclos: 0,
   });
 
   const resetActive = () => {
-    clearSave(SAVE_KEYS[page]);
+    const key = SAVE_KEYS[page];
+    if (!key || page === 'sons') return;
+    clearSave(key);
     setResetKeys((keys) => ({ ...keys, [page]: keys[page] + 1 }));
   };
 
@@ -68,6 +72,11 @@ export default function App() {
       >
         <Cycles key={resetKeys.ciclos} />
       </main>
+      <main
+        className={`${styles.contentFull} ${page !== 'sons' ? styles.hidden : ''}`}
+      >
+        <SoundLab />
+      </main>
 
       <footer className={styles.footer}>
         <nav className={styles.tabs}>
@@ -90,11 +99,19 @@ export default function App() {
             Ciclos
           </button>
           <button
-            className={`btn-secondary danger ${styles.resetTab}`}
-            onClick={resetActive}
+            className={`${styles.tab} ${page === 'sons' ? styles.active : ''}`}
+            onClick={() => setPage('sons')}
           >
-            Zerar
+            Sons
           </button>
+          {page !== 'sons' && (
+            <button
+              className={`btn-secondary danger ${styles.resetTab}`}
+              onClick={resetActive}
+            >
+              Zerar
+            </button>
+          )}
         </nav>
       </footer>
     </div>
