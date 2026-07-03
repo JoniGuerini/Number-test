@@ -133,14 +133,14 @@ export default function App() {
           >
             Config
           </button>
-          {SAVE_KEYS[page] !== undefined && (
-            <button
-              className={`btn-secondary danger ${styles.resetTab}`}
-              onClick={resetActive}
-            >
-              Zerar
-            </button>
-          )}
+          {/* Desabilitado (não some) nas abas sem save, pro layout não pular */}
+          <button
+            className={`btn-secondary danger ${styles.resetTab}`}
+            disabled={SAVE_KEYS[page] === undefined}
+            onClick={resetActive}
+          >
+            Zerar
+          </button>
         </nav>
       </footer>
     </div>
