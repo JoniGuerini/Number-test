@@ -10,11 +10,12 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
-    version: 'v0.13.0',
+    version: 'v0.13.x',
     date: '03/07/2026',
     title: 'Aba Temas e faixas exorcizadas',
     notes: [
-      'Config ganhou a aba Temas: cada tema virou um card horizontal pintado com as próprias cores, com um mini-mockup de interface dentro.',
+      'Config ganhou a aba Temas: cada tema virou um card pintado com as próprias cores, com um mini-mockup de interface dentro.',
+      'O tema ativo fica em destaque no topo; os disponíveis se organizam lado a lado, quebrando linha conforme a coleção cresce.',
       'Tabs da Config agora ocupam a largura toda.',
       'Corrigidas as faixas de pretos diferentes no Chrome/macOS: um micro-ruído imperceptível no fundo força todos os blocos de pintura pelo mesmo caminho de rasterização.',
     ],
