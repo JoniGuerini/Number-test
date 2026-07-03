@@ -10,6 +10,16 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.16.1',
+    date: '03/07/2026',
+    title: 'English as the canonical language',
+    notes: [
+      'English is now the project\u2019s canonical language: README, page metadata, docs and — starting with this entry — the patch notes are written in English.',
+      'Portuguese (Brasil) remains fully available as a UI language for players; the app still opens in pt-BR by default.',
+      'Older patch notes stay in Portuguese, as the historical documents they are.',
+    ],
+  },
+  {
     version: 'v0.16.0',
     date: '03/07/2026',
     title: 'O laboratório fala inglês',
