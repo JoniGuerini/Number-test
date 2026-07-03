@@ -17,6 +17,8 @@ type Mode = 'manual' | 'auto';
 
 interface Game {
   base: Decimal;
+  /** Total de base já produzido na vida do save (compras não descontam). */
+  totalProduced: Decimal;
   gens: Gen[];
   mode: Mode;
   /** false = ainda na tela de escolha de modo. */
@@ -31,6 +33,7 @@ interface Game {
 
 interface GenSave {
   base: string;
+  totalProduced?: string;
   gens: { amount: string; bought: number; unlockedAt?: number }[];
   uptime: number;
   mode?: Mode;
@@ -53,6 +56,7 @@ function loadGame(): Game {
   if (!s || s.gens.length === 0) {
     return {
       base: START_BASE,
+      totalProduced: new Decimal(0),
       gens: [newGen()],
       mode: 'manual',
       started: false,
@@ -74,6 +78,8 @@ function loadGame(): Game {
 
   return {
     base: new Decimal(s.base),
+    // Saves antigos não registravam: usa o saldo atual como piso.
+    totalProduced: new Decimal(s.totalProduced ?? s.base),
     gens: s.gens.map((g) => ({
       amount: new Decimal(g.amount),
       bought: g.bought,
@@ -121,6 +127,7 @@ const MAX_STEPS_PER_FRAME = 2_000;
 function advance(g: Game, nSteps: number): Game {
   const gens = g.gens.map((x) => ({ ...x }));
   let base = g.base;
+  let totalProduced = g.totalProduced;
   let uptime = g.uptime;
 
   for (let s = 0; s < nSteps; s++) {
@@ -130,7 +137,9 @@ function advance(g: Game, nSteps: number): Game {
     for (let i = gens.length - 1; i >= 1; i--) {
       gens[i - 1].amount = gens[i - 1].amount.add(gens[i].amount.mul(PROD_PER_STEP));
     }
-    base = base.add(gens[0].amount.mul(PROD_PER_STEP));
+    const income = gens[0].amount.mul(PROD_PER_STEP);
+    base = base.add(income);
+    totalProduced = totalProduced.add(income);
 
     // Modo automático: compra 1x o próximo gerador assim que alcançar o custo.
     if (g.mode === 'auto') {
@@ -146,7 +155,7 @@ function advance(g: Game, nSteps: number): Game {
     }
   }
 
-  return { ...g, base, gens, uptime, steps: g.steps + nSteps };
+  return { ...g, base, totalProduced, gens, uptime, steps: g.steps + nSteps };
 }
 
 export default function Generators() {
@@ -219,6 +228,7 @@ export default function Generators() {
       const g = saveRef.current;
       writeSave(GENERATORS_SAVE_KEY, {
         base: g.base.toString(),
+        totalProduced: g.totalProduced.toString(),
         gens: g.gens.map((x) => ({
           amount: x.amount.toString(),
           bought: x.bought,
@@ -300,10 +310,12 @@ export default function Generators() {
     return gen.amount.add(feeder.amount.mul(PROD_PER_UNIT).mul(partial));
   };
 
-  const dispBase =
+  const partialIncome =
     partial === 0
-      ? game.base
-      : game.base.add(game.gens[0].amount.mul(PROD_PER_UNIT).mul(partial));
+      ? new Decimal(0)
+      : game.gens[0].amount.mul(PROD_PER_UNIT).mul(partial);
+  const dispBase = game.base.add(partialIncome);
+  const dispTotal = game.totalProduced.add(partialIncome);
 
   const dispUptime = game.uptime + (game.gens[0].bought > 0 ? partial : 0);
 
@@ -321,6 +333,8 @@ export default function Generators() {
     lines.push(`modo,${game.mode}`);
     lines.push(`numero_base,${game.base.toString()}`);
     lines.push(`numero_base_fmt,${fmt(game.base)}`);
+    lines.push(`total_produzido,${game.totalProduced.toString()}`);
+    lines.push(`total_produzido_fmt,${fmt(game.totalProduced)}`);
     lines.push(
       `producao_base_por_s,${game.gens[0].amount.mul(PROD_PER_UNIT).toString()}`
     );
@@ -429,6 +443,10 @@ export default function Generators() {
         <div className={styles.timePill}>
           <span className={styles.timeValue}>{fmtTime(dispUptime)}</span>
           <span className={styles.timeLabel}>tempo</span>
+        </div>
+        <div className={styles.timePill}>
+          <span className={styles.timeValue}>{fmt(dispTotal)}</span>
+          <span className={styles.timeLabel}>produzido</span>
         </div>
         <button className={styles.exportBtn} onClick={exportCsv}>
           Exportar CSV

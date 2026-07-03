@@ -20,6 +20,8 @@ type Mode = 'manual' | 'auto';
 
 interface Game {
   base: Decimal;
+  /** Total de base já produzido na vida do save (compras não descontam). */
+  totalProduced: Decimal;
   gens: Gen[];
   mode: Mode;
   /** false = ainda na tela de escolha de modo. */
@@ -34,6 +36,7 @@ interface Game {
 
 interface CycSave {
   base: string;
+  totalProduced?: string;
   gens: { amount: string; bought: number; unlockedAt?: number; cycleStep: number }[];
   uptime: number;
   mode?: Mode;
@@ -79,6 +82,7 @@ function costOf(i: number, bought: number): Decimal {
 function advance(g: Game, nSteps: number): Game {
   const gens = g.gens.map((x) => ({ ...x }));
   let base = g.base;
+  let totalProduced = g.totalProduced;
   let uptime = g.uptime;
 
   for (let s = 0; s < nSteps; s++) {
@@ -94,8 +98,12 @@ function advance(g: Game, nSteps: number): Game {
       if (gen.cycleStep >= cycleStepsOf(i)) {
         gen.cycleStep = 0;
         const out = gen.amount.mul(prodPerCycleOf(i));
-        if (i === 0) base = base.add(out);
-        else gens[i - 1].amount = gens[i - 1].amount.add(out);
+        if (i === 0) {
+          base = base.add(out);
+          totalProduced = totalProduced.add(out);
+        } else {
+          gens[i - 1].amount = gens[i - 1].amount.add(out);
+        }
       }
     }
 
@@ -113,7 +121,7 @@ function advance(g: Game, nSteps: number): Game {
     }
   }
 
-  return { ...g, base, gens, uptime, steps: g.steps + nSteps };
+  return { ...g, base, totalProduced, gens, uptime, steps: g.steps + nSteps };
 }
 
 function loadGame(): Game {
@@ -121,6 +129,7 @@ function loadGame(): Game {
   if (!s || s.gens.length === 0) {
     return {
       base: START_BASE,
+      totalProduced: new Decimal(0),
       gens: [newGen()],
       mode: 'manual',
       started: false,
@@ -136,6 +145,8 @@ function loadGame(): Game {
 
   return {
     base: new Decimal(s.base),
+    // Saves antigos não registravam: usa o saldo atual como piso.
+    totalProduced: new Decimal(s.totalProduced ?? s.base),
     gens: s.gens.map((g) => ({
       amount: new Decimal(g.amount),
       bought: g.bought,
@@ -212,6 +223,7 @@ export default function Cycles() {
       const g = saveRef.current;
       writeSave(CYCLES_SAVE_KEY, {
         base: g.base.toString(),
+        totalProduced: g.totalProduced.toString(),
         gens: g.gens.map((x) => ({
           amount: x.amount.toString(),
           bought: x.bought,
@@ -300,6 +312,8 @@ export default function Cycles() {
     lines.push(`ciclo_base_s,${CYCLE_BASE_S}`);
     lines.push(`numero_base,${game.base.toString()}`);
     lines.push(`numero_base_fmt,${fmt(game.base)}`);
+    lines.push(`total_produzido,${game.totalProduced.toString()}`);
+    lines.push(`total_produzido_fmt,${fmt(game.totalProduced)}`);
     lines.push('');
 
     lines.push(
@@ -406,6 +420,10 @@ export default function Cycles() {
         <div className={styles.timePill}>
           <span className={styles.timeValue}>{fmtTime(dispUptime)}</span>
           <span className={styles.timeLabel}>tempo</span>
+        </div>
+        <div className={styles.timePill}>
+          <span className={styles.timeValue}>{fmt(game.totalProduced)}</span>
+          <span className={styles.timeLabel}>produzido</span>
         </div>
         <button className={styles.exportBtn} onClick={exportCsv}>
           Exportar CSV
