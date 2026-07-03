@@ -138,6 +138,15 @@
   transform: rotate(180deg);
 }
 
+/* Recessed divider between the master switch and the individual toggles */
+.separator {
+  height: 2px;
+  margin: 4px 2px;
+  border-radius: 999px;
+  background: var(--bg);
+  box-shadow: var(--card-edge-press);
+}
+
 /* ===== Slots de save ===== */
 .slotBlock {
   display: flex;

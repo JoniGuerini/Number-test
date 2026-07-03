@@ -386,6 +386,7 @@ export default function Settings({
                   </button>
                 );
               })()}
+              <div className={styles.separator} aria-hidden="true" />
               {VIDEO_TOGGLES.map((toggle) => {
                 const on = videoPrefs[toggle.key];
                 return (
