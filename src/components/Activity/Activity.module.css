@@ -7,14 +7,16 @@
   gap: 14px;
 }
 
-/* Abas internas por modo (mesmo padrão das tabs da Config) */
+/* Abas internas por modo, ocupando a largura toda */
 .tabs {
   display: flex;
   gap: 8px;
   flex-shrink: 0;
+  width: 100%;
 }
 
 .tab {
+  flex: 1;
   background: var(--paper);
   border: none;
   box-shadow: var(--card-edge);
