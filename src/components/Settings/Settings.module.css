@@ -187,12 +187,15 @@
 
 /* Disponíveis lado a lado, quebrando linha conforme crescem */
 .themeGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
+/* Largura fixa para todos os cards de tema (ativo incluso) */
 .themeCard {
+  width: 300px;
+  align-self: flex-start;
   display: flex;
   align-items: center;
   gap: 18px;
@@ -407,5 +410,8 @@
     flex: 1;
     padding: 11px 8px;
     text-align: center;
+  }
+  .themeCard {
+    width: 100%;
   }
 }
