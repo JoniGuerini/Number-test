@@ -199,8 +199,8 @@ export default function Settings({
                         {/* SVG no lugar do caractere ✕: o glifo variava de
                             tamanho entre macOS e Windows (fonte de fallback) */}
                         <svg
-                          width="10"
-                          height="10"
+                          width="8"
+                          height="8"
                           viewBox="0 0 10 10"
                           aria-hidden="true"
                         >
