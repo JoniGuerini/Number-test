@@ -1,5 +1,6 @@
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+import pkg from './package.json';
 
 const buildTime = new Date().toISOString();
 
@@ -24,5 +25,6 @@ export default defineConfig({
   define: {
     // Carimbo de quando este build foi gerado (cada deploy = build novo)
     __BUILD_TIME__: JSON.stringify(buildTime),
+    __APP_VERSION__: JSON.stringify(pkg.version),
   },
 });

@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
 
-/** Injetado pelo define do vite.config.ts no momento do build. */
+/** Injetados pelo define do vite.config.ts no momento do build. */
 declare const __BUILD_TIME__: string;
+declare const __APP_VERSION__: string;
