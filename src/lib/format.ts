@@ -69,6 +69,18 @@ export function fmtRate(n: Decimal | number): string {
   return fmt(d);
 }
 
+/** Idade aproximada, sem precisão de segundos: "há pouco" (<1min), depois
+    "5m", e a partir de 1h duas casas de grandeza ("2h 05m", "3d 04h"). */
+export function fmtAge(seconds: number): string {
+  const m = Math.floor(Math.max(0, seconds) / 60);
+  if (m < 1) return 'há pouco';
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ${(m % 60).toString().padStart(2, '0')}m`;
+  const d = Math.floor(h / 24);
+  return `${d}d ${(h % 24).toString().padStart(2, '0')}h`;
+}
+
 /** Tempo decorrido em segundos → "2m 05s" / "45s" / "1h 12m".
     Arredonda pra BAIXO (semântica de cronômetro): "5s" só aparece quando
     5s reais já passaram. (O ceil original do Coders era pra tempo restante.) */

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fmtTime } from '../../lib/format';
+import { fmtAge } from '../../lib/format';
 import styles from './FpsMeter.module.css';
 
 const BUILD_TIME_MS = new Date(__BUILD_TIME__).getTime();
@@ -134,9 +134,9 @@ export default function FpsMeter() {
       )}
       <div className={styles.pill}>
         <span className={styles.value}>
-          {fmtTime(Math.max((Date.now() - BUILD_TIME_MS) / 1000, 0))}
+          {fmtAge((Date.now() - BUILD_TIME_MS) / 1000)}
         </span>
-        <span className={styles.label}>atualizado há</span>
+        <span className={styles.label}>atualizado</span>
       </div>
     </div>
   );
