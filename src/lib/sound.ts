@@ -10,54 +10,41 @@ function getCtx(): AudioContext {
   return ctx;
 }
 
-interface ToneOpts {
-  type: OscillatorType;
-  freq: number;
-  /** Se definido, a frequência desliza até este valor ao longo do som. */
-  freqEnd?: number;
-  /** Passa-baixas para abafar os harmônicos agudos. */
-  lowpass?: number;
-  dur: number;
-  gain: number;
-  /** Atraso do início (para sons duplos). */
-  delay?: number;
+const CONFIG_KEY = 'number-test:config';
+
+interface SoundConfig {
+  volume?: number;
 }
 
-/** Tom simples com envelope de decay (e glide de pitch opcional). */
-function tone({ type, freq, freqEnd, lowpass, dur, gain, delay = 0 }: ToneOpts): void {
-  const ac = getCtx();
-  const start = ac.currentTime + delay;
-
-  const osc = ac.createOscillator();
-  osc.type = type;
-  osc.frequency.setValueAtTime(freq, start);
-  if (freqEnd !== undefined) {
-    osc.frequency.exponentialRampToValueAtTime(freqEnd, start + dur);
+function readConfig(): SoundConfig {
+  try {
+    const raw = localStorage.getItem(CONFIG_KEY);
+    return raw ? (JSON.parse(raw) as SoundConfig) : {};
+  } catch {
+    return {};
   }
-
-  let node: AudioNode = osc;
-  if (lowpass !== undefined) {
-    const f = ac.createBiquadFilter();
-    f.type = 'lowpass';
-    f.frequency.value = lowpass;
-    node.connect(f);
-    node = f;
-  }
-
-  const g = ac.createGain();
-  // O ramp exponencial exige valor inicial > 0
-  const level = Math.max(gain * currentVolume, 0.0001);
-  g.gain.setValueAtTime(level, start);
-  g.gain.exponentialRampToValueAtTime(0.001, start + dur);
-
-  node.connect(g);
-  g.connect(ac.destination);
-  osc.start(start);
-  osc.stop(start + dur);
 }
 
-/** Click de ruído seco de 8ms — o som que o generators-kappa.vercel.app de
-    fato toca (a camada tonal de lá é código morto: um bug de ms/s a silencia). */
+/** Volume mestre dos sons de botão (0..1). */
+let currentVolume: number = readConfig().volume ?? 1;
+
+export function getSoundVolume(): number {
+  return currentVolume;
+}
+
+export function setSoundVolume(volume: number): void {
+  currentVolume = Math.min(Math.max(volume, 0), 1);
+  try {
+    localStorage.setItem(
+      CONFIG_KEY,
+      JSON.stringify({ ...readConfig(), volume: currentVolume })
+    );
+  } catch {
+    // Sem localStorage — a escolha vale só pra sessão
+  }
+}
+
+/** "Toc": click de ruído seco de 8ms — o som oficial do app. */
 function noiseClick(): void {
   const ac = getCtx();
   const now = ac.currentTime;
@@ -78,100 +65,21 @@ function noiseClick(): void {
   src.stop(now + 0.01);
 }
 
-/* ===== Temas de som dos botões (par pressionar/soltar) ===== */
-
-export interface SoundTheme {
-  id: string;
-  name: string;
-  press: () => void;
-  release: () => void;
-}
-
-export const SOUND_THEMES: SoundTheme[] = [
-  {
-    id: 'click-fino-grave',
-    name: 'Click fino grave',
-    press: () => tone({ type: 'square', freq: 1600, lowpass: 3200, dur: 0.01, gain: 0.14 }),
-    release: () => tone({ type: 'square', freq: 2100, lowpass: 4200, dur: 0.01, gain: 0.09 }),
-  },
-  {
-    id: 'pip',
-    name: 'Pip',
-    press: () => tone({ type: 'sine', freq: 1760, dur: 0.02, gain: 0.12 }),
-    release: () => tone({ type: 'sine', freq: 2200, dur: 0.015, gain: 0.07 }),
-  },
-  {
-    id: 'toc',
-    name: 'Toc',
-    press: () => noiseClick(),
-    release: () => noiseClick(),
-  },
-];
-
-const CONFIG_KEY = 'number-test:config';
-
-interface SoundConfig {
-  soundTheme?: string;
-  volume?: number;
-}
-
-function readConfig(): SoundConfig {
-  try {
-    const raw = localStorage.getItem(CONFIG_KEY);
-    return raw ? (JSON.parse(raw) as SoundConfig) : {};
-  } catch {
-    return {};
-  }
-}
-
-function writeConfig(patch: SoundConfig): void {
-  try {
-    localStorage.setItem(CONFIG_KEY, JSON.stringify({ ...readConfig(), ...patch }));
-  } catch {
-    // Sem localStorage — a escolha vale só pra sessão
-  }
-}
-
-let currentThemeId: string = readConfig().soundTheme ?? SOUND_THEMES[0].id;
-/** Volume mestre dos sons de botão (0..1). */
-let currentVolume: number = readConfig().volume ?? 1;
-
-export function getSoundThemeId(): string {
-  return currentThemeId;
-}
-
-export function setSoundTheme(id: string): void {
-  currentThemeId = id;
-  writeConfig({ soundTheme: id });
-}
-
-export function getSoundVolume(): number {
-  return currentVolume;
-}
-
-export function setSoundVolume(volume: number): void {
-  currentVolume = Math.min(Math.max(volume, 0), 1);
-  writeConfig({ volume: currentVolume });
-}
-
-const currentTheme = (): SoundTheme =>
-  SOUND_THEMES.find((t) => t.id === currentThemeId) ?? SOUND_THEMES[0];
-
-/** Som ao PRESSIONAR um botão (tema escolhido nas Configurações). */
+/** Som ao PRESSIONAR um botão. */
 export function playPress(): void {
   if (currentVolume <= 0) return;
   try {
-    currentTheme().press();
+    noiseClick();
   } catch {
     // Sem suporte a Web Audio — segue sem som
   }
 }
 
-/** Som ao SOLTAR o botão (variação do tema escolhido). */
+/** Som ao SOLTAR o botão. */
 export function playRelease(): void {
   if (currentVolume <= 0) return;
   try {
-    currentTheme().release();
+    noiseClick();
   } catch {
     // Sem suporte a Web Audio — segue sem som
   }
