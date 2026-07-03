@@ -16,7 +16,7 @@ export const CHANGELOG: PatchNote[] = [
     notes: [
       'Clicar num save não troca mais na hora: abre um painel abaixo dele com as opções de carregar e de zerar cada modo.',
       'Os botões de zerar progresso saíram da seção solta e agora vivem dentro do save escolhido, lado a lado — dá até para zerar um modo de um save inativo.',
-      'O botão de carregar usa o mesmo estilo dos botões de compra dos Geradores.',
+      'Os botões de carregar e de criar save usam o mesmo estilo dos botões de compra dos Geradores, com texto centralizado.',
       'Criar um novo save também ficou mais calmo: ele entra na lista sem assumir o lugar do atual; carregue quando quiser.',
     ],
   },

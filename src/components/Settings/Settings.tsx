@@ -195,9 +195,8 @@ export default function Settings({
                   </div>
                 );
               })}
-              <button className={styles.option} onClick={onCreateSlot}>
-                <span>Criar novo save</span>
-                <span className={styles.badge}>+</span>
+              <button className="btn-primary" onClick={onCreateSlot}>
+                Criar novo save +
               </button>
             </div>
           </section>
