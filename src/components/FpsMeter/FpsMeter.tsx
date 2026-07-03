@@ -11,7 +11,14 @@ interface FrameStats {
 interface BatteryManager extends EventTarget {
   level: number;
   charging: boolean;
+  chargingTime: number;
 }
+
+/** Desktops sem bateria reportam uma bateria "fantasma": 100%, carregando,
+    com 0s restantes de carga — a API não tem um sinal explícito de "sem
+    bateria", então filtramos essa assinatura. */
+const isPhantomBattery = (m: BatteryManager): boolean =>
+  m.charging && m.level === 1 && m.chargingTime === 0;
 
 function useBattery() {
   const [battery, setBattery] = useState<{ level: number; charging: boolean } | null>(
@@ -28,7 +35,11 @@ function useBattery() {
     let manager: BatteryManager | null = null;
     const update = () => {
       if (manager && !disposed) {
-        setBattery({ level: manager.level, charging: manager.charging });
+        setBattery(
+          isPhantomBattery(manager)
+            ? null
+            : { level: manager.level, charging: manager.charging }
+        );
       }
     };
 
@@ -38,12 +49,14 @@ function useBattery() {
       update();
       m.addEventListener('levelchange', update);
       m.addEventListener('chargingchange', update);
+      m.addEventListener('chargingtimechange', update);
     });
 
     return () => {
       disposed = true;
       manager?.removeEventListener('levelchange', update);
       manager?.removeEventListener('chargingchange', update);
+      manager?.removeEventListener('chargingtimechange', update);
     };
   }, []);
 
