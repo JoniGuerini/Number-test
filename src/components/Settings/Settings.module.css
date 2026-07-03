@@ -42,7 +42,7 @@
 }
 .tab:active {
   box-shadow: var(--card-edge-press);
-  transform: scale(0.99);
+  transform: translateY(1px);
 }
 
 .tabActive,
@@ -207,7 +207,7 @@
 }
 .dangerBtn:active {
   box-shadow: var(--card-edge-press);
-  transform: scale(0.98);
+  transform: translateY(1px);
 }
 
 .slotDate {
@@ -290,7 +290,7 @@
     0 0 0 1px rgba(128, 128, 128, 0.35);
 }
 .themeCard:active {
-  transform: scale(0.995);
+  transform: translateY(1px);
 }
 
 /* Ativo: destacado pela posição (seção própria), sem anel nem interação */

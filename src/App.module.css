@@ -84,7 +84,7 @@
 }
 .tab:active {
   box-shadow: var(--card-edge-press);
-  transform: scale(0.99);
+  transform: translateY(1px);
 }
 
 .active,

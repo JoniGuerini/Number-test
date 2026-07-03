@@ -17,7 +17,8 @@
 }
 .btn-primary:active:not(:disabled) {
   box-shadow: var(--card-edge-press);
-  transform: scale(0.98);
+  /* Deslocamento fixo: scale em % encolhia demais os botões largos */
+  transform: translateY(1px);
 }
 .btn-primary:disabled {
   background: var(--ink-faint);
@@ -46,7 +47,7 @@
 }
 .btn-secondary:active:not(:disabled) {
   box-shadow: var(--card-edge-press);
-  transform: scale(0.98);
+  transform: translateY(1px);
 }
 .btn-secondary:disabled {
   opacity: 0.5;
