@@ -200,23 +200,15 @@ export default function Cycles() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [genCount]);
 
-  const [edges, setEdges] = useState({ above: false, below: false });
-  const updateEdges = () => {
-    const el = listRef.current;
-    if (!el) return;
-    const above = el.scrollTop > 4;
-    const below = el.scrollTop + el.clientHeight < el.scrollHeight - 4;
-    setEdges((e) => (e.above === above && e.below === below ? e : { above, below }));
+  // Bordas calculadas a cada render (o componente re-renderiza todo frame):
+  // sempre frescas, mesmo quando a virtualização muda a altura do conteúdo
+  // sem disparar eventos de scroll/resize.
+  const listEl = listRef.current;
+  const edges = {
+    above: !!listEl && listEl.scrollTop > 4,
+    below:
+      !!listEl && listEl.scrollTop + listEl.clientHeight < listEl.scrollHeight - 4,
   };
-  useEffect(() => {
-    updateEdges();
-    const el = listRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver(updateEdges);
-    observer.observe(el);
-    return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [genCount, game.started]);
 
   // Save automático: 1x por segundo e ao fechar/recarregar a página.
   const saveRef = useRef(game);
@@ -463,7 +455,7 @@ export default function Cycles() {
           </button>
         )}
 
-        <div className={styles.list} ref={listRef} onScroll={updateEdges}>
+        <div className={styles.list} ref={listRef}>
           {game.gens.map((gen, i) => {
             if (i < virtual.first || i > virtual.last) {
               return (

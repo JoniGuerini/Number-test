@@ -10,6 +10,14 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.7.1',
+    date: '03/07/2026',
+    title: 'Setinhas honestas',
+    notes: [
+      'Corrige as setinhas de navegação que às vezes ficavam visíveis (e inertes) mesmo com a lista já no fim — o estado das bordas envelhecia quando a virtualização mudava a altura do conteúdo sem evento de scroll.',
+    ],
+  },
+  {
     version: 'v0.7.0',
     date: '03/07/2026',
     title: 'Notas de patch',
