@@ -3,6 +3,8 @@ import Decimal from 'break_eternity.js';
 import { fmt, fmtRate, fmtTime } from '../../lib/format';
 import { COUNTER_SAVE_KEY, loadSave, writeSave } from '../../lib/storage';
 import styles from './Counter.module.css';
+// Reusa o visual dos cardzinhos do topo (padrão das abas Geradores/Ciclos)
+import hub from '../Generators/Generators.module.css';
 
 const BASE_RATE = new Decimal(0.1);
 
@@ -114,9 +116,15 @@ export default function Counter() {
 
   return (
     <div className={styles.counter}>
+      <div className={hub.corner}>
+        <div className={hub.timePill}>
+          <span className={hub.timeValue}>{fmtTime(uptime)}</span>
+          <span className={hub.timeLabel}>tempo</span>
+        </div>
+      </div>
+
       <span className={styles.number}>{fmt(value)}</span>
       <span className={styles.rate}>+{fmtRate(rate)} / s</span>
-      <span className={styles.uptime}>rodando há {fmtTime(uptime)}</span>
 
       <div className={styles.actions}>
         <button

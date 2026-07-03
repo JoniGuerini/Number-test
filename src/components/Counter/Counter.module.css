@@ -18,11 +18,6 @@
   color: var(--ink-muted);
 }
 
-.uptime {
-  font: 400 12px var(--mono);
-  letter-spacing: 0.06em;
-  color: var(--ink-faint);
-}
 
 .actions {
   display: flex;
