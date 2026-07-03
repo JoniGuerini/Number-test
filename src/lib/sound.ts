@@ -27,15 +27,21 @@ export function playClick(): void {
     const src = ac.createBufferSource();
     src.buffer = noiseBuffer;
 
+    // Banda média-alta (3–8kHz): mantém o caráter de chimbal sem o
+    // chiado estridente das frequências mais agudas.
     const highpass = ac.createBiquadFilter();
     highpass.type = 'highpass';
-    highpass.frequency.value = 7000;
+    highpass.frequency.value = 3000;
+
+    const lowpass = ac.createBiquadFilter();
+    lowpass.type = 'lowpass';
+    lowpass.frequency.value = 8000;
 
     const gain = ac.createGain();
-    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.setValueAtTime(0.12, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + DUR_S);
 
-    src.connect(highpass).connect(gain).connect(ac.destination);
+    src.connect(highpass).connect(lowpass).connect(gain).connect(ac.destination);
     src.start(now);
     src.stop(now + DUR_S);
   } catch {
