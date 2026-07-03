@@ -102,7 +102,7 @@ const pt = {
 
   // Config: Temas
   'themes.title': 'Temas',
-  'themes.hint': 'A escolha vale para o app inteiro.',
+  'themes.hint': 'Biblioteca de temas.',
   'themes.active': 'tema ativo',
   'themes.available': 'disponíveis',
   'theme.neutro': 'Dark neutro',
@@ -209,7 +209,7 @@ const en: Record<TKey, string> = {
   'saves.defaultName': 'Save {n}',
 
   'themes.title': 'Themes',
-  'themes.hint': 'Your choice applies to the whole app.',
+  'themes.hint': 'Theme library.',
   'themes.active': 'active theme',
   'themes.available': 'available',
   'theme.neutro': 'Neutral dark',
