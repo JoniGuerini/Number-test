@@ -43,7 +43,9 @@
 
 .footer {
   position: sticky;
-  bottom: 12px;
+  /* Sem offset extra: a distância do fundo fica igual ao padding do frame,
+     uniforme com as laterais */
+  bottom: 0;
   display: flex;
   justify-content: center;
   pointer-events: none;
@@ -100,9 +102,6 @@
     padding: 12px;
   }
 
-  .footer {
-    bottom: 8px;
-  }
   /* Mesma largura dos cards da lista */
   .tabs {
     width: 100%;
