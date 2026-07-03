@@ -168,7 +168,8 @@ export const SOUNDS: SoundDef[] = [
     tone({ type: 'sine', freq: 1100, dur: 0.03, gain: 0.15, delay: 0.05 });
   }),
   S('beep-curto', 'Beep curto', 'Blips', () => tone({ type: 'triangle', freq: 990, dur: 0.035, gain: 0.2 })),
-  S('pip', 'Pip', 'Blips', () => tone({ type: 'sine', freq: 1760, dur: 0.02, gain: 0.12 })),
+  S('pip', 'Pip (pressionar)', 'Blips', () => tone({ type: 'sine', freq: 1760, dur: 0.02, gain: 0.12 })),
+  S('pip-soltar', 'Pip (soltar)', 'Blips', () => tone({ type: 'sine', freq: 2200, dur: 0.015, gain: 0.07 })),
 
   // ===== Cordas / plucks =====
   S('corda-curta', 'Corda curta', 'Cordas', () => tone({ type: 'triangle', freq: 660, dur: 0.12, gain: 0.2 })),
@@ -197,19 +198,70 @@ export const SOUNDS: SoundDef[] = [
 ];
 /* eslint-enable prettier/prettier */
 
-/** Som ao PRESSIONAR um botão: Click fino grave. */
+/* ===== Temas de som dos botões (par pressionar/soltar) ===== */
+
+export interface SoundTheme {
+  id: string;
+  name: string;
+  press: () => void;
+  release: () => void;
+}
+
+export const SOUND_THEMES: SoundTheme[] = [
+  {
+    id: 'click-fino-grave',
+    name: 'Click fino grave',
+    press: () => tone({ type: 'square', freq: 1600, lowpass: 3200, dur: 0.01, gain: 0.14 }),
+    release: () => tone({ type: 'square', freq: 2100, lowpass: 4200, dur: 0.01, gain: 0.09 }),
+  },
+  {
+    id: 'pip',
+    name: 'Pip',
+    press: () => tone({ type: 'sine', freq: 1760, dur: 0.02, gain: 0.12 }),
+    release: () => tone({ type: 'sine', freq: 2200, dur: 0.015, gain: 0.07 }),
+  },
+];
+
+const CONFIG_KEY = 'number-test:config';
+
+let currentThemeId: string = (() => {
+  try {
+    const raw = localStorage.getItem(CONFIG_KEY);
+    return (raw ? JSON.parse(raw).soundTheme : null) ?? SOUND_THEMES[0].id;
+  } catch {
+    return SOUND_THEMES[0].id;
+  }
+})();
+
+export function getSoundThemeId(): string {
+  return currentThemeId;
+}
+
+export function setSoundTheme(id: string): void {
+  currentThemeId = id;
+  try {
+    localStorage.setItem(CONFIG_KEY, JSON.stringify({ soundTheme: id }));
+  } catch {
+    // Sem localStorage — a escolha vale só pra sessão
+  }
+}
+
+const currentTheme = (): SoundTheme =>
+  SOUND_THEMES.find((t) => t.id === currentThemeId) ?? SOUND_THEMES[0];
+
+/** Som ao PRESSIONAR um botão (tema escolhido nas Configurações). */
 export function playPress(): void {
   try {
-    tone({ type: 'square', freq: 1600, lowpass: 3200, dur: 0.01, gain: 0.14 });
+    currentTheme().press();
   } catch {
     // Sem suporte a Web Audio — segue sem som
   }
 }
 
-/** Som ao SOLTAR: variação mais aguda e mais leve do Click fino grave. */
+/** Som ao SOLTAR o botão (variação do tema escolhido). */
 export function playRelease(): void {
   try {
-    tone({ type: 'square', freq: 2100, lowpass: 4200, dur: 0.01, gain: 0.09 });
+    currentTheme().release();
   } catch {
     // Sem suporte a Web Audio — segue sem som
   }

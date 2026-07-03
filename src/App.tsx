@@ -3,6 +3,7 @@ import Counter from './components/Counter/Counter';
 import Generators from './components/Generators/Generators';
 import Cycles from './components/Cycles/Cycles';
 import SoundLab from './components/SoundLab/SoundLab';
+import Settings from './components/Settings/Settings';
 import FpsMeter from './components/FpsMeter/FpsMeter';
 import { useWakeLock } from './hooks/useWakeLock';
 import { playPress, playRelease } from './lib/sound';
@@ -21,7 +22,7 @@ const SAVE_KEYS: Partial<Record<Page, string>> = {
   ciclos: CYCLES_SAVE_KEY,
 };
 
-type Page = 'contador' | 'geradores' | 'ciclos' | 'sons';
+type Page = 'contador' | 'geradores' | 'ciclos' | 'sons' | 'config';
 
 export default function App() {
   useWakeLock();
@@ -64,7 +65,7 @@ export default function App() {
 
   const resetActive = () => {
     const key = SAVE_KEYS[page];
-    if (!key || page === 'sons') return;
+    if (!key || page === 'sons' || page === 'config') return;
     clearSave(key);
     setResetKeys((keys) => ({ ...keys, [page]: keys[page] + 1 }));
   };
@@ -94,6 +95,11 @@ export default function App() {
       >
         <SoundLab />
       </main>
+      <main
+        className={`${styles.contentCenter} ${page !== 'config' ? styles.hidden : ''}`}
+      >
+        <Settings />
+      </main>
 
       <footer className={styles.footer}>
         <nav className={styles.tabs}>
@@ -121,7 +127,13 @@ export default function App() {
           >
             Sons
           </button>
-          {page !== 'sons' && (
+          <button
+            className={`${styles.tab} ${page === 'config' ? styles.active : ''}`}
+            onClick={() => setPage('config')}
+          >
+            Config
+          </button>
+          {SAVE_KEYS[page] !== undefined && (
             <button
               className={`btn-secondary danger ${styles.resetTab}`}
               onClick={resetActive}

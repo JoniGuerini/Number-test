@@ -1,0 +1,79 @@
+.screen {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.card {
+  background: var(--paper);
+  border: none;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 440px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: var(--card-edge-lg);
+}
+
+.title {
+  font: 500 22px/1.2 var(--serif);
+  font-variation-settings: 'opsz' 36;
+  color: var(--brass-deep);
+  letter-spacing: -0.01em;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sectionLabel {
+  font: 500 11px var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 2px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--surface);
+  border: none;
+  box-shadow: var(--card-edge);
+  border-radius: 4px;
+  padding: 13px 16px;
+  font: 500 13px var(--mono);
+  color: var(--ink-muted);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+.option:hover {
+  background: var(--surface-hover);
+  color: var(--ink);
+}
+
+.active,
+.active:hover {
+  background: var(--surface-deep);
+  color: var(--brass-deep);
+}
+
+.badge {
+  font: 600 10px var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brass-deep);
+}
+
+.hint {
+  font: 400 12px/1.5 var(--mono);
+  color: var(--ink-faint);
+  margin-top: 4px;
+}
