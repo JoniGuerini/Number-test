@@ -67,9 +67,48 @@ function useBattery() {
 }
 
 /** Mede FPS e frame time via requestAnimationFrame, atualizando o display 2x por segundo. */
+/** Consulta o version.json do servidor (renovado a cada deploy) e avisa
+    quando existe uma versão mais nova que a carregada. */
+function useUpdateAvailable() {
+  const [available, setAvailable] = useState(false);
+
+  useEffect(() => {
+    // No dev não existe version.json — o hot reload já cumpre o papel
+    if (!import.meta.env.PROD) return;
+
+    let disposed = false;
+    const check = async () => {
+      try {
+        const res = await fetch('/version.json', { cache: 'no-store' });
+        if (!res.ok) return;
+        const data: { buildTime?: string } = await res.json();
+        if (
+          !disposed &&
+          data.buildTime &&
+          new Date(data.buildTime).getTime() > BUILD_TIME_MS + 1000
+        ) {
+          setAvailable(true);
+        }
+      } catch {
+        // Offline/erro de rede — tenta de novo no próximo ciclo
+      }
+    };
+
+    check();
+    const id = setInterval(check, 60_000);
+    return () => {
+      disposed = true;
+      clearInterval(id);
+    };
+  }, []);
+
+  return available;
+}
+
 export default function FpsMeter() {
   const [stats, setStats] = useState<FrameStats>({ fps: 0, avgMs: 0, maxMs: 0 });
   const battery = useBattery();
+  const updateAvailable = useUpdateAvailable();
 
   useEffect(() => {
     let rafId: number;
@@ -132,12 +171,21 @@ export default function FpsMeter() {
           <span className={styles.label}>bat</span>
         </div>
       )}
-      <div className={styles.pill}>
-        <span className={styles.value}>
-          {fmtAge((Date.now() - BUILD_TIME_MS) / 1000)}
-        </span>
-        <span className={styles.label}>atualizado</span>
-      </div>
+      {updateAvailable ? (
+        <button
+          className={`${styles.pill} ${styles.updatePill}`}
+          onClick={() => window.location.reload()}
+        >
+          nova versão · recarregar
+        </button>
+      ) : (
+        <div className={styles.pill}>
+          <span className={styles.value}>
+            {fmtAge((Date.now() - BUILD_TIME_MS) / 1000)}
+          </span>
+          <span className={styles.label}>atualizado</span>
+        </div>
+      )}
     </div>
   );
 }
