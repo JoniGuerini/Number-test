@@ -17,6 +17,8 @@ interface CounterSave {
   rate: string;
   uptime: number;
   running?: boolean;
+  /** Date.now() do primeiro Iniciar — identifica quando o save nasceu. */
+  startedAt?: number;
   /** Date.now() do momento do save — para recuperar o tempo do refresh. */
   savedAt?: number;
 }
@@ -24,7 +26,13 @@ interface CounterSave {
 function loadCounter() {
   const s = loadSave<CounterSave>(COUNTER_SAVE_KEY);
   if (!s) {
-    return { value: new Decimal(0), rate: BASE_RATE, uptime: 0, running: false };
+    return {
+      value: new Decimal(0),
+      rate: BASE_RATE,
+      uptime: 0,
+      running: false,
+      startedAt: undefined as number | undefined,
+    };
   }
 
   let value = new Decimal(s.value);
@@ -41,7 +49,7 @@ function loadCounter() {
       uptime += elapsed;
     }
   }
-  return { value, rate, uptime, running };
+  return { value, rate, uptime, running, startedAt: s.startedAt };
 }
 
 export default function Counter() {
@@ -50,10 +58,11 @@ export default function Counter() {
   const [rate, setRate] = useState<Decimal>(initial.rate);
   const [uptime, setUptime] = useState(initial.uptime);
   const [running, setRunning] = useState(initial.running);
+  const [startedAt, setStartedAt] = useState<number | undefined>(initial.startedAt);
 
   // Save automático: 1x por segundo e ao fechar/recarregar a página.
-  const saveRef = useRef({ value, rate, uptime, running });
-  saveRef.current = { value, rate, uptime, running };
+  const saveRef = useRef({ value, rate, uptime, running, startedAt });
+  saveRef.current = { value, rate, uptime, running, startedAt };
   useEffect(() => {
     const persist = () => {
       const s = saveRef.current;
@@ -62,6 +71,7 @@ export default function Counter() {
         rate: s.rate.toString(),
         uptime: s.uptime,
         running: s.running,
+        startedAt: s.startedAt,
         savedAt: Date.now(),
       } satisfies CounterSave);
     };
@@ -95,6 +105,36 @@ export default function Counter() {
 
   useEffect(() => stopHold, []);
 
+  const toggleRunning = () => {
+    // O primeiro Iniciar carimba o nascimento do save
+    if (!running && startedAt === undefined) setStartedAt(Date.now());
+    setRunning((r) => !r);
+  };
+
+  /** Baixa um .csv com o estado atual do contador. */
+  const exportCsv = () => {
+    const lines = [
+      'chave,valor',
+      `inicio_do_save,${startedAt !== undefined ? new Date(startedAt).toISOString() : ''}`,
+      `tempo_de_jogo_s,${uptime.toFixed(1)}`,
+      `tempo_de_jogo_fmt,${fmtTime(uptime)}`,
+      `rodando,${running}`,
+      `valor,${value.toString()}`,
+      `valor_fmt,${fmt(value)}`,
+      `producao_por_s,${rate.toString()}`,
+      `producao_fmt,${fmtRate(rate)}`,
+    ];
+
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `contador-${stamp}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   useEffect(() => {
     if (!running) return;
 
@@ -118,9 +158,26 @@ export default function Counter() {
     <div className={styles.counter}>
       <div className={hub.corner}>
         <div className={hub.timePill}>
+          <span className={hub.timeValue}>
+            {startedAt !== undefined
+              ? new Date(startedAt).toLocaleString('pt-BR', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                })
+              : '—'}
+          </span>
+          <span className={hub.timeLabel}>início</span>
+        </div>
+        <div className={hub.timePill}>
           <span className={hub.timeValue}>{fmtTime(uptime)}</span>
           <span className={hub.timeLabel}>tempo</span>
         </div>
+        <button className={hub.exportBtn} onClick={exportCsv}>
+          Exportar CSV
+        </button>
       </div>
 
       <span className={styles.number}>{fmt(value)}</span>
@@ -137,7 +194,7 @@ export default function Counter() {
         >
           Dobrar produção
         </button>
-        <button className="btn-primary" onClick={() => setRunning((r) => !r)}>
+        <button className="btn-primary" onClick={toggleRunning}>
           {running ? 'Pausar' : 'Iniciar'}
         </button>
       </div>
