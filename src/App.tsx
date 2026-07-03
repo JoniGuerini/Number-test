@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Counter from './components/Counter/Counter';
 import Generators from './components/Generators/Generators';
 import Cycles from './components/Cycles/Cycles';
 import FpsMeter from './components/FpsMeter/FpsMeter';
 import { useWakeLock } from './hooks/useWakeLock';
+import { playClick } from './lib/sound';
 import {
   clearSave,
   COUNTER_SAVE_KEY,
@@ -22,6 +23,17 @@ type Page = 'contador' | 'geradores' | 'ciclos';
 
 export default function App() {
   useWakeLock();
+
+  // Feedback sonoro global: qualquer botão habilitado toca o hi-hat no toque
+  // (pointerdown responde mais rápido que click).
+  useEffect(() => {
+    const onPointerDown = (e: PointerEvent) => {
+      const btn = (e.target as HTMLElement | null)?.closest?.('button');
+      if (btn && !btn.disabled) playClick();
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, []);
 
   const [page, setPage] = useState<Page>('ciclos');
   // Trocar a key remonta o componente da aba, zerando só aquele jogo.
