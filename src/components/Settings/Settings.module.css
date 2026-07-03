@@ -1,55 +1,91 @@
-.wrap {
+/* Painel único ocupando toda a área da aba Config */
+.panel {
   width: 100%;
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
-  scrollbar-width: none;
-}
-.wrap::-webkit-scrollbar {
-  display: none;
-}
-
-/* Grid de painéis: Saves em largura total, demais lado a lado */
-.grid {
-  max-width: 920px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  align-items: start;
-}
-
-.panel {
   background: var(--paper);
   border: none;
   border-radius: 4px;
   box-shadow: var(--card-edge);
-  padding: 24px;
+  padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 20px;
 }
 
-.panelWide {
-  grid-column: 1 / -1;
+/* Tabs internas de navegação entre os tipos de config */
+.tabs {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
-.panelTitle {
+.tab {
+  background: var(--surface);
+  border: none;
+  box-shadow: var(--card-edge);
+  border-radius: 4px;
+  padding: 11px 26px;
+  font: 500 12px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s, transform 0.08s;
+}
+.tab:hover {
+  background: var(--surface-hover);
+  color: var(--ink);
+}
+.tab:active {
+  box-shadow: var(--card-edge-press);
+  transform: scale(0.99);
+}
+
+.tabActive,
+.tabActive:hover {
+  background: var(--surface-deep);
+  color: var(--brass-deep);
+}
+
+/* Conteúdo da tab ativa, com rolagem própria */
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 640px;
+}
+.body::-webkit-scrollbar {
+  display: none;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sectionTitle {
   font: 500 20px var(--serif);
   font-variation-settings: 'opsz' 36;
   letter-spacing: -0.015em;
   color: var(--brass-deep);
 }
 
-.panelHint {
+.sectionHint {
   font: 400 12px/1.5 var(--mono);
   color: var(--ink-muted);
 }
 
-.panelBody {
+.sectionBody {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-top: 4px;
 }
 
 /* ===== Opções (linhas clicáveis) ===== */
@@ -188,7 +224,18 @@
 }
 
 @media (max-width: 640px) {
-  .grid {
-    grid-template-columns: 1fr;
+  .panel {
+    padding: 14px 16px;
+  }
+  .tabs {
+    width: 100%;
+  }
+  .tab {
+    flex: 1;
+    padding: 11px 8px;
+    text-align: center;
+  }
+  .body {
+    max-width: none;
   }
 }

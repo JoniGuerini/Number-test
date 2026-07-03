@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
+import { getVideoPrefs, subscribeVideoPrefs } from '../../lib/prefs';
 import styles from './FpsMeter.module.css';
 
 const BUILD_TIME_MS = new Date(__BUILD_TIME__).getTime();
@@ -108,6 +109,7 @@ export default function FpsMeter() {
   const [stats, setStats] = useState<FrameStats>({ fps: 0, avgMs: 0, maxMs: 0 });
   const battery = useBattery();
   const updateAvailable = useUpdateAvailable();
+  const prefs = useSyncExternalStore(subscribeVideoPrefs, getVideoPrefs);
 
   useEffect(() => {
     let rafId: number;
@@ -146,18 +148,22 @@ export default function FpsMeter() {
           {import.meta.env.DEV ? 'localhost' : 'produção'}
         </span>
       </div>
-      <div className={styles.pill}>
-        <span className={styles.value}>{stats.fps}</span>
-        <span className={styles.label}>fps</span>
-      </div>
-      <div className={styles.pill}>
-        <span className={styles.value}>{stats.avgMs.toFixed(1)}</span>
-        <span className={styles.label}>ms</span>
-        <span className={styles.divider} />
-        <span className={styles.label}>máx</span>
-        <span className={styles.value}>{stats.maxMs.toFixed(1)}</span>
-      </div>
-      {battery && (
+      {prefs.showFps && (
+        <div className={styles.pill}>
+          <span className={styles.value}>{stats.fps}</span>
+          <span className={styles.label}>fps</span>
+        </div>
+      )}
+      {prefs.showFrameTime && (
+        <div className={styles.pill}>
+          <span className={styles.value}>{stats.avgMs.toFixed(1)}</span>
+          <span className={styles.label}>ms</span>
+          <span className={styles.divider} />
+          <span className={styles.label}>máx</span>
+          <span className={styles.value}>{stats.maxMs.toFixed(1)}</span>
+        </div>
+      )}
+      {prefs.showBattery && battery && (
         <div className={styles.pill}>
           <span
             className={`${styles.value} ${
