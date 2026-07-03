@@ -2,6 +2,14 @@ import Decimal from 'break_eternity.js';
 
 const SUFFIXES = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No'];
 
+/** Trunca (não arredonda) para n casas — estilo odômetro: "0.5" só aparece
+    quando o valor realmente vale 0.5. O epsilon evita que resíduo de ponto
+    flutuante (0.4999...9) derrube o dígito que deveria estar completo. */
+function truncTo(num: number, decimals: number): string {
+  const f = 10 ** decimals;
+  return (Math.floor(num * f + 1e-9) / f).toFixed(decimals);
+}
+
 /** Sufixo de letras infinito: 0='aa'...'az', 26='ba'...675='zz',
     676='aaa'...'zzz', depois 'aaaa' e assim por diante. */
 function letterSuffix(index: number): string {
@@ -31,7 +39,9 @@ export function fmt(n: Decimal | number): string {
 
   if (d.lt(1000)) {
     const num = d.toNumber();
-    return Number.isInteger(num) || num >= 100 ? Math.floor(num).toString() : num.toFixed(1);
+    return Number.isInteger(num) || num >= 100
+      ? Math.floor(num + 1e-9).toString()
+      : truncTo(num, 1);
   }
 
   const exp = d.log10().toNumber();
@@ -40,7 +50,7 @@ export function fmt(n: Decimal | number): string {
 
   const tier = Math.floor(exp / 3);
   const scaled = d.div(Decimal.pow(10, tier * 3)).toNumber();
-  const body = scaled >= 100 ? scaled.toFixed(0) : scaled.toFixed(1);
+  const body = scaled >= 100 ? truncTo(scaled, 0) : truncTo(scaled, 1);
   const suffix = tier < SUFFIXES.length ? SUFFIXES[tier] : letterSuffix(tier - SUFFIXES.length);
   return body + suffix;
 }
@@ -54,7 +64,7 @@ export function fmtRate(n: Decimal | number): string {
   const d = n instanceof Decimal ? n : new Decimal(n);
   if (d.lt(1000)) {
     const num = d.toNumber();
-    if (!Number.isInteger(num)) return num.toFixed(1);
+    if (!Number.isInteger(num)) return truncTo(num, 1);
   }
   return fmt(d);
 }
