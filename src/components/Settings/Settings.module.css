@@ -174,14 +174,16 @@
   color: var(--paper);
 }
 
-/* ===== Switch (liga/desliga) ===== */
+/* ===== Switch (liga/desliga) =====
+   Trilho em baixo relevo (afundado no card) e bolinha em alto relevo,
+   parecendo estar no mesmo nível da superfície externa. */
 .switch {
   flex-shrink: 0;
   width: 40px;
   height: 22px;
   border-radius: 999px;
-  background: var(--surface-deep);
-  box-shadow: var(--card-edge-pill);
+  background: var(--bg);
+  box-shadow: var(--card-edge-press);
   position: relative;
   transition: background 0.18s;
 }
@@ -194,15 +196,19 @@
   height: 16px;
   border-radius: 50%;
   background: var(--ink-muted);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 2px 4px rgba(0, 0, 0, 0.55),
+    0 0 0 0.5px rgba(0, 0, 0, 0.7);
   transition: transform 0.18s, background 0.18s;
 }
 
 .switchOn {
-  background: var(--brass-deep);
+  background: var(--brass);
 }
 .switchOn .switchThumb {
   transform: translateX(18px);
-  background: var(--paper);
+  background: var(--brass-deep);
 }
 
 /* ===== Volume ===== */
