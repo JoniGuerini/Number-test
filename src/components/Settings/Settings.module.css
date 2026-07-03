@@ -51,7 +51,7 @@
   color: var(--brass-deep);
 }
 
-/* Conteúdo da tab ativa, com rolagem própria */
+/* Conteúdo da tab ativa, com rolagem própria e largura total */
 .body {
   flex: 1;
   min-height: 0;
@@ -60,7 +60,6 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  max-width: 640px;
 }
 .body::-webkit-scrollbar {
   display: none;
@@ -217,12 +216,10 @@
   transform: scale(0.995);
 }
 
-/* Ativo: anel na cor de acento do próprio tema; sem interação */
+/* Ativo: destacado pela posição (seção própria), sem anel nem interação */
 .themeCardActive,
 .themeCardActive:hover {
-  box-shadow:
-    var(--card-edge),
-    0 0 0 2px var(--theme-accent);
+  box-shadow: var(--card-edge);
   transform: none;
   cursor: default;
 }
@@ -410,8 +407,5 @@
     flex: 1;
     padding: 11px 8px;
     text-align: center;
-  }
-  .body {
-    max-width: none;
   }
 }

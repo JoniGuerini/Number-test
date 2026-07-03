@@ -16,7 +16,8 @@ export const CHANGELOG: PatchNote[] = [
     notes: [
       'Config ganhou a aba Temas: cada tema virou um card pintado com as próprias cores, com um mini-mockup de interface dentro.',
       'O tema ativo fica em destaque no topo; os disponíveis se organizam lado a lado, quebrando linha conforme a coleção cresce.',
-      'Tabs da Config agora ocupam a largura toda.',
+      'Tabs da Config agora ocupam a largura toda, e o conteúdo das abas também — os cards de tema aproveitam o espaço no desktop.',
+      'O tema ativo perdeu o anel de destaque: a posição no topo já conta a história.',
       'Corrigidas as faixas de pretos diferentes no Chrome/macOS: um micro-ruído imperceptível no fundo força todos os blocos de pintura pelo mesmo caminho de rasterização.',
     ],
   },
