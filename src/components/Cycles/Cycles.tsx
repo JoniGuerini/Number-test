@@ -482,46 +482,6 @@ export default function Cycles() {
               );
             }
 
-            const prevUnlockedAt = i === 0 ? 0 : game.gens[i - 1].unlockedAt;
-            const prevPrevUnlockedAt = i <= 1 ? 0 : game.gens[i - 2].unlockedAt;
-            const delta =
-              gen.unlockedAt !== undefined && prevUnlockedAt !== undefined
-                ? gen.unlockedAt - prevUnlockedAt
-                : undefined;
-            const prevDelta =
-              prevUnlockedAt !== undefined && prevPrevUnlockedAt !== undefined
-                ? prevUnlockedAt - prevPrevUnlockedAt
-                : undefined;
-            const accel =
-              delta !== undefined && prevDelta !== undefined
-                ? delta - prevDelta
-                : undefined;
-
-            // Aceleração colorida: vermelho = demorou mais que o anterior,
-            // verde = desbloqueou mais rápido
-            const unlockText =
-              gen.unlockedAt === undefined ? (
-                '—'
-              ) : (
-                <>
-                  {fmtTime(gen.unlockedAt)}
-                  {delta !== undefined && <> · +{fmtTime(delta)}</>}
-                  {accel !== undefined && (
-                    <>
-                      {' · '}
-                      <span
-                        className={
-                          accel < 0 ? cyc.accelFast : accel > 0 ? cyc.accelSlow : ''
-                        }
-                      >
-                        {accel < 0 ? '−' : '+'}
-                        {fmtTime(Math.abs(accel))}
-                      </span>
-                    </>
-                  )}
-                </>
-              );
-
             // Tempo restante do ciclo atual (contagem viva, extrapolada por frame)
             const remaining = Math.max(
               cycleSecondsOf(i) - (gen.cycleStep * SIM_STEP_S + partial),
@@ -552,11 +512,6 @@ export default function Cycles() {
                     <span className={styles.statValue}>
                       {fmtTime(Math.ceil(remaining))}
                     </span>
-                  </div>
-
-                  <div className={styles.stat}>
-                    <span className={styles.statLabel}>desbloqueio</span>
-                    <span className={styles.statValue}>{unlockText}</span>
                   </div>
                 </div>
 

@@ -1,16 +1,7 @@
-/* Aceleração do desbloqueio: mais lento que o anterior (vermelho) ou mais
-   rápido (verde) */
-.accelSlow {
-  color: var(--accent);
-}
-.accelFast {
-  color: var(--tier-startup);
-}
-
-/* Variante do grid com 6 colunas (a coluna extra de ciclo/tempo restante).
-   Só vale no desktop: no mobile o .row vira flex e ignora as colunas. */
+/* Grid dos Ciclos: nome, possui, produz, ciclo e botão (o log de
+   desbloqueios vive na aba Atividade). Só vale no desktop. */
 .rowWide {
-  grid-template-columns: 60px 120px 130px 150px 230px 120px;
+  grid-template-columns: 60px 150px 160px 160px 120px;
 }
 
 /* Barra de progresso do ciclo, deitada na base do card do gerador */

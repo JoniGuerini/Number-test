@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Counter from './components/Counter/Counter';
 import Generators from './components/Generators/Generators';
 import Cycles from './components/Cycles/Cycles';
+import Activity from './components/Activity/Activity';
 import Settings from './components/Settings/Settings';
 import FpsMeter from './components/FpsMeter/FpsMeter';
 import { useWakeLock } from './hooks/useWakeLock';
@@ -22,7 +23,7 @@ const SAVE_KEYS: Record<GameTab, string> = {
 };
 
 export type GameTab = 'contador' | 'geradores' | 'ciclos';
-type Page = GameTab | 'config';
+type Page = GameTab | 'atividade' | 'config';
 
 export default function App() {
   useWakeLock();
@@ -89,6 +90,12 @@ export default function App() {
         <Cycles key={resetKeys.ciclos} />
       </main>
       <main
+        className={`${styles.contentFull} ${page !== 'atividade' ? styles.hidden : ''}`}
+      >
+        {/* Remonta ao zerar os Ciclos para o log sumir junto */}
+        <Activity key={resetKeys.ciclos} />
+      </main>
+      <main
         className={`${styles.contentCenter} ${page !== 'config' ? styles.hidden : ''}`}
       >
         <Settings onReset={resetGame} />
@@ -113,6 +120,12 @@ export default function App() {
             onClick={() => setPage('ciclos')}
           >
             Ciclos
+          </button>
+          <button
+            className={`${styles.tab} ${page === 'atividade' ? styles.active : ''}`}
+            onClick={() => setPage('atividade')}
+          >
+            Atividade
           </button>
           <button
             className={`${styles.tab} ${page === 'config' ? styles.active : ''}`}
