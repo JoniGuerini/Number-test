@@ -5,8 +5,15 @@ import { loadSave, saveKeyFor } from '../../lib/storage';
 import gstyles from '../Generators/Generators.module.css';
 import styles from './Activity.module.css';
 
-/** Campos do save dos Ciclos que interessam ao log de atividade. */
-interface CycSaveLite {
+type LogGame = 'ciclos' | 'geradores';
+
+const GAMES: { id: LogGame; name: string }[] = [
+  { id: 'ciclos', name: 'Ciclos' },
+  { id: 'geradores', name: 'Geradores' },
+];
+
+/** Campos comuns aos saves dos dois modos que interessam ao log. */
+interface GameSaveLite {
   gens: { bought: number; unlockedAt?: number }[];
   uptime: number;
 }
@@ -21,7 +28,7 @@ interface Entry {
 }
 
 function readLog(saveKey: string): { entries: Entry[]; uptime: number } {
-  const save = loadSave<CycSaveLite>(saveKey);
+  const save = loadSave<GameSaveLite>(saveKey);
   if (!save) return { entries: [], uptime: 0 };
 
   const unlocked = save.gens
@@ -43,20 +50,30 @@ function readLog(saveKey: string): { entries: Entry[]; uptime: number } {
   return { entries, uptime: save.uptime };
 }
 
-/** Log de desbloqueios do modo Ciclos, com cada tempo explicado. */
-export default function Activity() {
-  // Lê o save dos Ciclos do slot ativo (trocar de slot remonta o componente)
-  const [saveKey] = useState(() => saveKeyFor('ciclos'));
-  const [log, setLog] = useState(() => readLog(saveKey));
+interface ActivityProps {
+  /** Leva o jogador para a aba do modo (CTA do estado vazio). */
+  onNavigate: (game: LogGame) => void;
+}
+
+/** Log de desbloqueios, com abas por modo e cada tempo explicado. */
+export default function Activity({ onNavigate }: ActivityProps) {
+  // Chaves dos saves do slot ativo (trocar de slot remonta o componente)
+  const [keys] = useState(() => ({
+    ciclos: saveKeyFor('ciclos'),
+    geradores: saveKeyFor('geradores'),
+  }));
+  const [game, setGame] = useState<LogGame>('ciclos');
+  const [log, setLog] = useState(() => readLog(keys.ciclos));
   const { entries, uptime } = log;
   const listRef = useRef<HTMLDivElement>(null);
 
-  // O save dos Ciclos é gravado 1x/s; reler no mesmo ritmo mantém o log vivo.
+  // O save é gravado 1x/s; reler no mesmo ritmo mantém o log vivo.
   useEffect(() => {
-    const id = setInterval(() => setLog(readLog(saveKey)), 1000);
+    setLog(readLog(keys[game]));
+    const id = setInterval(() => setLog(readLog(keys[game])), 1000);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [game]);
 
   // Mesma animação de scroll das listas de geradores (alvo recalculado por frame)
   const scrollAnimRef = useRef(0);
@@ -87,12 +104,17 @@ export default function Activity() {
   // rolado para cima para ler o histórico.
   const stickRef = useRef(true);
 
-  // Entrada nova no log → rola até ela (o mais recente fica no fim da lista)
+  // Trocar de modo volta a colar no fim
+  useEffect(() => {
+    stickRef.current = true;
+  }, [game]);
+
+  // Entrada nova no log (ou troca de modo) → rola até o fim
   const entryCount = entries.length;
   useEffect(() => {
     if (stickRef.current) scrollToEnd();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entryCount]);
+  }, [entryCount, game]);
 
   // Setinhas esmaecidas: aparecem quando há conteúdo além das bordas
   const [edges, setEdges] = useState({ above: false, below: false });
@@ -125,114 +147,136 @@ export default function Activity() {
     observer.observe(el);
     return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entryCount]);
-
-  if (entries.length === 0) {
-    return (
-      <div className={styles.empty}>
-        Nenhum desbloqueio registrado ainda — compre o primeiro gerador nos Ciclos.
-      </div>
-    );
-  }
+  }, [entryCount, game]);
 
   // ===== Resumo do header =====
   const last = entries[entries.length - 1];
-  // Intervalo médio entre desbloqueios (do 1º ao último)
   const avgInterval =
     entries.length > 1 ? last.unlockedAt / (entries.length - 1) : undefined;
-  const sinceLast = Math.max(uptime - last.unlockedAt, 0);
+  const sinceLast = last ? Math.max(uptime - last.unlockedAt, 0) : 0;
+
+  const gameName = GAMES.find((g) => g.id === game)?.name ?? game;
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.summary}>
-        <div className={styles.summaryItem}>
-          <span className={styles.summaryValue}>{entries.length}</span>
-          <span className={styles.summaryLabel}>geradores desbloqueados</span>
-        </div>
-        <div className={styles.summaryItem}>
-          <span className={styles.summaryValue}>{fmtTime(uptime)}</span>
-          <span className={styles.summaryLabel}>tempo de jogo</span>
-        </div>
-        <div className={styles.summaryItem}>
-          <span className={styles.summaryValue}>
-            {avgInterval !== undefined ? fmtTime(avgInterval) : '—'}
-          </span>
-          <span className={styles.summaryLabel}>média do “tempo desde o anterior”</span>
-        </div>
-        <div className={styles.summaryItem}>
-          <span className={styles.summaryValue}>{fmtTime(sinceLast)}</span>
-          <span className={styles.summaryLabel}>desde o último</span>
-        </div>
-      </div>
-
-      <div className={gstyles.listWrap}>
-        {edges.above && (
+      <nav className={styles.tabs}>
+        {GAMES.map((g) => (
           <button
-            className={`${gstyles.fade} ${gstyles.fadeTop}`}
-            onClick={scrollToStart}
-            aria-label="Ir para o começo"
+            key={g.id}
+            className={`${styles.tab} ${game === g.id ? styles.tabActive : ''}`}
+            onClick={() => setGame(g.id)}
           >
-            ↑
+            {g.name}
           </button>
-        )}
+        ))}
+      </nav>
 
-        <div className={gstyles.list} ref={listRef} onScroll={onListScroll}>
-          {entries.map((entry) => (
-            <div key={entry.gen} className={styles.entry}>
-              <span className={styles.entryTitle}>Gerador {entry.gen}</span>
-
-              <div className={styles.fields}>
-                <div className={styles.field}>
-                  <span className={styles.fieldLabel}>desbloqueado com</span>
-                  <span className={styles.fieldValue}>
-                    {fmtTime(entry.unlockedAt)} de jogo
-                  </span>
-                </div>
-
-                <div className={styles.field}>
-                  <span className={styles.fieldLabel}>tempo desde o anterior</span>
-                  <span className={styles.fieldValue}>
-                    {entry.gen === 1
-                      ? 'início do jogo'
-                      : `+${fmtTime(entry.delta ?? 0)}`}
-                  </span>
-                </div>
-
-                <div className={styles.field}>
-                  <span className={styles.fieldLabel}>
-                    ritmo vs. desbloqueio anterior
-                  </span>
-                  {entry.accel === undefined ? (
-                    <span className={styles.fieldValue}>—</span>
-                  ) : entry.accel === 0 ? (
-                    <span className={styles.fieldValue}>mesmo ritmo</span>
-                  ) : (
-                    <span
-                      className={`${styles.fieldValue} ${
-                        entry.accel > 0 ? styles.slower : styles.faster
-                      }`}
-                    >
-                      {entry.accel > 0 ? '+' : '−'}
-                      {fmtTime(Math.abs(entry.accel))}{' '}
-                      {entry.accel > 0 ? 'mais lento' : 'mais rápido'}
-                    </span>
-                  )}
-                </div>
-              </div>
+      {entries.length === 0 ? (
+        <div className={styles.empty}>
+          <p className={styles.emptyText}>
+            Nenhum desbloqueio registrado no modo {gameName} ainda.
+          </p>
+          <button className="btn-primary" onClick={() => onNavigate(game)}>
+            Começar a jogar {gameName}
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className={styles.summary}>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryValue}>{entries.length}</span>
+              <span className={styles.summaryLabel}>geradores desbloqueados</span>
             </div>
-          ))}
-        </div>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryValue}>{fmtTime(uptime)}</span>
+              <span className={styles.summaryLabel}>tempo de jogo</span>
+            </div>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryValue}>
+                {avgInterval !== undefined ? fmtTime(avgInterval) : '—'}
+              </span>
+              <span className={styles.summaryLabel}>
+                média do “tempo desde o anterior”
+              </span>
+            </div>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryValue}>{fmtTime(sinceLast)}</span>
+              <span className={styles.summaryLabel}>desde o último</span>
+            </div>
+          </div>
 
-        {edges.below && (
-          <button
-            className={`${gstyles.fade} ${gstyles.fadeBottom}`}
-            onClick={scrollToEnd}
-            aria-label="Ir para o fim"
-          >
-            ↓
-          </button>
-        )}
-      </div>
+          <div className={gstyles.listWrap}>
+            {edges.above && (
+              <button
+                className={`${gstyles.fade} ${gstyles.fadeTop}`}
+                onClick={scrollToStart}
+                aria-label="Ir para o começo"
+              >
+                ↑
+              </button>
+            )}
+
+            <div className={gstyles.list} ref={listRef} onScroll={onListScroll}>
+              {entries.map((entry) => (
+                <div key={entry.gen} className={styles.entry}>
+                  <span className={styles.entryTitle}>Gerador {entry.gen}</span>
+
+                  <div className={styles.fields}>
+                    <div className={styles.field}>
+                      <span className={styles.fieldLabel}>desbloqueado com</span>
+                      <span className={styles.fieldValue}>
+                        {fmtTime(entry.unlockedAt)} de jogo
+                      </span>
+                    </div>
+
+                    <div className={styles.field}>
+                      <span className={styles.fieldLabel}>
+                        tempo desde o anterior
+                      </span>
+                      <span className={styles.fieldValue}>
+                        {entry.gen === 1
+                          ? 'início do jogo'
+                          : `+${fmtTime(entry.delta ?? 0)}`}
+                      </span>
+                    </div>
+
+                    <div className={styles.field}>
+                      <span className={styles.fieldLabel}>
+                        ritmo vs. desbloqueio anterior
+                      </span>
+                      {entry.accel === undefined ? (
+                        <span className={styles.fieldValue}>—</span>
+                      ) : entry.accel === 0 ? (
+                        <span className={styles.fieldValue}>mesmo ritmo</span>
+                      ) : (
+                        <span
+                          className={`${styles.fieldValue} ${
+                            entry.accel > 0 ? styles.slower : styles.faster
+                          }`}
+                        >
+                          {entry.accel > 0 ? '+' : '−'}
+                          {fmtTime(Math.abs(entry.accel))}{' '}
+                          {entry.accel > 0 ? 'mais lento' : 'mais rápido'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {edges.below && (
+              <button
+                className={`${gstyles.fade} ${gstyles.fadeBottom}`}
+                onClick={scrollToEnd}
+                aria-label="Ir para o fim"
+              >
+                ↓
+              </button>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -120,8 +120,11 @@ export default function App() {
       <main
         className={`${styles.contentFull} ${page !== 'atividade' ? styles.hidden : ''}`}
       >
-        {/* Remonta ao zerar os Ciclos (ou trocar de slot) para o log acompanhar */}
-        <Activity key={`${slotEpoch}:${resetKeys.ciclos}`} />
+        {/* Remonta ao zerar um dos modos (ou trocar de slot) para o log acompanhar */}
+        <Activity
+          key={`${slotEpoch}:${resetKeys.ciclos}:${resetKeys.geradores}`}
+          onNavigate={setPage}
+        />
       </main>
       <main
         className={`${styles.contentFull} ${page !== 'notas' ? styles.hidden : ''}`}

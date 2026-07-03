@@ -224,8 +224,9 @@
   position: relative;
   overflow: hidden;
   display: grid;
-  /* Colunas de largura fixa + space-between = mesma distância entre todas */
-  grid-template-columns: 60px 140px 140px 240px 120px;
+  /* Colunas de largura fixa + space-between = mesma distância entre todas
+     (o log de desbloqueios vive na aba Atividade) */
+  grid-template-columns: 60px 180px 200px 120px;
   justify-content: space-between;
   align-items: center;
   gap: 16px;

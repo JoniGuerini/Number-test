@@ -515,31 +515,6 @@ export default function Generators() {
             );
           }
 
-          const prevUnlockedAt = i === 0 ? 0 : game.gens[i - 1].unlockedAt;
-          const prevPrevUnlockedAt = i <= 1 ? 0 : game.gens[i - 2].unlockedAt;
-          const delta =
-            gen.unlockedAt !== undefined && prevUnlockedAt !== undefined
-              ? gen.unlockedAt - prevUnlockedAt
-              : undefined;
-          // Diferença entre o intervalo deste desbloqueio e o do anterior
-          const prevDelta =
-            prevUnlockedAt !== undefined && prevPrevUnlockedAt !== undefined
-              ? prevUnlockedAt - prevPrevUnlockedAt
-              : undefined;
-          const accel =
-            delta !== undefined && prevDelta !== undefined
-              ? delta - prevDelta
-              : undefined;
-
-          let unlockText = '—';
-          if (gen.unlockedAt !== undefined) {
-            const parts = [fmtTime(gen.unlockedAt)];
-            if (delta !== undefined) parts.push(`+${fmtTime(delta)}`);
-            if (accel !== undefined)
-              parts.push(`${accel < 0 ? '−' : '+'}${fmtTime(Math.abs(accel))}`);
-            unlockText = parts.join(' · ');
-          }
-
           return (
             <div key={i} className={styles.row} ref={virtual.measureRef}>
               <span className={styles.genName}>{i + 1}</span>
@@ -555,11 +530,6 @@ export default function Generators() {
                   <span className={styles.statValue}>
                     +{fmtRate(dispAmount(i).mul(PROD_PER_UNIT))} / s
                   </span>
-                </div>
-
-                <div className={styles.stat}>
-                  <span className={styles.statLabel}>desbloqueio</span>
-                  <span className={styles.statValue}>{unlockText}</span>
                 </div>
               </div>
 

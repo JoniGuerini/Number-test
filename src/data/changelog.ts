@@ -10,6 +10,16 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.12.0',
+    date: '03/07/2026',
+    title: 'Atividade para os dois modos',
+    notes: [
+      'A Atividade ganhou abas Ciclos e Geradores — o log de desbloqueios agora cobre os dois modos.',
+      'O card do gerador nos Geradores perdeu a coluna de desbloqueio (a informação vive na Atividade) e o grid foi redistribuído.',
+      'Modo sem desbloqueios mostra um convite com botão para começar a jogar dali mesmo.',
+    ],
+  },
+  {
     version: 'v0.11.x',
     date: '03/07/2026',
     title: 'Verde musgo e amostras',
