@@ -11,6 +11,14 @@
   background: var(--bg);
 }
 
+/* Desktop: a linha do topo é exclusiva dos cardzinhos fixos (hub e FPS);
+   o conteúdo (número base etc.) começa numa seção abaixo, sem sobreposição */
+@media (min-width: 641px) {
+  .frame {
+    padding-top: 56px;
+  }
+}
+
 /* Contador: centralizado na área restante */
 .contentCenter {
   flex: 1;
