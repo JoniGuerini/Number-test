@@ -87,8 +87,7 @@ const pt = {
 
   // Config: Saves
   'saves.title': 'Jogos salvos',
-  'saves.hint':
-    'Cada jogo salvo guarda os três modos. Clique num deles para abrir as opções.',
+  'saves.hint': 'Seus jogos salvos.',
   'saves.active': 'ativo',
   'saves.load': 'Carregar jogo salvo',
   'saves.reset': 'Zerar {game}',
@@ -196,7 +195,7 @@ const en: Record<TKey, string> = {
   'tab.idioma': 'Language',
 
   'saves.title': 'Saves',
-  'saves.hint': 'Each save holds all three modes. Click a save to open its options.',
+  'saves.hint': 'Your saved games.',
   'saves.active': 'active',
   'saves.load': 'Load save',
   'saves.reset': 'Reset {game}',
