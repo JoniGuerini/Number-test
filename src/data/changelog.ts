@@ -19,6 +19,7 @@ export const CHANGELOG: PatchNote[] = [
       'Tabs da Config agora ocupam a largura toda, e o conteúdo das abas também — os cards de tema aproveitam o espaço no desktop.',
       'O tema ativo perdeu o anel de destaque: a posição no topo já conta a história.',
       'Cards de tema agora têm largura fixa — o ativo parou de esticar pela tela toda.',
+      'O app lembra em qual página você estava: dar refresh não te devolve mais para os Ciclos.',
       'Corrigidas as faixas de pretos diferentes no Chrome/macOS: um micro-ruído imperceptível no fundo força todos os blocos de pintura pelo mesmo caminho de rasterização.',
     ],
   },

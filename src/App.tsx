@@ -22,6 +22,20 @@ import styles from './App.module.css';
 export type GameTab = 'contador' | 'geradores' | 'ciclos';
 type Page = GameTab | 'atividade' | 'notas' | 'config';
 
+/* A última página visitada sobrevive ao refresh */
+const PAGE_KEY = 'number-test:page';
+const PAGES: Page[] = ['contador', 'geradores', 'ciclos', 'atividade', 'notas', 'config'];
+
+function readStoredPage(): Page {
+  try {
+    const stored = localStorage.getItem(PAGE_KEY);
+    if (stored && (PAGES as string[]).includes(stored)) return stored as Page;
+  } catch {
+    // Sem localStorage — cai no padrão
+  }
+  return 'ciclos';
+}
+
 export default function App() {
   useWakeLock();
 
@@ -53,7 +67,14 @@ export default function App() {
     };
   }, []);
 
-  const [page, setPage] = useState<Page>('ciclos');
+  const [page, setPage] = useState<Page>(readStoredPage);
+  useEffect(() => {
+    try {
+      localStorage.setItem(PAGE_KEY, page);
+    } catch {
+      // Sem localStorage — vale só pra sessão
+    }
+  }, [page]);
   // Trocar a key remonta o componente da aba, zerando só aquele jogo.
   const [resetKeys, setResetKeys] = useState({
     contador: 0,
