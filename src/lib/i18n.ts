@@ -118,7 +118,7 @@ const pt = {
 
   // Config: Vídeo
   'video.title': 'Telemetria',
-  'video.hint': 'Escolha o que aparece no topo da tela.',
+  'video.hint': 'Opções que aparecem no topo da tela.',
   'video.all': 'Todos os cards',
   'video.individual': 'cards individuais',
   'video.fps': 'FPS',
@@ -223,7 +223,7 @@ const en: Record<TKey, string> = {
   'sound.volumeAria': 'Button sound volume',
 
   'video.title': 'Telemetry',
-  'video.hint': 'Choose what appears at the top of the screen.',
+  'video.hint': 'Options shown at the top of the screen.',
   'video.all': 'All cards',
   'video.individual': 'individual cards',
   'video.fps': 'FPS',
