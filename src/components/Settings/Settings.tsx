@@ -172,24 +172,22 @@ export default function Settings({
                       <div className={styles.slotOptions}>
                         {!active && (
                           <button
-                            className={styles.option}
+                            className="btn-primary"
                             onClick={() => {
                               onSwitchSlot(slot.id);
                               setExpandedSlotId(null);
                             }}
                           >
-                            <span>Carregar save</span>
-                            <span className={styles.badge}>usar</span>
+                            Carregar save
                           </button>
                         )}
                         {GAMES.map((game) => (
                           <button
                             key={game.id}
-                            className={`${styles.option} ${styles.dangerOption}`}
+                            className={styles.dangerBtn}
                             onClick={() => onReset(slot.id, game.id)}
                           >
-                            <span>Zerar {game.name}</span>
-                            <span className={styles.badge}>zerar</span>
+                            Zerar {game.name}
                           </button>
                         ))}
                       </div>

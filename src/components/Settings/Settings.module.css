@@ -142,15 +142,40 @@
   min-width: 0;
 }
 
-/* Opções do save expandido: painel afundado logo abaixo do card */
+/* Opções do save expandido: painel afundado com botões lado a lado */
 .slotOptions {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
   padding: 12px;
   border-radius: 4px;
   background: var(--bg);
   box-shadow: var(--card-edge-press);
+}
+
+/* Botão compacto de ação destrutiva (zerar um modo do save) */
+.dangerBtn {
+  background: var(--surface);
+  border: none;
+  box-shadow: var(--card-edge-pill);
+  color: var(--accent);
+  padding: 11px 18px;
+  font: 500 12px/1 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s, transform 0.08s;
+}
+.dangerBtn:hover {
+  background: var(--accent);
+  color: var(--paper);
+  box-shadow: var(--card-edge-lg);
+}
+.dangerBtn:active {
+  box-shadow: var(--card-edge-press);
+  transform: scale(0.98);
 }
 
 .slotDate {
