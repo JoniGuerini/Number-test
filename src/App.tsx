@@ -123,7 +123,7 @@ export default function App() {
         <Activity key={`${slotEpoch}:${resetKeys.ciclos}`} />
       </main>
       <main
-        className={`${styles.contentCenter} ${page !== 'config' ? styles.hidden : ''}`}
+        className={`${styles.contentFull} ${page !== 'config' ? styles.hidden : ''}`}
       >
         <Settings
           onReset={resetGame}
