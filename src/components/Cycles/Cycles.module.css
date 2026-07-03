@@ -4,14 +4,41 @@
   grid-template-columns: 60px 150px 160px 160px 120px;
 }
 
-/* Barra de progresso do ciclo, deitada na base do card do gerador */
-.cycleBar {
+/* ===== Barra de progresso do ciclo (interna ao card) =====
+   Canaleta em baixo relevo com o preenchimento em alto relevo por cima,
+   mesma linguagem do slider da Config. Ocupa a largura útil do card:
+   no grid desktop vira uma segunda linha; no mobile empilha natural. */
+.cycleTrack {
+  grid-column: 1 / -1;
+  position: relative;
+  width: 100%;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.cycleGroove {
   position: absolute;
   left: 0;
-  bottom: 0;
-  height: 3px;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg);
+  box-shadow: var(--card-edge-press);
+}
+
+.cycleFill {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 10px;
+  border-radius: 999px;
   background: var(--brass-deep);
-  opacity: 0.55;
-  border-radius: 0 0 0 4px;
-  pointer-events: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 2px 4px rgba(0, 0, 0, 0.55);
 }

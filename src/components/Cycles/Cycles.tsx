@@ -544,11 +544,15 @@ export default function Cycles() {
                   {fmt(cost)}
                 </button>
 
-                <span
-                  className={cyc.cycleBar}
-                  style={{ width: `${cycleProgress(gen, i) * 100}%` }}
-                  aria-hidden="true"
-                />
+                {/* Barra do ciclo: canaleta em baixo relevo + preenchimento
+                    em alto relevo (mesma linguagem do slider da Config) */}
+                <div className={cyc.cycleTrack} aria-hidden="true">
+                  <div className={cyc.cycleGroove} />
+                  <div
+                    className={cyc.cycleFill}
+                    style={{ width: `${cycleProgress(gen, i) * 100}%` }}
+                  />
+                </div>
               </div>
             );
           })}
