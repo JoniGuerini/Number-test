@@ -14,14 +14,15 @@ import {
 } from './lib/storage';
 import styles from './App.module.css';
 
-/** Abas com save (podem ser zeradas). A aba Sons não tem estado. */
-const SAVE_KEYS: Partial<Record<Page, string>> = {
+/** Jogos com save (podem ser zerados pela Config). */
+const SAVE_KEYS: Record<GameTab, string> = {
   contador: COUNTER_SAVE_KEY,
   geradores: GENERATORS_SAVE_KEY,
   ciclos: CYCLES_SAVE_KEY,
 };
 
-type Page = 'contador' | 'geradores' | 'ciclos' | 'config';
+export type GameTab = 'contador' | 'geradores' | 'ciclos';
+type Page = GameTab | 'config';
 
 export default function App() {
   useWakeLock();
@@ -62,11 +63,9 @@ export default function App() {
     ciclos: 0,
   });
 
-  const resetActive = () => {
-    const key = SAVE_KEYS[page];
-    if (!key || page === 'config') return;
-    clearSave(key);
-    setResetKeys((keys) => ({ ...keys, [page]: keys[page] + 1 }));
+  const resetGame = (game: GameTab) => {
+    clearSave(SAVE_KEYS[game]);
+    setResetKeys((keys) => ({ ...keys, [game]: keys[game] + 1 }));
   };
 
   return (
@@ -92,7 +91,7 @@ export default function App() {
       <main
         className={`${styles.contentCenter} ${page !== 'config' ? styles.hidden : ''}`}
       >
-        <Settings />
+        <Settings onReset={resetGame} />
       </main>
 
       <footer className={styles.footer}>
@@ -120,14 +119,6 @@ export default function App() {
             onClick={() => setPage('config')}
           >
             Config
-          </button>
-          {/* Desabilitado (não some) nas abas sem save, pro layout não pular */}
-          <button
-            className={`btn-secondary danger ${styles.resetTab}`}
-            disabled={SAVE_KEYS[page] === undefined}
-            onClick={resetActive}
-          >
-            Zerar
           </button>
         </nav>
       </footer>

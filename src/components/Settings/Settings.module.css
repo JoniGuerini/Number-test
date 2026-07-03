@@ -72,6 +72,18 @@
   color: var(--brass-deep);
 }
 
+/* Ações destrutivas (zerar progresso) */
+.dangerOption .badge {
+  color: var(--accent);
+}
+.dangerOption:hover {
+  background: var(--accent);
+  color: var(--paper);
+}
+.dangerOption:hover .badge {
+  color: var(--paper);
+}
+
 .hint {
   font: 400 12px/1.5 var(--mono);
   color: var(--ink-faint);

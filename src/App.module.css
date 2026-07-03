@@ -88,14 +88,6 @@
   color: var(--brass-deep);
 }
 
-/* Alinha o Zerar à altura das tabs do footer */
-.resetTab {
-  flex: 1;
-  padding: 12px 28px;
-  font-size: 13px;
-  line-height: 1;
-}
-
 @media (max-width: 640px) {
   .frame {
     gap: 12px;
@@ -109,8 +101,5 @@
   .tab {
     flex: 1;
     padding: 12px 8px;
-  }
-  .resetTab {
-    padding: 12px 14px;
   }
 }
