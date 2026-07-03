@@ -26,10 +26,11 @@ const VIDEO_TOGGLES: {
   { key: 'showBattery', name: 'Card de bateria' },
 ];
 
-type ConfigTab = 'saves' | 'som' | 'video';
+type ConfigTab = 'saves' | 'temas' | 'som' | 'video';
 
 const TABS: { id: ConfigTab; name: string }[] = [
   { id: 'saves', name: 'Saves' },
+  { id: 'temas', name: 'Temas' },
   { id: 'som', name: 'Som' },
   { id: 'video', name: 'Vídeo' },
 ];
@@ -185,72 +186,93 @@ export default function Settings({
           </section>
         )}
 
-        {tab === 'video' && (
-          <>
-            <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Paleta de cores</h2>
-              <p className={styles.sectionHint}>
-                O tema vale para o app inteiro e fica salvo neste dispositivo.
-              </p>
-              <div className={styles.sectionBody}>
-                {THEMES.map((theme) => {
-                  const active = videoPrefs.theme === theme.id;
-                  return (
-                    <button
-                      key={theme.id}
-                      className={`${styles.option} ${active ? styles.active : ''}`}
-                      onClick={() => setVideoPref('theme', theme.id)}
+        {tab === 'temas' && (
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>Temas</h2>
+            <p className={styles.sectionHint}>
+              Cada card usa as cores do próprio tema. A escolha vale para o app
+              inteiro e fica salva neste dispositivo.
+            </p>
+            <div className={styles.sectionBody}>
+              {THEMES.map((theme) => {
+                const active = videoPrefs.theme === theme.id;
+                const [bg, paper, accentColor, ink] = theme.preview;
+                return (
+                  <button
+                    key={theme.id}
+                    className={`${styles.themeCard} ${active ? styles.themeCardActive : ''}`}
+                    style={{
+                      background: bg,
+                      ['--theme-accent' as string]: accentColor,
+                    }}
+                    onClick={() => setVideoPref('theme', theme.id)}
+                  >
+                    {/* Mini-mockup: um card do tema com texto e barra de acento */}
+                    <span
+                      className={styles.themeMock}
+                      style={{ background: paper }}
+                      aria-hidden="true"
                     >
-                      <span className={styles.themeLabel}>
-                        <span className={styles.swatches} aria-hidden="true">
-                          {theme.preview.map((color, i) => (
-                            <span
-                              key={i}
-                              className={styles.swatch}
-                              style={{ background: color }}
-                            />
-                          ))}
-                        </span>
-                        {theme.name}
-                      </span>
-                      <span className={styles.badge}>
-                        {active ? 'ativo' : 'usar'}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Telemetria</h2>
-              <p className={styles.sectionHint}>
-                Escolha quais cardzinhos aparecem no topo da tela.
-              </p>
-              <div className={styles.sectionBody}>
-                {VIDEO_TOGGLES.map((toggle) => {
-                  const on = videoPrefs[toggle.key];
-                  return (
-                    <button
-                      key={toggle.key}
-                      className={styles.option}
-                      role="switch"
-                      aria-checked={on}
-                      onClick={() => setVideoPref(toggle.key, !on)}
-                    >
-                      <span>{toggle.name}</span>
                       <span
-                        className={`${styles.switch} ${on ? styles.switchOn : ''}`}
-                        aria-hidden="true"
-                      >
-                        <span className={styles.switchThumb} />
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-          </>
+                        className={styles.themeMockTitle}
+                        style={{ background: accentColor }}
+                      />
+                      <span
+                        className={styles.themeMockLine}
+                        style={{ background: ink, opacity: 0.55 }}
+                      />
+                      <span
+                        className={styles.themeMockBar}
+                        style={{ background: accentColor }}
+                      />
+                    </span>
+
+                    <span className={styles.themeName} style={{ color: ink }}>
+                      {theme.name}
+                    </span>
+
+                    <span
+                      className={styles.themeBadge}
+                      style={{ color: accentColor }}
+                    >
+                      {active ? 'ativo' : 'usar'}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {tab === 'video' && (
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>Telemetria</h2>
+            <p className={styles.sectionHint}>
+              Escolha quais cardzinhos aparecem no topo da tela.
+            </p>
+            <div className={styles.sectionBody}>
+              {VIDEO_TOGGLES.map((toggle) => {
+                const on = videoPrefs[toggle.key];
+                return (
+                  <button
+                    key={toggle.key}
+                    className={styles.option}
+                    role="switch"
+                    aria-checked={on}
+                    onClick={() => setVideoPref(toggle.key, !on)}
+                  >
+                    <span>{toggle.name}</span>
+                    <span
+                      className={`${styles.switch} ${on ? styles.switchOn : ''}`}
+                      aria-hidden="true"
+                    >
+                      <span className={styles.switchThumb} />
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
         )}
       </div>
     </div>
