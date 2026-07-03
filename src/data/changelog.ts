@@ -17,6 +17,7 @@ export const CHANGELOG: PatchNote[] = [
       'Criar um save agora abre um campo de nome já preenchido com o genérico (Save N) — é só apagar e batizar como quiser antes de confirmar.',
       'Todo save pode ser renomeado: o campo fica no painel expandido, junto das outras opções.',
       'Enter confirma, Esc cancela a criação.',
+      'Refinos: o filete de foco do campo de nome não é mais cortado na esquerda, e o input de renomear ganhou um fundo mais claro dentro do painel escuro.',
     ],
   },
   {
