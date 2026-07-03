@@ -509,7 +509,11 @@ export default function Cycles() {
                   {accel !== undefined && (
                     <>
                       {' · '}
-                      <span className={accel < 0 ? cyc.accelFast : cyc.accelSlow}>
+                      <span
+                        className={
+                          accel < 0 ? cyc.accelFast : accel > 0 ? cyc.accelSlow : ''
+                        }
+                      >
                         {accel < 0 ? '−' : '+'}
                         {fmtTime(Math.abs(accel))}
                       </span>
