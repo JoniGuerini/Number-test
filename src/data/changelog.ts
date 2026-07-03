@@ -10,6 +10,14 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.7.2',
+    date: '03/07/2026',
+    title: 'Canaleta discreta',
+    notes: [
+      'A parte vazia da barra de ciclo ficou num tom mais próximo ao do card, para não roubar atenção do preenchimento.',
+    ],
+  },
+  {
     version: 'v0.7.1',
     date: '03/07/2026',
     title: 'Setinhas honestas',

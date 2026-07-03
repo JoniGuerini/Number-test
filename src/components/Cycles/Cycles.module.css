@@ -25,9 +25,10 @@
   top: 50%;
   transform: translateY(-50%);
   height: 4px;
-  /* Pontas achatadas com cantos suaves, como os cards */
+  /* Pontas achatadas com cantos suaves, como os cards; tom próximo ao do
+     card pra parte vazia não roubar atenção */
   border-radius: 3px;
-  background: var(--bg);
+  background: var(--surface);
   box-shadow: var(--card-edge-press);
 }
 
