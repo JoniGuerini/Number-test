@@ -1,5 +1,6 @@
 import { useEffect, useReducer, useRef, useState } from 'react';
 import Decimal from 'break_eternity.js';
+import { useVirtualRows } from '../../hooks/useVirtualRows';
 import { fmt, fmtRate, fmtTime } from '../../lib/format';
 import { GENERATORS_SAVE_KEY, loadSave, writeSave } from '../../lib/storage';
 import styles from './Generators.module.css';
@@ -319,6 +320,9 @@ export default function Generators() {
 
   const dispUptime = game.uptime + (game.gens[0].bought > 0 ? partial : 0);
 
+  // Cards fora da janela visível viram fantasmas (mesma altura, sem conteúdo)
+  const virtual = useVirtualRows(listRef, game.gens.length, 8);
+
   /** Baixa um .csv com a progressão atual: metadados + uma linha por gerador,
       com valores brutos (análise) e formatados (leitura). */
   const exportCsv = () => {
@@ -482,6 +486,17 @@ export default function Generators() {
 
         <div className={styles.list} ref={listRef} onScroll={updateEdges}>
           {game.gens.map((gen, i) => {
+          if (i < virtual.first || i > virtual.last) {
+            return (
+              <div
+                key={i}
+                className={styles.row}
+                style={{ height: virtual.rowHeight }}
+                aria-hidden="true"
+              />
+            );
+          }
+
           const cost = costOf(i, gen.bought);
           const target = i === 0 ? 'base' : `${i}`;
 
@@ -533,7 +548,7 @@ export default function Generators() {
           }
 
           return (
-            <div key={i} className={styles.row}>
+            <div key={i} className={styles.row} ref={virtual.measureRef}>
               <span className={styles.genName}>{i + 1}</span>
 
               <div className={styles.statsRow}>
