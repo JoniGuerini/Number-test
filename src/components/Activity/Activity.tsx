@@ -126,7 +126,7 @@ export default function Activity() {
       <div className={styles.summary}>
         <div className={styles.summaryItem}>
           <span className={styles.summaryValue}>{entries.length}</span>
-          <span className={styles.summaryLabel}>desbloqueados</span>
+          <span className={styles.summaryLabel}>geradores desbloqueados</span>
         </div>
         <div className={styles.summaryItem}>
           <span className={styles.summaryValue}>{fmtTime(uptime)}</span>
