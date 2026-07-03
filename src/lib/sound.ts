@@ -60,12 +60,14 @@ interface ToneOpts {
   freq: number;
   /** Se definido, a frequência desliza até este valor ao longo do som. */
   freqEnd?: number;
+  /** Passa-baixas para abafar os harmônicos agudos. */
+  lowpass?: number;
   dur: number;
   gain: number;
 }
 
 /** Tom simples com envelope de decay (e glide de pitch opcional). */
-function tone({ type, freq, freqEnd, dur, gain }: ToneOpts): void {
+function tone({ type, freq, freqEnd, lowpass, dur, gain }: ToneOpts): void {
   const ac = getCtx();
   const now = ac.currentTime;
 
@@ -76,11 +78,20 @@ function tone({ type, freq, freqEnd, dur, gain }: ToneOpts): void {
     osc.frequency.exponentialRampToValueAtTime(freqEnd, now + dur);
   }
 
+  let node: AudioNode = osc;
+  if (lowpass !== undefined) {
+    const f = ac.createBiquadFilter();
+    f.type = 'lowpass';
+    f.frequency.value = lowpass;
+    node.connect(f);
+    node = f;
+  }
+
   const g = ac.createGain();
   g.gain.setValueAtTime(gain, now);
   g.gain.exponentialRampToValueAtTime(0.001, now + dur);
 
-  osc.connect(g);
+  node.connect(g);
   g.connect(ac.destination);
   osc.start(now);
   osc.stop(now + dur);
@@ -143,6 +154,24 @@ export const SOUNDS: SoundDef[] = [
     id: 'click-classico',
     name: 'Click clássico',
     play: () => tone({ type: 'square', freq: 2000, dur: 0.015, gain: 0.12 }),
+  },
+  {
+    id: 'click-abafado',
+    name: 'Click abafado',
+    play: () =>
+      tone({ type: 'square', freq: 900, lowpass: 1800, dur: 0.015, gain: 0.2 }),
+  },
+  {
+    id: 'click-surdo',
+    name: 'Click surdo',
+    play: () =>
+      tone({ type: 'triangle', freq: 600, lowpass: 1200, dur: 0.02, gain: 0.3 }),
+  },
+  {
+    id: 'click-medio',
+    name: 'Click médio',
+    play: () =>
+      tone({ type: 'square', freq: 1400, lowpass: 3000, dur: 0.015, gain: 0.15 }),
   },
 ];
 
