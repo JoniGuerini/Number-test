@@ -438,12 +438,12 @@ export default function Settings({
               <button
                 className={styles.option}
                 role="switch"
-                aria-checked={videoPrefs.vsync}
-                onClick={() => setVideoPref('vsync', !videoPrefs.vsync)}
+                aria-checked={videoPrefs.uncapFps}
+                onClick={() => setVideoPref('uncapFps', !videoPrefs.uncapFps)}
               >
-                <span>{t('video.vsync')}</span>
+                <span>{t('video.uncap')}</span>
                 <span
-                  className={`${styles.switch} ${videoPrefs.vsync ? styles.switchOn : ''}`}
+                  className={`${styles.switch} ${videoPrefs.uncapFps ? styles.switchOn : ''}`}
                   aria-hidden="true"
                 >
                   <span className={styles.switchThumb} />

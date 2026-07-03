@@ -14,7 +14,7 @@ export const CHANGELOG: PatchNote[] = [
     date: '03/07/2026',
     title: 'Beyond the monitor',
     notes: [
-      'New VSync switch in the Video tab — on by default, mirroring the real state. Turn it off and the frame loop runs as fast as the machine allows, past the monitor refresh rate.',
+      'New "Uncapped FPS (no vsync)" switch in the Video tab: the frame loop runs as fast as the machine allows, past the monitor refresh rate.',
       'The FPS meter counts the real loop rate, so you can see how far your machine goes.',
       'Deterministic sync is untouched either way — the simulation advances by fixed wall-clock steps, no matter how often frames run.',
     ],
