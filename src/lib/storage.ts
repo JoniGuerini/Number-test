@@ -1,5 +1,6 @@
 export const COUNTER_SAVE_KEY = 'number-test:contador';
 export const GENERATORS_SAVE_KEY = 'number-test:geradores';
+export const CYCLES_SAVE_KEY = 'number-test:ciclos';
 
 export function loadSave<T>(key: string): T | null {
   try {

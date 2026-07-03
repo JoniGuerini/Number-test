@@ -221,6 +221,8 @@
 
 .row {
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
   display: grid;
   /* Colunas de largura fixa + space-between = mesma distância entre todas */
   grid-template-columns: 60px 140px 140px 240px 120px;

@@ -1,0 +1,11 @@
+/* Barra de progresso do ciclo, deitada na base do card do gerador */
+.cycleBar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--brass-deep);
+  opacity: 0.55;
+  border-radius: 0 0 0 4px;
+  pointer-events: none;
+}
