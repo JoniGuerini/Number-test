@@ -16,7 +16,7 @@ export interface ThemeInfo {
 }
 
 export const THEMES: ThemeInfo[] = [
-  { id: 'neutro', name: 'Dark neutro', preview: ['#000000', '#111111', '#bcb09a', '#e0e0e0'] },
+  { id: 'neutro', name: 'Dark neutro', preview: ['#070707', '#111111', '#bcb09a', '#e0e0e0'] },
   { id: 'midnight', name: 'Azul meia-noite', preview: ['#0c0e12', '#131620', '#bcb09a', '#d8dce2'] },
   { id: 'creme', name: 'Creme terracota', preview: ['#e8dcc8', '#f7f0e2', '#a34a24', '#3a2e24'] },
   { id: 'verde', name: 'Verde musgo', preview: ['#0a0f0a', '#111811', '#cfa63a', '#dde3dd'] },
@@ -24,7 +24,7 @@ export const THEMES: ThemeInfo[] = [
 
 /** Cor da moldura do navegador (theme-color) por tema. */
 const THEME_BG: Record<ThemeId, string> = {
-  neutro: '#000000',
+  neutro: '#070707',
   midnight: '#0c0e12',
   creme: '#e8dcc8',
   verde: '#0a0f0a',
