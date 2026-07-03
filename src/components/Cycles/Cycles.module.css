@@ -1,3 +1,12 @@
+/* Aceleração do desbloqueio: mais lento que o anterior (vermelho) ou mais
+   rápido (verde) */
+.accelSlow {
+  color: var(--accent);
+}
+.accelFast {
+  color: var(--tier-startup);
+}
+
 /* Variante do grid com 6 colunas (a coluna extra de ciclo/tempo restante).
    Só vale no desktop: no mobile o .row vira flex e ignora as colunas. */
 .rowWide {

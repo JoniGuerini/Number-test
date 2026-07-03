@@ -497,14 +497,26 @@ export default function Cycles() {
                 ? delta - prevDelta
                 : undefined;
 
-            let unlockText = '—';
-            if (gen.unlockedAt !== undefined) {
-              const parts = [fmtTime(gen.unlockedAt)];
-              if (delta !== undefined) parts.push(`+${fmtTime(delta)}`);
-              if (accel !== undefined)
-                parts.push(`${accel < 0 ? '−' : '+'}${fmtTime(Math.abs(accel))}`);
-              unlockText = parts.join(' · ');
-            }
+            // Aceleração colorida: vermelho = demorou mais que o anterior,
+            // verde = desbloqueou mais rápido
+            const unlockText =
+              gen.unlockedAt === undefined ? (
+                '—'
+              ) : (
+                <>
+                  {fmtTime(gen.unlockedAt)}
+                  {delta !== undefined && <> · +{fmtTime(delta)}</>}
+                  {accel !== undefined && (
+                    <>
+                      {' · '}
+                      <span className={accel < 0 ? cyc.accelFast : cyc.accelSlow}>
+                        {accel < 0 ? '−' : '+'}
+                        {fmtTime(Math.abs(accel))}
+                      </span>
+                    </>
+                  )}
+                </>
+              );
 
             // Tempo restante do ciclo atual (contagem viva, extrapolada por frame)
             const remaining = Math.max(
