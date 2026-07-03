@@ -87,6 +87,67 @@
   --mono: 'JetBrains Mono Variable', 'JetBrains Mono', 'Courier New', monospace;
 }
 
+/* Fim transparente dos gradientes de fade, casado com o --bg de cada tema
+   (transparent puro esverdeia/escurece a interpolação) */
+:root {
+  --bg-fade: rgba(7, 7, 7, 0);
+}
+
+/* ============================================================
+   TEMA: Creme terracota — claro, quente, com acento terracota
+   ============================================================ */
+:root[data-theme='creme'] {
+  color-scheme: light;
+
+  --bg: #e8dcc8;
+  --paper: #f7f0e2;
+  --surface: #efe6d2;
+  --surface-hover: #e9dec6;
+  --surface-deep: #ddcfb2;
+  --bg-fade: rgba(232, 220, 200, 0);
+
+  /* Terracota assume o papel do latão */
+  --brass-light: #d9b8a5;
+  --brass: #b56a4a;
+  --brass-deep: #a34a24;
+  --brass-bright: #c25a2e;
+
+  --ink: #3a2e24;
+  --ink-soft: #5c4c3d;
+  --ink-muted: #7d6a56;
+  --ink-faint: #a8967e;
+
+  --accent: #b04434;
+  --tier-startup: #2f7d3f;
+
+  --border: #cbb999;
+  --border-soft: #d9cab0;
+  --border-faint: #e2d6bf;
+
+  /* Sombras recalibradas para superfície clara */
+  --card-edge:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    0 1px 2px rgba(90, 60, 40, 0.22),
+    0 0 0 0.5px rgba(90, 60, 40, 0.14);
+
+  --card-edge-lg:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 6px 18px rgba(90, 60, 40, 0.2),
+    0 0 0 0.5px rgba(90, 60, 40, 0.14);
+
+  --card-edge-pill:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 1px 1px rgba(90, 60, 40, 0.18),
+    0 0 0 0.5px rgba(90, 60, 40, 0.14);
+
+  --card-edge-press:
+    inset 0 2px 4px rgba(90, 60, 40, 0.28),
+    0 0 0 0.5px rgba(90, 60, 40, 0.14);
+
+  --shadow-md: var(--card-edge-lg);
+  --shadow-lg: var(--card-edge-lg);
+}
+
 /* ============================================================
    TEMA: Azul meia-noite — a paleta original portada do Coders
    (aplicado via data-theme no <html>; o padrão é o dark neutro)
@@ -106,4 +167,6 @@
   --border: #2a3045;
   --border-soft: #1d2230;
   --border-faint: #14181f;
+
+  --bg-fade: rgba(12, 14, 18, 0);
 }

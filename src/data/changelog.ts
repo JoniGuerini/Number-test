@@ -10,6 +10,14 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.10.0',
+    date: '03/07/2026',
+    title: 'Creme terracota',
+    notes: [
+      'Terceiro tema, agora claro: fundos em areia/creme, tintas em marrons quentes, terracota queimada como acento e sombras recalibradas para superfície clara.',
+    ],
+  },
+  {
     version: 'v0.9.0',
     date: '03/07/2026',
     title: 'Sistema de temas',
