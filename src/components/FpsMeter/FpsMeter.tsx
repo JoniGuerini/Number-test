@@ -175,7 +175,7 @@ export default function FpsMeter() {
           className={`${styles.pill} ${styles.updatePill}`}
           onClick={() => window.location.reload()}
         >
-          nova versão · recarregar
+          Nova versão pendente
         </button>
       ) : (
         <div className={styles.pill}>
