@@ -2,7 +2,7 @@ import { useEffect, useReducer, useRef, useState } from 'react';
 import Decimal from 'break_eternity.js';
 import { useVirtualRows } from '../../hooks/useVirtualRows';
 import { fmt, fmtRate, fmtTime } from '../../lib/format';
-import { GENERATORS_SAVE_KEY, loadSave, writeSave } from '../../lib/storage';
+import { loadSave, saveKeyFor, writeSave } from '../../lib/storage';
 import styles from './Generators.module.css';
 
 interface Gen {
@@ -52,8 +52,8 @@ const PROD_PER_UNIT = new Decimal(0.1);
 
 const newGen = (): Gen => ({ amount: new Decimal(0), bought: 0 });
 
-function loadGame(): Game {
-  const s = loadSave<GenSave>(GENERATORS_SAVE_KEY);
+function loadGame(saveKey: string): Game {
+  const s = loadSave<GenSave>(saveKey);
   if (!s || s.gens.length === 0) {
     return {
       base: START_BASE,
@@ -160,7 +160,9 @@ function advance(g: Game, nSteps: number): Game {
 }
 
 export default function Generators() {
-  const [game, setGame] = useState<Game>(loadGame);
+  // Amarra a instância ao slot ativo do momento da montagem
+  const [saveKey] = useState(() => saveKeyFor('geradores'));
+  const [game, setGame] = useState<Game>(() => loadGame(saveKey));
   // Re-render a cada frame para a extrapolação visual (a simulação em si só
   // avança nos passos fixos — isto é pura cosmética de display).
   const [, bumpFrame] = useReducer((x: number) => x + 1, 0);
@@ -227,7 +229,7 @@ export default function Generators() {
   useEffect(() => {
     const persist = () => {
       const g = saveRef.current;
-      writeSave(GENERATORS_SAVE_KEY, {
+      writeSave(saveKey, {
         base: g.base.toString(),
         totalProduced: g.totalProduced.toString(),
         gens: g.gens.map((x) => ({

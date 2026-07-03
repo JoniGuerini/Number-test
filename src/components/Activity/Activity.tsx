@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { fmtTime } from '../../lib/format';
-import { CYCLES_SAVE_KEY, loadSave } from '../../lib/storage';
+import { loadSave, saveKeyFor } from '../../lib/storage';
 // Reusa o esqueleto visual das listas de geradores (scroll, fades)
 import gstyles from '../Generators/Generators.module.css';
 import styles from './Activity.module.css';
@@ -20,8 +20,8 @@ interface Entry {
   accel?: number;
 }
 
-function readLog(): { entries: Entry[]; uptime: number } {
-  const save = loadSave<CycSaveLite>(CYCLES_SAVE_KEY);
+function readLog(saveKey: string): { entries: Entry[]; uptime: number } {
+  const save = loadSave<CycSaveLite>(saveKey);
   if (!save) return { entries: [], uptime: 0 };
 
   const unlocked = save.gens
@@ -45,14 +45,17 @@ function readLog(): { entries: Entry[]; uptime: number } {
 
 /** Log de desbloqueios do modo Ciclos, com cada tempo explicado. */
 export default function Activity() {
-  const [log, setLog] = useState(readLog);
+  // Lê o save dos Ciclos do slot ativo (trocar de slot remonta o componente)
+  const [saveKey] = useState(() => saveKeyFor('ciclos'));
+  const [log, setLog] = useState(() => readLog(saveKey));
   const { entries, uptime } = log;
   const listRef = useRef<HTMLDivElement>(null);
 
   // O save dos Ciclos é gravado 1x/s; reler no mesmo ritmo mantém o log vivo.
   useEffect(() => {
-    const id = setInterval(() => setLog(readLog()), 1000);
+    const id = setInterval(() => setLog(readLog(saveKey)), 1000);
     return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Mesma animação de scroll das listas de geradores (alvo recalculado por frame)

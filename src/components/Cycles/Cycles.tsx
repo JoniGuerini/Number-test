@@ -2,7 +2,7 @@ import { useEffect, useReducer, useRef, useState } from 'react';
 import Decimal from 'break_eternity.js';
 import { useVirtualRows } from '../../hooks/useVirtualRows';
 import { fmt, fmtRate, fmtTime } from '../../lib/format';
-import { CYCLES_SAVE_KEY, loadSave, writeSave } from '../../lib/storage';
+import { loadSave, saveKeyFor, writeSave } from '../../lib/storage';
 import styles from '../Generators/Generators.module.css';
 import cyc from './Cycles.module.css';
 
@@ -125,8 +125,8 @@ function advance(g: Game, nSteps: number): Game {
   return { ...g, base, totalProduced, gens, uptime, steps: g.steps + nSteps };
 }
 
-function loadGame(): Game {
-  const s = loadSave<CycSave>(CYCLES_SAVE_KEY);
+function loadGame(saveKey: string): Game {
+  const s = loadSave<CycSave>(saveKey);
   if (!s || s.gens.length === 0) {
     return {
       base: START_BASE,
@@ -163,7 +163,9 @@ function loadGame(): Game {
 }
 
 export default function Cycles() {
-  const [game, setGame] = useState<Game>(loadGame);
+  // Amarra a instância ao slot ativo do momento da montagem
+  const [saveKey] = useState(() => saveKeyFor('ciclos'));
+  const [game, setGame] = useState<Game>(() => loadGame(saveKey));
   // Re-render por frame para as barras de ciclo andarem suaves.
   const [, bumpFrame] = useReducer((x: number) => x + 1, 0);
   const listRef = useRef<HTMLDivElement>(null);
@@ -222,7 +224,7 @@ export default function Cycles() {
   useEffect(() => {
     const persist = () => {
       const g = saveRef.current;
-      writeSave(CYCLES_SAVE_KEY, {
+      writeSave(saveKey, {
         base: g.base.toString(),
         totalProduced: g.totalProduced.toString(),
         gens: g.gens.map((x) => ({

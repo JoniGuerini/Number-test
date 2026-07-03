@@ -72,6 +72,44 @@
   color: var(--brass-deep);
 }
 
+/* ===== Slots de save ===== */
+.slotRow {
+  display: flex;
+  gap: 8px;
+}
+.slotRow .option {
+  flex: 1;
+  min-width: 0;
+}
+
+.slotDate {
+  color: var(--ink-faint);
+  text-transform: none;
+}
+
+.slotDelete {
+  width: 42px;
+  background: var(--surface);
+  border: none;
+  box-shadow: var(--card-edge);
+  border-radius: 4px;
+  font: 600 13px var(--mono);
+  color: var(--ink-faint);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.slotDelete:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.slotDeleteOn {
+  color: var(--accent);
+}
+.slotDeleteOn:hover {
+  background: var(--accent);
+  color: var(--paper);
+}
+
 /* Ações destrutivas (zerar progresso) */
 .dangerOption .badge {
   color: var(--accent);

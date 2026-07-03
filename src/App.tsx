@@ -9,18 +9,14 @@ import { useWakeLock } from './hooks/useWakeLock';
 import { playPress, playRelease } from './lib/sound';
 import {
   clearSave,
-  COUNTER_SAVE_KEY,
-  CYCLES_SAVE_KEY,
-  GENERATORS_SAVE_KEY,
+  createSlot,
+  deleteSlot,
+  getActiveSlotId,
+  listSlots,
+  saveKeyFor,
+  switchSlot,
 } from './lib/storage';
 import styles from './App.module.css';
-
-/** Jogos com save (podem ser zerados pela Config). */
-const SAVE_KEYS: Record<GameTab, string> = {
-  contador: COUNTER_SAVE_KEY,
-  geradores: GENERATORS_SAVE_KEY,
-  ciclos: CYCLES_SAVE_KEY,
-};
 
 export type GameTab = 'contador' | 'geradores' | 'ciclos';
 type Page = GameTab | 'atividade' | 'config';
@@ -65,8 +61,39 @@ export default function App() {
   });
 
   const resetGame = (game: GameTab) => {
-    clearSave(SAVE_KEYS[game]);
+    clearSave(saveKeyFor(game));
     setResetKeys((keys) => ({ ...keys, [game]: keys[game] + 1 }));
+  };
+
+  // ===== Slots de save =====
+  const [slots, setSlots] = useState(listSlots);
+  const [activeSlotId, setActiveSlotId] = useState(getActiveSlotId);
+  // Muda a cada troca de slot: remonta os jogos, que carregam do slot novo
+  const [slotEpoch, setSlotEpoch] = useState(0);
+
+  const refreshSlots = () => {
+    setSlots(listSlots());
+    setActiveSlotId(getActiveSlotId());
+  };
+
+  const handleCreateSlot = () => {
+    const slot = createSlot();
+    switchSlot(slot.id);
+    refreshSlots();
+    setSlotEpoch((e) => e + 1);
+  };
+
+  const handleSwitchSlot = (id: string) => {
+    if (id === activeSlotId) return;
+    switchSlot(id);
+    refreshSlots();
+    setSlotEpoch((e) => e + 1);
+  };
+
+  const handleDeleteSlot = (id: string) => {
+    if (id === activeSlotId) return;
+    deleteSlot(id);
+    refreshSlots();
   };
 
   return (
@@ -77,28 +104,35 @@ export default function App() {
       <main
         className={`${styles.contentCenter} ${page !== 'contador' ? styles.hidden : ''}`}
       >
-        <Counter key={resetKeys.contador} />
+        <Counter key={`${slotEpoch}:${resetKeys.contador}`} />
       </main>
       <main
         className={`${styles.contentFull} ${page !== 'geradores' ? styles.hidden : ''}`}
       >
-        <Generators key={resetKeys.geradores} />
+        <Generators key={`${slotEpoch}:${resetKeys.geradores}`} />
       </main>
       <main
         className={`${styles.contentFull} ${page !== 'ciclos' ? styles.hidden : ''}`}
       >
-        <Cycles key={resetKeys.ciclos} />
+        <Cycles key={`${slotEpoch}:${resetKeys.ciclos}`} />
       </main>
       <main
         className={`${styles.contentFull} ${page !== 'atividade' ? styles.hidden : ''}`}
       >
-        {/* Remonta ao zerar os Ciclos para o log sumir junto */}
-        <Activity key={resetKeys.ciclos} />
+        {/* Remonta ao zerar os Ciclos (ou trocar de slot) para o log acompanhar */}
+        <Activity key={`${slotEpoch}:${resetKeys.ciclos}`} />
       </main>
       <main
         className={`${styles.contentCenter} ${page !== 'config' ? styles.hidden : ''}`}
       >
-        <Settings onReset={resetGame} />
+        <Settings
+          onReset={resetGame}
+          slots={slots}
+          activeSlotId={activeSlotId}
+          onCreateSlot={handleCreateSlot}
+          onSwitchSlot={handleSwitchSlot}
+          onDeleteSlot={handleDeleteSlot}
+        />
       </main>
 
       <footer className={styles.footer}>

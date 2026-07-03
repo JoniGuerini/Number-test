@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Decimal from 'break_eternity.js';
 import { fmt, fmtRate, fmtTime } from '../../lib/format';
-import { COUNTER_SAVE_KEY, loadSave, writeSave } from '../../lib/storage';
+import { loadSave, saveKeyFor, writeSave } from '../../lib/storage';
 import styles from './Counter.module.css';
 // Reusa o visual dos cardzinhos do topo (padrão das abas Geradores/Ciclos)
 import hub from '../Generators/Generators.module.css';
@@ -23,8 +23,8 @@ interface CounterSave {
   savedAt?: number;
 }
 
-function loadCounter() {
-  const s = loadSave<CounterSave>(COUNTER_SAVE_KEY);
+function loadCounter(saveKey: string) {
+  const s = loadSave<CounterSave>(saveKey);
   if (!s) {
     return {
       value: new Decimal(0),
@@ -53,7 +53,10 @@ function loadCounter() {
 }
 
 export default function Counter() {
-  const [initial] = useState(loadCounter);
+  // Amarra a instância ao slot ativo do momento da montagem
+  // (trocar de slot remonta o componente)
+  const [saveKey] = useState(() => saveKeyFor('contador'));
+  const [initial] = useState(() => loadCounter(saveKey));
   const [value, setValue] = useState<Decimal>(initial.value);
   const [rate, setRate] = useState<Decimal>(initial.rate);
   const [uptime, setUptime] = useState(initial.uptime);
@@ -66,7 +69,7 @@ export default function Counter() {
   useEffect(() => {
     const persist = () => {
       const s = saveRef.current;
-      writeSave(COUNTER_SAVE_KEY, {
+      writeSave(saveKey, {
         value: s.value.toString(),
         rate: s.rate.toString(),
         uptime: s.uptime,
