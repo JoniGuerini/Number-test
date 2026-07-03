@@ -56,40 +56,26 @@ function tone({ type, freq, freqEnd, lowpass, dur, gain, delay = 0 }: ToneOpts):
   osc.stop(start + dur);
 }
 
-/** "Thock": transiente de ruído (8ms) + corpo senoidal com glide de pitch
-    começando 3ms depois — receita do jogo generators-kappa.vercel.app. */
-function thock(freqStart: number, freqEnd: number, durMs: number): void {
+/** Click de ruído seco de 8ms — o som que o generators-kappa.vercel.app de
+    fato toca (a camada tonal de lá é código morto: um bug de ms/s a silencia). */
+function noiseClick(): void {
   const ac = getCtx();
   const now = ac.currentTime;
-  const dur = durMs / 1000;
 
-  // Camada 1: o "toque" físico
   const len = Math.ceil(ac.sampleRate * 0.008);
   const buf = ac.createBuffer(1, len, ac.sampleRate);
   const data = buf.getChannelData(0);
   for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * 0.6;
+
   const src = ac.createBufferSource();
   src.buffer = buf;
-  const noiseGain = ac.createGain();
-  noiseGain.gain.setValueAtTime(Math.max(0.125 * currentVolume, 0.0001), now);
-  noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.008);
-  src.connect(noiseGain);
-  noiseGain.connect(ac.destination);
+  const g = ac.createGain();
+  g.gain.setValueAtTime(Math.max(0.125 * currentVolume, 0.0001), now);
+  g.gain.exponentialRampToValueAtTime(0.001, now + 0.008);
+  src.connect(g);
+  g.connect(ac.destination);
   src.start(now);
   src.stop(now + 0.01);
-
-  // Camada 2: o corpo tonal deslizando de pitch
-  const osc = ac.createOscillator();
-  const oscGain = ac.createGain();
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(freqStart, now + 0.003);
-  osc.frequency.exponentialRampToValueAtTime(freqEnd, now + dur);
-  oscGain.gain.setValueAtTime(Math.max(0.1 * currentVolume, 0.0001), now + 0.003);
-  oscGain.gain.exponentialRampToValueAtTime(0.001, now + dur);
-  osc.connect(oscGain);
-  oscGain.connect(ac.destination);
-  osc.start(now + 0.003);
-  osc.stop(now + dur);
 }
 
 /* ===== Temas de som dos botões (par pressionar/soltar) ===== */
@@ -117,8 +103,8 @@ export const SOUND_THEMES: SoundTheme[] = [
   {
     id: 'toc',
     name: 'Toc',
-    press: () => thock(1400, 600, 45),
-    release: () => thock(900, 1200, 40),
+    press: () => noiseClick(),
+    release: () => noiseClick(),
   },
 ];
 
