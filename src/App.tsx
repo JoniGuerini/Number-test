@@ -5,7 +5,7 @@ import Cycles from './components/Cycles/Cycles';
 import SoundLab from './components/SoundLab/SoundLab';
 import FpsMeter from './components/FpsMeter/FpsMeter';
 import { useWakeLock } from './hooks/useWakeLock';
-import { playClick } from './lib/sound';
+import { playPress, playRelease } from './lib/sound';
 import {
   clearSave,
   COUNTER_SAVE_KEY,
@@ -26,15 +26,32 @@ type Page = 'contador' | 'geradores' | 'ciclos' | 'sons';
 export default function App() {
   useWakeLock();
 
-  // Feedback sonoro global: qualquer botão habilitado toca o hi-hat no toque
-  // (pointerdown responde mais rápido que click).
+  // Feedback sonoro global: um som ao pressionar qualquer botão habilitado e
+  // outro (variação mais leve) ao soltar — sensação de tecla física.
   useEffect(() => {
+    let pressed = false;
+
     const onPointerDown = (e: PointerEvent) => {
       const btn = (e.target as HTMLElement | null)?.closest?.('button');
-      if (btn && !btn.disabled && !btn.hasAttribute('data-nosound')) playClick();
+      if (btn && !btn.disabled && !btn.hasAttribute('data-nosound')) {
+        pressed = true;
+        playPress();
+      }
     };
+    // O soltar toca mesmo se o dedo/cursor saiu do botão (como tecla real)
+    const onPointerUp = () => {
+      if (pressed) {
+        pressed = false;
+        playRelease();
+      }
+    };
+
     document.addEventListener('pointerdown', onPointerDown);
-    return () => document.removeEventListener('pointerdown', onPointerDown);
+    document.addEventListener('pointerup', onPointerUp);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('pointerup', onPointerUp);
+    };
   }, []);
 
   const [page, setPage] = useState<Page>('ciclos');
