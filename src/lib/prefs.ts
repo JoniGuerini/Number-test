@@ -8,11 +8,18 @@ const CONFIG_KEY = 'number-test:config';
 
 export type ThemeId = 'neutro' | 'midnight' | 'creme' | 'verde';
 
-export const THEMES: { id: ThemeId; name: string }[] = [
-  { id: 'neutro', name: 'Dark neutro' },
-  { id: 'midnight', name: 'Azul meia-noite' },
-  { id: 'creme', name: 'Creme terracota' },
-  { id: 'verde', name: 'Verde musgo' },
+export interface ThemeInfo {
+  id: ThemeId;
+  name: string;
+  /** Amostras da paleta (fundo, card, acento, texto) para o seletor. */
+  preview: [string, string, string, string];
+}
+
+export const THEMES: ThemeInfo[] = [
+  { id: 'neutro', name: 'Dark neutro', preview: ['#070707', '#111111', '#bcb09a', '#e0e0e0'] },
+  { id: 'midnight', name: 'Azul meia-noite', preview: ['#0c0e12', '#131620', '#bcb09a', '#d8dce2'] },
+  { id: 'creme', name: 'Creme terracota', preview: ['#e8dcc8', '#f7f0e2', '#a34a24', '#3a2e24'] },
+  { id: 'verde', name: 'Verde musgo', preview: ['#0a0f0a', '#111811', '#cfa63a', '#dde3dd'] },
 ];
 
 /** Cor da moldura do navegador (theme-color) por tema. */

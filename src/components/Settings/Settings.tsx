@@ -201,7 +201,18 @@ export default function Settings({
                       className={`${styles.option} ${active ? styles.active : ''}`}
                       onClick={() => setVideoPref('theme', theme.id)}
                     >
-                      <span>{theme.name}</span>
+                      <span className={styles.themeLabel}>
+                        <span className={styles.swatches} aria-hidden="true">
+                          {theme.preview.map((color, i) => (
+                            <span
+                              key={i}
+                              className={styles.swatch}
+                              style={{ background: color }}
+                            />
+                          ))}
+                        </span>
+                        {theme.name}
+                      </span>
                       <span className={styles.badge}>
                         {active ? 'ativo' : 'usar'}
                       </span>

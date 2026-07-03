@@ -10,11 +10,12 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
-    version: 'v0.11.0',
+    version: 'v0.11.x',
     date: '03/07/2026',
-    title: 'Verde musgo',
+    title: 'Verde musgo e amostras',
     notes: [
       'Quarto tema: base verde-musgo escura com amarelo queimado (mostarda) nos acentos.',
+      'O seletor de temas ganhou amostras de cores (fundo, card, acento, texto) ao lado de cada nome.',
     ],
   },
   {
