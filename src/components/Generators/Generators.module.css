@@ -298,6 +298,8 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-faint);
+  /* Nunca quebra linha — senão o card fica mais alto que os irmãos */
+  white-space: nowrap;
 }
 
 .statValue {
