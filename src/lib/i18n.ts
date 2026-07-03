@@ -120,9 +120,9 @@ const pt = {
   'video.hint': 'Escolha o que aparece no topo da tela.',
   'video.all': 'Todos os cards',
   'video.individual': 'cards individuais',
-  'video.fps': 'Card de FPS',
-  'video.frameTime': 'Card de frame time (ms / máx)',
-  'video.battery': 'Card de bateria',
+  'video.fps': 'FPS',
+  'video.frameTime': 'Frame time',
+  'video.battery': 'Bateria',
 
   // Config: Idioma
   'lang.title': 'Idioma',
@@ -223,9 +223,9 @@ const en: Record<TKey, string> = {
   'video.hint': 'Choose what appears at the top of the screen.',
   'video.all': 'All cards',
   'video.individual': 'individual cards',
-  'video.fps': 'FPS card',
-  'video.frameTime': 'Frame time card (ms / max)',
-  'video.battery': 'Battery card',
+  'video.fps': 'FPS',
+  'video.frameTime': 'Frame time',
+  'video.battery': 'Battery',
 
   'lang.title': 'Language',
   'lang.hint': 'Applies to the whole app.',
