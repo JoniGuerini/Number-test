@@ -79,26 +79,27 @@ const pt = {
   'fps.newVersion': 'Nova versão pendente',
 
   // Config: tabs
-  'tab.saves': 'Saves',
+  'tab.saves': 'Salvos',
   'tab.temas': 'Temas',
   'tab.som': 'Som',
   'tab.video': 'Vídeo',
   'tab.idioma': 'Idioma',
 
   // Config: Saves
-  'saves.title': 'Saves',
+  'saves.title': 'Jogos salvos',
   'saves.hint':
-    'Cada save guarda os três modos. Clique num save para abrir as opções.',
+    'Cada jogo salvo guarda os três modos. Clique num deles para abrir as opções.',
   'saves.active': 'ativo',
-  'saves.load': 'Carregar save',
+  'saves.load': 'Carregar jogo salvo',
   'saves.reset': 'Zerar {game}',
   'saves.rename': 'Renomear',
-  'saves.create': 'Criar novo save +',
+  'saves.create': 'Criar novo jogo salvo +',
   'saves.confirmCreate': 'Criar',
   'saves.cancel': 'Cancelar',
   'saves.deleteAria': 'Excluir {name}',
   'saves.nameAria': 'Nome do {name}',
-  'saves.newNameAria': 'Nome do novo save',
+  'saves.newNameAria': 'Nome do novo jogo salvo',
+  'saves.defaultName': 'Jogo salvo {n}',
 
   // Config: Temas
   'themes.title': 'Temas',
@@ -206,6 +207,7 @@ const en: Record<TKey, string> = {
   'saves.deleteAria': 'Delete {name}',
   'saves.nameAria': 'Name of {name}',
   'saves.newNameAria': 'New save name',
+  'saves.defaultName': 'Save {n}',
 
   'themes.title': 'Themes',
   'themes.hint': 'Your choice applies to the whole app.',

@@ -4,6 +4,8 @@
     consome não mudam — os slots só resolvem QUAL chave é lida/gravada, então
     a sincronia determinística e o catch-up ficam intactos. */
 
+import { translate } from './i18n';
+
 export type SaveGame = 'contador' | 'geradores' | 'ciclos';
 
 /** Chaves antigas (pré-slots), migradas para o primeiro slot. */
@@ -102,14 +104,14 @@ export function listSlots(): SlotMeta[] {
   return [...ensureMeta().slots].sort((a, b) => a.createdAt - b.createdAt);
 }
 
-/** Próximo nome genérico disponível ("Save N"). */
+/** Next available generic name, localized ("Save N" / "Jogo salvo N"). */
 export function nextSlotName(): string {
   const meta = ensureMeta();
   const maxN = meta.slots.reduce((max, s) => {
-    const m = /^Save (\d+)$/.exec(s.name);
+    const m = /^(?:Save|Jogo salvo) (\d+)$/.exec(s.name);
     return m ? Math.max(max, Number(m[1])) : max;
   }, 0);
-  return `Save ${maxN + 1}`;
+  return translate('saves.defaultName', { n: maxN + 1 });
 }
 
 /** Cria um slot vazio (sem trocar para ele), com nome opcional. */

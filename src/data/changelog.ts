@@ -10,6 +10,14 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.16.6',
+    date: '03/07/2026',
+    title: 'Jogos salvos',
+    notes: [
+      'The Portuguese UI now says "jogos salvos" instead of the English loanword "saves" — tab, titles, buttons and the default name of new saves (Jogo salvo N).',
+    ],
+  },
+  {
     version: 'v0.16.5',
     date: '03/07/2026',
     title: 'Sound switch',
