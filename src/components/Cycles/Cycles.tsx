@@ -5,9 +5,25 @@ import { CYCLES_SAVE_KEY, loadSave, writeSave } from '../../lib/storage';
 import styles from '../Generators/Generators.module.css';
 import cyc from './Cycles.module.css';
 
+/* ============================================================================
+   ARQUITETURA: economia contínua, ciclos como apresentação.
+
+   Rajadas de verdade não conseguem acompanhar a economia contínua em todos os
+   prazos (o atraso dos desbloqueios compõe, e o throughput depende
+   caoticamente do alinhamento de fases entre ciclos — medido em
+   scripts/compare-engines.mjs e debug-credit.mjs). Então a economia roda
+   EXATAMENTE como a aba Geradores (0.1/s por unidade, contínuo, mesmo custo),
+   garantindo desbloqueios bit a bit idênticos em qualquer horizonte; o ciclo
+   só controla QUANDO os números visíveis são atualizados: cada gerador
+   "entrega" no fim do ciclo, atualizando o valor exibido do nível de baixo
+   para o valor real acumulado.
+   ========================================================================== */
+
 interface Gen {
-  /** Total possuído (comprados + produzidos pelo gerador seguinte). */
+  /** Total real (economia contínua, idêntica à aba Geradores). */
   amount: Decimal;
+  /** Valor exibido — atualiza em rajada quando o ciclo do gerador acima fecha. */
+  shown: Decimal;
   /** Unidades compradas manualmente — só elas encarecem o custo. */
   bought: number;
   /** Tempo de jogo (em segundos) em que a primeira unidade foi comprada. */
@@ -19,7 +35,10 @@ interface Gen {
 type Mode = 'manual' | 'auto';
 
 interface Game {
+  /** Saldo real (contínuo) — usado em compras e desbloqueios. */
   base: Decimal;
+  /** Saldo exibido — atualiza em rajada no fim do ciclo do Gerador 1. */
+  shownBase: Decimal;
   /** Total de base já produzido na vida do save (compras não descontam). */
   totalProduced: Decimal;
   gens: Gen[];
@@ -36,8 +55,15 @@ interface Game {
 
 interface CycSave {
   base: string;
+  shownBase?: string;
   totalProduced?: string;
-  gens: { amount: string; bought: number; unlockedAt?: number; cycleStep: number }[];
+  gens: {
+    amount: string;
+    shown?: string;
+    bought: number;
+    unlockedAt?: number;
+    cycleStep: number;
+  }[];
   uptime: number;
   mode?: Mode;
   started?: boolean;
@@ -53,10 +79,10 @@ const SIM_STEP_S = 0.25;
 /** Ciclo do Gerador 1; cada gerador seguinte tem ciclo proporcionalmente
     mais longo: ciclo do gerador N = 5s × N (5s, 10s, 15s...). */
 const CYCLE_BASE_S = 5;
-/** Taxa média por unidade (0.1/s): a entrega por ciclo cresce na mesma
-    proporção da duração, então todo gerador rende o mesmo na média — o que
-    muda é a cadência (lotes mais raros e mais gordos no fundo da cadeia). */
+/** Taxa por unidade (0.1/s) — idêntica à aba Geradores. */
 const AVG_RATE = new Decimal(0.1);
+/** Produção por unidade em um passo. */
+const PROD_PER_STEP = AVG_RATE.mul(SIM_STEP_S);
 /** Teto de passos por frame no catch-up. */
 const MAX_STEPS_PER_FRAME = 2_000;
 
@@ -64,10 +90,13 @@ const MAX_STEPS_PER_FRAME = 2_000;
 const cycleSecondsOf = (i: number): number => CYCLE_BASE_S * (i + 1);
 /** Duração do ciclo em passos de simulação. */
 const cycleStepsOf = (i: number): number => cycleSecondsOf(i) / SIM_STEP_S;
-/** Entrega por unidade ao completar o ciclo: 0.1/s × duração (0.5, 1.0, 1.5...). */
-const prodPerCycleOf = (i: number): Decimal => AVG_RATE.mul(cycleSecondsOf(i));
 
-const newGen = (): Gen => ({ amount: new Decimal(0), bought: 0, cycleStep: 0 });
+const newGen = (): Gen => ({
+  amount: new Decimal(0),
+  shown: new Decimal(0),
+  bought: 0,
+  cycleStep: 0,
+});
 
 /** Mesma curva de custos dos Geradores, para comparar o pacing. */
 const COST_CURVE = 0.004;
@@ -82,14 +111,23 @@ function costOf(i: number, bought: number): Decimal {
 function advance(g: Game, nSteps: number): Game {
   const gens = g.gens.map((x) => ({ ...x }));
   let base = g.base;
+  let shownBase = g.shownBase;
   let totalProduced = g.totalProduced;
   let uptime = g.uptime;
 
   for (let s = 0; s < nSteps; s++) {
     if (gens[0].bought > 0) uptime += SIM_STEP_S;
 
-    // Do topo da cadeia para a base: cada gerador cumpre seu ciclo e, ao
-    // completar, entrega o lote inteiro ao nível de baixo de uma vez.
+    // Economia contínua, idêntica à aba Geradores.
+    for (let i = gens.length - 1; i >= 1; i--) {
+      gens[i - 1].amount = gens[i - 1].amount.add(gens[i].amount.mul(PROD_PER_STEP));
+    }
+    const income = gens[0].amount.mul(PROD_PER_STEP);
+    base = base.add(income);
+    totalProduced = totalProduced.add(income);
+
+    // Ciclos (apresentação): ao fechar, o valor exibido do nível de baixo
+    // "recebe a entrega" — salta para o valor real acumulado até aqui.
     for (let i = gens.length - 1; i >= 0; i--) {
       const gen = gens[i];
       if (gen.amount.lte(0)) continue;
@@ -97,31 +135,30 @@ function advance(g: Game, nSteps: number): Game {
       gen.cycleStep += 1;
       if (gen.cycleStep >= cycleStepsOf(i)) {
         gen.cycleStep = 0;
-        const out = gen.amount.mul(prodPerCycleOf(i));
-        if (i === 0) {
-          base = base.add(out);
-          totalProduced = totalProduced.add(out);
-        } else {
-          gens[i - 1].amount = gens[i - 1].amount.add(out);
-        }
+        if (i === 0) shownBase = base;
+        else gens[i - 1].shown = gens[i - 1].amount;
       }
     }
 
-    // Modo automático: compra 1x o próximo gerador assim que alcançar o custo.
+    // Modo automático: compra 1x o próximo gerador assim que alcançar o custo
+    // (saldo REAL — desbloqueia no mesmo passo exato da aba Geradores).
     if (g.mode === 'auto') {
       const last = gens.length - 1;
       const cost = costOf(last, 0);
       if (gens[last].bought === 0 && base.gte(cost)) {
         base = base.sub(cost);
+        // A compra "saca" a produção em trânsito: o saldo exibido sincroniza.
+        shownBase = base;
         gens[last].bought = 1;
         gens[last].amount = gens[last].amount.add(1);
+        gens[last].shown = gens[last].amount;
         gens[last].unlockedAt = uptime;
         gens.push(newGen());
       }
     }
   }
 
-  return { ...g, base, totalProduced, gens, uptime, steps: g.steps + nSteps };
+  return { ...g, base, shownBase, totalProduced, gens, uptime, steps: g.steps + nSteps };
 }
 
 function loadGame(): Game {
@@ -129,6 +166,7 @@ function loadGame(): Game {
   if (!s || s.gens.length === 0) {
     return {
       base: START_BASE,
+      shownBase: START_BASE,
       totalProduced: new Decimal(0),
       gens: [newGen()],
       mode: 'manual',
@@ -145,10 +183,12 @@ function loadGame(): Game {
 
   return {
     base: new Decimal(s.base),
+    shownBase: new Decimal(s.shownBase ?? s.base),
     // Saves antigos não registravam: usa o saldo atual como piso.
     totalProduced: new Decimal(s.totalProduced ?? s.base),
     gens: s.gens.map((g) => ({
       amount: new Decimal(g.amount),
+      shown: new Decimal(g.shown ?? g.amount),
       bought: g.bought,
       unlockedAt: g.unlockedAt,
       cycleStep: g.cycleStep ?? 0,
@@ -223,9 +263,11 @@ export default function Cycles() {
       const g = saveRef.current;
       writeSave(CYCLES_SAVE_KEY, {
         base: g.base.toString(),
+        shownBase: g.shownBase.toString(),
         totalProduced: g.totalProduced.toString(),
         gens: g.gens.map((x) => ({
           amount: x.amount.toString(),
+          shown: x.shown.toString(),
           bought: x.bought,
           unlockedAt: x.unlockedAt,
           cycleStep: x.cycleStep,
@@ -273,10 +315,13 @@ export default function Cycles() {
       const gens = g.gens.map((x) => ({ ...x }));
       gens[i].bought += 1;
       gens[i].amount = gens[i].amount.add(1);
+      gens[i].shown = gens[i].amount;
       if (gens[i].bought === 1) gens[i].unlockedAt = g.uptime;
       if (i === g.gens.length - 1) gens.push(newGen());
 
-      return { ...g, base: g.base.sub(cost), gens };
+      // A compra "saca" a produção em trânsito: o saldo exibido sincroniza.
+      const base = g.base.sub(cost);
+      return { ...g, base, shownBase: base, gens };
     });
   };
 
@@ -320,7 +365,7 @@ export default function Cycles() {
       'gerador,comprados,possui,possui_fmt,ciclo_s,produz_por_ciclo,produz_fmt,desbloqueio_s,desbloqueio_fmt,delta_desde_anterior_s,delta_fmt,aceleracao_s'
     );
     game.gens.forEach((gen, i) => {
-      const perCycle = gen.amount.mul(prodPerCycleOf(i));
+      const perCycle = gen.amount.mul(AVG_RATE).mul(cycleSecondsOf(i));
       const prev = i === 0 ? 0 : game.gens[i - 1].unlockedAt;
       const prevPrev = i <= 1 ? 0 : game.gens[i - 2].unlockedAt;
       const delta =
@@ -422,7 +467,10 @@ export default function Cycles() {
           <span className={styles.timeLabel}>tempo</span>
         </div>
         <div className={styles.timePill}>
-          <span className={styles.timeValue}>{fmt(game.totalProduced)}</span>
+          {/* Desconta a produção em trânsito p/ pulsar junto com o saldo exibido */}
+          <span className={styles.timeValue}>
+            {fmt(game.totalProduced.sub(game.base.sub(game.shownBase)))}
+          </span>
           <span className={styles.timeLabel}>produzido</span>
         </div>
         <button className={styles.exportBtn} onClick={exportCsv}>
@@ -440,7 +488,7 @@ export default function Cycles() {
 
       <div className={styles.baseBlock}>
         <span className={styles.baseLabel}>número base</span>
-        <span className={styles.baseValue}>{fmt(game.base)}</span>
+        <span className={styles.baseValue}>{fmt(game.shownBase)}</span>
         <span className={styles.baseRate}>
           +{fmtRate(game.gens[0].amount.mul(AVG_RATE))} / s
         </span>
@@ -513,7 +561,7 @@ export default function Cycles() {
                 <div className={styles.statsRow}>
                   <div className={styles.stat}>
                     <span className={styles.statLabel}>possui</span>
-                    <span className={styles.statValue}>{fmt(gen.amount)}</span>
+                    <span className={styles.statValue}>{fmt(gen.shown)}</span>
                   </div>
 
                   <div className={styles.stat}>
@@ -521,7 +569,7 @@ export default function Cycles() {
                       produz {target} · ciclo {cycleSecondsOf(i)}s
                     </span>
                     <span className={styles.statValue}>
-                      +{fmt(gen.amount.mul(prodPerCycleOf(i)))} / ciclo
+                      +{fmt(gen.amount.mul(AVG_RATE).mul(cycleSecondsOf(i)))} / ciclo
                     </span>
                   </div>
 
