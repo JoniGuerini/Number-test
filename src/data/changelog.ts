@@ -10,6 +10,15 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.16.2',
+    date: '03/07/2026',
+    title: 'The app speaks your language',
+    notes: [
+      'On first visit the UI language now follows the OS/browser language: Portuguese systems get pt-BR, everything else gets English.',
+      'Picking a language in Settings still overrides the detection and is remembered on the device.',
+    ],
+  },
+  {
     version: 'v0.16.1',
     date: '03/07/2026',
     title: 'English as the canonical language',

@@ -239,14 +239,25 @@ const DICTS: Record<Locale, Record<TKey, string>> = { pt, en };
    Store (mesmo padrão de prefs.ts)
    ============================================================ */
 
+/** Best match for the OS/browser language (first visit only). */
+function detectLocale(): Locale {
+  const langs = navigator.languages ?? [navigator.language];
+  for (const lang of langs) {
+    if (lang?.toLowerCase().startsWith('pt')) return 'pt';
+    if (lang?.toLowerCase().startsWith('en')) return 'en';
+  }
+  return 'en';
+}
+
 function readStored(): Locale {
   try {
     const stored = localStorage.getItem(LOCALE_KEY);
     if (stored === 'pt' || stored === 'en') return stored;
   } catch {
-    // Sem localStorage — cai no padrão
+    // No localStorage — fall through to detection
   }
-  return 'pt';
+  // No explicit choice yet: follow the OS/browser language
+  return detectLocale();
 }
 
 let locale: Locale = readStored();
