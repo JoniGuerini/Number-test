@@ -136,6 +136,7 @@ export const SOUNDS: SoundDef[] = [
   S('click-surdo', 'Click surdo', 'Clicks', () => tone({ type: 'triangle', freq: 600, lowpass: 1200, dur: 0.02, gain: 0.3 })),
   S('click-oco', 'Click oco', 'Clicks', () => tone({ type: 'square', freq: 400, lowpass: 900, dur: 0.025, gain: 0.35 })),
   S('click-fino', 'Click fino', 'Clicks', () => tone({ type: 'square', freq: 3000, lowpass: 6000, dur: 0.01, gain: 0.08 })),
+  S('click-fino-grave', 'Click fino grave', 'Clicks', () => tone({ type: 'square', freq: 1600, lowpass: 3200, dur: 0.01, gain: 0.14 })),
   S('click-vidro', 'Click de vidro', 'Clicks', () => tone({ type: 'sine', freq: 2400, dur: 0.02, gain: 0.15 })),
   S('tec-tec', 'Tec-tec (duplo)', 'Clicks', () => {
     tone({ type: 'square', freq: 1200, lowpass: 2500, dur: 0.012, gain: 0.15 });
