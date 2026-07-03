@@ -4,6 +4,7 @@ import { useVirtualRows } from '../../hooks/useVirtualRows';
 import { fmt, fmtRate, fmtTime } from '../../lib/format';
 import { getDateLocale, useI18n } from '../../lib/i18n';
 import { loadSave, saveKeyFor, writeSave } from '../../lib/storage';
+import { startTicker } from '../../lib/ticker';
 import styles from './Generators.module.css';
 
 interface Gen {
@@ -247,12 +248,11 @@ export default function Generators() {
   }, []);
 
   useEffect(() => {
-    let rafId: number;
-
     // O relógio de parede dita quantos passos fixos já deveriam ter sido
     // executados desde o startedAt; o frame só corre atrás da diferença.
     // Estado = f(nº de passos) → determinístico entre máquinas e sessões.
-    const tick = () => {
+    // (startTicker segue o pref de FPS ilimitado ao vivo.)
+    return startTicker(() => {
       setGame((g) => {
         if (!g.started || g.startedAt === undefined) return g;
         const target = Math.floor((Date.now() - g.startedAt) / (SIM_STEP_S * 1000));
@@ -260,12 +260,7 @@ export default function Generators() {
         return todo > 0 ? advance(g, todo) : g;
       });
       bumpFrame();
-
-      rafId = requestAnimationFrame(tick);
-    };
-
-    rafId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafId);
+    });
   }, []);
 
   const buy = (i: number) => {

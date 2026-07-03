@@ -3,6 +3,7 @@ import Decimal from 'break_eternity.js';
 import { fmt, fmtRate, fmtTime } from '../../lib/format';
 import { getDateLocale, useI18n } from '../../lib/i18n';
 import { loadSave, saveKeyFor, writeSave } from '../../lib/storage';
+import { startTicker } from '../../lib/ticker';
 import styles from './Counter.module.css';
 // Reusa o visual dos cardzinhos do topo (padrão das abas Geradores/Ciclos)
 import hub from '../Generators/Generators.module.css';
@@ -87,7 +88,6 @@ export default function Counter() {
       window.removeEventListener('beforeunload', persist);
     };
   }, []);
-  const rafRef = useRef<number>();
   const lastTickRef = useRef<number>(0);
   const holdTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const holdIntervalRef = useRef<ReturnType<typeof setInterval>>();
@@ -145,18 +145,13 @@ export default function Counter() {
 
     lastTickRef.current = performance.now();
 
-    const tick = (now: number) => {
+    // startTicker segue o pref de FPS ilimitado ao vivo
+    return startTicker((now) => {
       const dtSeconds = (now - lastTickRef.current) / 1000;
       lastTickRef.current = now;
       setValue((v) => v.add(rate.mul(dtSeconds)));
       setUptime((u) => u + dtSeconds);
-      rafRef.current = requestAnimationFrame(tick);
-    };
-
-    rafRef.current = requestAnimationFrame(tick);
-    return () => {
-      if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current);
-    };
+    });
   }, [running, rate]);
 
   return (

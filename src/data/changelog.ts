@@ -10,6 +10,16 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.17.0',
+    date: '03/07/2026',
+    title: 'Beyond the monitor',
+    notes: [
+      'New "Uncapped FPS (no vsync)" switch in the Video tab: the frame loop runs as fast as the machine allows, past the monitor refresh rate.',
+      'The FPS meter counts the real loop rate, so you can see how far your machine goes.',
+      'Deterministic sync is untouched either way — the simulation advances by fixed wall-clock steps, no matter how often frames run.',
+    ],
+  },
+  {
     version: 'v0.16.5',
     date: '03/07/2026',
     title: 'Sound switch',
