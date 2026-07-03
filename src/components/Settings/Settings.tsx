@@ -160,6 +160,10 @@ export default function Settings({
                   min={0}
                   max={100}
                   value={Math.round(volume * 100)}
+                  // Preenche o trilho até a posição da pill, na cor dela
+                  style={{
+                    background: `linear-gradient(to right, var(--brass-deep) ${Math.round(volume * 100)}%, var(--bg) ${Math.round(volume * 100)}%)`,
+                  }}
                   onChange={(e) => changeVolume(Number(e.target.value) / 100)}
                   onPointerUp={() => playPress()}
                   aria-label="Volume do som dos botões"
