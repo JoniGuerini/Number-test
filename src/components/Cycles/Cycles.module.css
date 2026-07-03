@@ -1,3 +1,9 @@
+/* Variante do grid com 6 colunas (a coluna extra de ciclo/tempo restante).
+   Só vale no desktop: no mobile o .row vira flex e ignora as colunas. */
+.rowWide {
+  grid-template-columns: 60px 120px 130px 150px 230px 120px;
+}
+
 /* Barra de progresso do ciclo, deitada na base do card do gerador */
 .cycleBar {
   position: absolute;

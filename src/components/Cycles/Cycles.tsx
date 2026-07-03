@@ -506,8 +506,14 @@ export default function Cycles() {
               unlockText = parts.join(' · ');
             }
 
+            // Tempo restante do ciclo atual (contagem viva, extrapolada por frame)
+            const remaining = Math.max(
+              cycleSecondsOf(i) - (gen.cycleStep * SIM_STEP_S + partial),
+              0
+            );
+
             return (
-              <div key={i} className={styles.row}>
+              <div key={i} className={`${styles.row} ${cyc.rowWide}`}>
                 <span className={styles.genName}>{i + 1}</span>
 
                 <div className={styles.statsRow}>
@@ -517,11 +523,18 @@ export default function Cycles() {
                   </div>
 
                   <div className={styles.stat}>
-                    <span className={styles.statLabel}>
-                      produz {target} · ciclo {fmtTime(cycleSecondsOf(i))}
-                    </span>
+                    <span className={styles.statLabel}>produz {target}</span>
                     <span className={styles.statValue}>
                       +{fmt(gen.amount.mul(prodPerCycleOf(i)))} / ciclo
+                    </span>
+                  </div>
+
+                  <div className={styles.stat}>
+                    <span className={styles.statLabel}>
+                      ciclo {fmtTime(cycleSecondsOf(i))}
+                    </span>
+                    <span className={styles.statValue}>
+                      falta {fmtTime(Math.ceil(remaining))}
                     </span>
                   </div>
 
