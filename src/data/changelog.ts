@@ -10,6 +10,14 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.8.0',
+    date: '03/07/2026',
+    title: 'Dark neutro',
+    notes: [
+      'Teste de paleta: a base azulada deu lugar a pretos e cinzas puros — dark mode de verdade, mantendo a hierarquia de profundidade (fundo → cards → superfícies) e o latão como acento.',
+    ],
+  },
+  {
     version: 'v0.7.2 – v0.7.3',
     date: '03/07/2026',
     title: 'Canaleta calibrada',

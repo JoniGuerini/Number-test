@@ -1,13 +1,13 @@
 :root {
   /* ============================================================
      FUNDOS — base graduada do mais profundo ao mais elevado
-     (portado do design system do Underdarkness)
+     (dark neutro: pretos/cinzas puros, sem o tom azulado original)
      ============================================================ */
-  --bg: #0c0e12;
-  --paper: #131620;
-  --surface: #1a1e2a;
-  --surface-hover: #232838;
-  --surface-deep: #2a3045;
+  --bg: #070707;
+  --paper: #111111;
+  --surface: #1a1a1a;
+  --surface-hover: #232323;
+  --surface-deep: #2d2d2d;
 
   /* ============================================================
      LATÃO — UI primária, acentos, botões principais e títulos
@@ -18,12 +18,12 @@
   --brass-bright: #c2a878;
 
   /* ============================================================
-     FOLHA — textos, do mais forte ao mais discreto
+     FOLHA — textos, do mais forte ao mais discreto (cinzas neutros)
      ============================================================ */
-  --ink: #d8dce2;
-  --ink-soft: #b0b6c0;
-  --ink-muted: #8b96a3;
-  --ink-faint: #545d6e;
+  --ink: #e0e0e0;
+  --ink-soft: #b6b6b6;
+  --ink-muted: #909090;
+  --ink-faint: #5a5a5a;
 
   /* ============================================================
      ACENTO — destrutivo (vermelho)
@@ -51,9 +51,9 @@
   /* ============================================================
      BORDAS — visíveis sobre fundo escuro
      ============================================================ */
-  --border: #2a3045;
-  --border-soft: #1d2230;
-  --border-faint: #14181f;
+  --border: #2d2d2d;
+  --border-soft: #1f1f1f;
+  --border-faint: #161616;
 
   /* ============================================================
      SOMBRAS — sistema layered (dark mode tuned)

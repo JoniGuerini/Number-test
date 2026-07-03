@@ -211,12 +211,12 @@
 
 .fadeTop {
   top: 0;
-  background: linear-gradient(to bottom, var(--bg) 25%, rgba(12, 14, 18, 0));
+  background: linear-gradient(to bottom, var(--bg) 25%, rgba(7, 7, 7, 0));
 }
 
 .fadeBottom {
   bottom: 0;
-  background: linear-gradient(to top, var(--bg) 25%, rgba(12, 14, 18, 0));
+  background: linear-gradient(to top, var(--bg) 25%, rgba(7, 7, 7, 0));
 }
 
 .row {
