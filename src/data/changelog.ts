@@ -19,6 +19,7 @@ export const CHANGELOG: PatchNote[] = [
       'Enter confirma, Esc cancela a criação.',
       'Refinos: o filete de foco do campo de nome não é mais cortado na esquerda, e o input de renomear ganhou um fundo mais claro dentro do painel escuro.',
       'Botões pressionados agora afundam 1px fixo em vez de encolher em porcentagem — botões largos não recuam mais de forma exagerada.',
+      'O filete de foco do input agora é cor sólida de verdade: a sombra interna do baixo relevo escurecia o topo dele, dando impressão de gradiente.',
     ],
   },
   {

@@ -174,11 +174,13 @@
   outline: none;
   transition: box-shadow 0.15s;
 }
-/* Filete de foco por dentro: por fora ele era cortado pelo overflow do painel */
+/* Filete de foco por dentro: por fora ele era cortado pelo overflow do painel.
+   O filete vem ANTES na lista para ser pintado por cima da sombra interna do
+   baixo relevo — senão o topo dele escurece e parece gradiente. */
 .nameInput:focus {
   box-shadow:
-    var(--card-edge-press),
-    inset 0 0 0 1px var(--brass-deep);
+    inset 0 0 0 1px var(--brass-deep),
+    var(--card-edge-press);
 }
 
 /* Dentro do painel expandido (fundo já escuro), o input sobe um tom */
