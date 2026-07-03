@@ -77,3 +77,50 @@
   color: var(--ink-faint);
   margin-top: 4px;
 }
+
+.volumeRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.volumeValue {
+  font: 600 13px var(--mono);
+  color: var(--brass-deep);
+  font-variant-numeric: tabular-nums;
+  min-width: 4ch;
+  text-align: right;
+}
+
+/* Slider no visual do design system */
+.slider {
+  flex: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--surface-deep);
+  box-shadow: var(--card-edge-pill);
+  cursor: pointer;
+}
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--brass-deep);
+  box-shadow: var(--card-edge-pill);
+  transition: background 0.15s;
+}
+.slider::-webkit-slider-thumb:hover {
+  background: var(--brass-bright);
+}
+.slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: var(--brass-deep);
+  box-shadow: var(--card-edge-pill);
+}

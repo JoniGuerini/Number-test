@@ -45,7 +45,9 @@ function tone({ type, freq, freqEnd, lowpass, dur, gain, delay = 0 }: ToneOpts):
   }
 
   const g = ac.createGain();
-  g.gain.setValueAtTime(gain, start);
+  // O ramp exponencial exige valor inicial > 0
+  const level = Math.max(gain * currentVolume, 0.0001);
+  g.gain.setValueAtTime(level, start);
   g.gain.exponentialRampToValueAtTime(0.001, start + dur);
 
   node.connect(g);
@@ -80,14 +82,31 @@ export const SOUND_THEMES: SoundTheme[] = [
 
 const CONFIG_KEY = 'number-test:config';
 
-let currentThemeId: string = (() => {
+interface SoundConfig {
+  soundTheme?: string;
+  volume?: number;
+}
+
+function readConfig(): SoundConfig {
   try {
     const raw = localStorage.getItem(CONFIG_KEY);
-    return (raw ? JSON.parse(raw).soundTheme : null) ?? SOUND_THEMES[0].id;
+    return raw ? (JSON.parse(raw) as SoundConfig) : {};
   } catch {
-    return SOUND_THEMES[0].id;
+    return {};
   }
-})();
+}
+
+function writeConfig(patch: SoundConfig): void {
+  try {
+    localStorage.setItem(CONFIG_KEY, JSON.stringify({ ...readConfig(), ...patch }));
+  } catch {
+    // Sem localStorage — a escolha vale só pra sessão
+  }
+}
+
+let currentThemeId: string = readConfig().soundTheme ?? SOUND_THEMES[0].id;
+/** Volume mestre dos sons de botão (0..1). */
+let currentVolume: number = readConfig().volume ?? 1;
 
 export function getSoundThemeId(): string {
   return currentThemeId;
@@ -95,11 +114,16 @@ export function getSoundThemeId(): string {
 
 export function setSoundTheme(id: string): void {
   currentThemeId = id;
-  try {
-    localStorage.setItem(CONFIG_KEY, JSON.stringify({ soundTheme: id }));
-  } catch {
-    // Sem localStorage — a escolha vale só pra sessão
-  }
+  writeConfig({ soundTheme: id });
+}
+
+export function getSoundVolume(): number {
+  return currentVolume;
+}
+
+export function setSoundVolume(volume: number): void {
+  currentVolume = Math.min(Math.max(volume, 0), 1);
+  writeConfig({ volume: currentVolume });
 }
 
 const currentTheme = (): SoundTheme =>
@@ -107,6 +131,7 @@ const currentTheme = (): SoundTheme =>
 
 /** Som ao PRESSIONAR um botão (tema escolhido nas Configurações). */
 export function playPress(): void {
+  if (currentVolume <= 0) return;
   try {
     currentTheme().press();
   } catch {
@@ -116,6 +141,7 @@ export function playPress(): void {
 
 /** Som ao SOLTAR o botão (variação do tema escolhido). */
 export function playRelease(): void {
+  if (currentVolume <= 0) return;
   try {
     currentTheme().release();
   } catch {
