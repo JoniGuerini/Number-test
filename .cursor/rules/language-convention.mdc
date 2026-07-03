@@ -18,3 +18,6 @@ alwaysApply: true
   translate them.
 - Conversation with the user happens in Portuguese (see user rules), but
   everything committed to the repo is in English.
+- UI copy is short and essential: hints/descriptions state only what the user
+  needs (e.g. "Volume do click dos botões."), no extra explanations or
+  side notes.

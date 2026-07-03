@@ -10,6 +10,14 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.16.3',
+    date: '03/07/2026',
+    title: 'Less chatter in Settings',
+    notes: [
+      'Settings descriptions trimmed to the essentials — shorter hints for Saves, Themes, Sound, Video and Language.',
+    ],
+  },
+  {
     version: 'v0.16.2',
     date: '03/07/2026',
     title: 'The app speaks your language',

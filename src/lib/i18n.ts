@@ -88,7 +88,7 @@ const pt = {
   // Config: Saves
   'saves.title': 'Saves',
   'saves.hint':
-    'Cada save guarda os três modos. Clique num save para abrir as opções: carregar ou zerar o progresso de um modo. O ✕ exclui (só saves inativos).',
+    'Cada save guarda os três modos. Clique num save para abrir as opções.',
   'saves.active': 'ativo',
   'saves.load': 'Carregar save',
   'saves.reset': 'Zerar {game}',
@@ -102,8 +102,7 @@ const pt = {
 
   // Config: Temas
   'themes.title': 'Temas',
-  'themes.hint':
-    'Cada card usa as cores do próprio tema. A escolha vale para o app inteiro e fica salva neste dispositivo.',
+  'themes.hint': 'A escolha vale para o app inteiro.',
   'themes.active': 'tema ativo',
   'themes.available': 'disponíveis',
   'theme.neutro': 'Dark neutro',
@@ -113,21 +112,19 @@ const pt = {
 
   // Config: Som
   'sound.title': 'Som',
-  'sound.hint':
-    'Volume do click dos botões. Solte o controle para ouvir uma prévia.',
+  'sound.hint': 'Volume do click dos botões.',
   'sound.volumeAria': 'Volume do som dos botões',
 
   // Config: Vídeo
   'video.title': 'Telemetria',
-  'video.hint': 'Escolha quais cardzinhos aparecem no topo da tela.',
+  'video.hint': 'Escolha o que aparece no topo da tela.',
   'video.fps': 'Card de FPS',
   'video.frameTime': 'Card de frame time (ms / máx)',
   'video.battery': 'Card de bateria',
 
   // Config: Idioma
   'lang.title': 'Idioma',
-  'lang.hint':
-    'A escolha vale para o app inteiro e fica salva neste dispositivo. As notas de patch permanecem no idioma original.',
+  'lang.hint': 'A escolha vale para o app inteiro.',
 };
 
 export type TKey = keyof typeof pt;
@@ -195,8 +192,7 @@ const en: Record<TKey, string> = {
   'tab.idioma': 'Language',
 
   'saves.title': 'Saves',
-  'saves.hint':
-    'Each save holds all three modes. Click a save to open its options: load it or reset a single mode. The ✕ deletes (inactive saves only).',
+  'saves.hint': 'Each save holds all three modes. Click a save to open its options.',
   'saves.active': 'active',
   'saves.load': 'Load save',
   'saves.reset': 'Reset {game}',
@@ -209,8 +205,7 @@ const en: Record<TKey, string> = {
   'saves.newNameAria': 'New save name',
 
   'themes.title': 'Themes',
-  'themes.hint':
-    'Each card is painted with its own theme colors. Your choice applies to the whole app and is saved on this device.',
+  'themes.hint': 'Your choice applies to the whole app.',
   'themes.active': 'active theme',
   'themes.available': 'available',
   'theme.neutro': 'Neutral dark',
@@ -219,18 +214,17 @@ const en: Record<TKey, string> = {
   'theme.verde': 'Moss green',
 
   'sound.title': 'Sound',
-  'sound.hint': 'Button click volume. Release the slider to hear a preview.',
+  'sound.hint': 'Button click volume.',
   'sound.volumeAria': 'Button sound volume',
 
   'video.title': 'Telemetry',
-  'video.hint': 'Choose which little cards appear at the top of the screen.',
+  'video.hint': 'Choose what appears at the top of the screen.',
   'video.fps': 'FPS card',
   'video.frameTime': 'Frame time card (ms / max)',
   'video.battery': 'Battery card',
 
   'lang.title': 'Language',
-  'lang.hint':
-    'Applies to the whole app and is saved on this device. Patch notes stay in their original language.',
+  'lang.hint': 'Applies to the whole app.',
 };
 
 const DICTS: Record<Locale, Record<TKey, string>> = { pt, en };
