@@ -534,7 +534,7 @@ export default function Cycles() {
                       ciclo {fmtTime(cycleSecondsOf(i))}
                     </span>
                     <span className={styles.statValue}>
-                      falta {fmtTime(Math.ceil(remaining))}
+                      {fmtTime(Math.ceil(remaining))}
                     </span>
                   </div>
 
