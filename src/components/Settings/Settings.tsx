@@ -4,6 +4,7 @@ import {
   getVideoPrefs,
   setVideoPref,
   subscribeVideoPrefs,
+  THEMES,
   type VideoPrefs,
 } from '../../lib/prefs';
 import { getSoundVolume, playPress, setSoundVolume } from '../../lib/sound';
@@ -16,7 +17,10 @@ const GAMES: { id: GameTab; name: string }[] = [
   { id: 'ciclos', name: 'Ciclos' },
 ];
 
-const VIDEO_TOGGLES: { key: keyof VideoPrefs; name: string }[] = [
+const VIDEO_TOGGLES: {
+  key: Exclude<keyof VideoPrefs, 'theme'>;
+  name: string;
+}[] = [
   { key: 'showFps', name: 'Card de FPS' },
   { key: 'showFrameTime', name: 'Card de frame time (ms / máx)' },
   { key: 'showBattery', name: 'Card de bateria' },
@@ -182,34 +186,60 @@ export default function Settings({
         )}
 
         {tab === 'video' && (
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Vídeo</h2>
-            <p className={styles.sectionHint}>
-              Escolha quais cardzinhos de telemetria aparecem no topo da tela.
-            </p>
-            <div className={styles.sectionBody}>
-              {VIDEO_TOGGLES.map((toggle) => {
-                const on = videoPrefs[toggle.key];
-                return (
-                  <button
-                    key={toggle.key}
-                    className={styles.option}
-                    role="switch"
-                    aria-checked={on}
-                    onClick={() => setVideoPref(toggle.key, !on)}
-                  >
-                    <span>{toggle.name}</span>
-                    <span
-                      className={`${styles.switch} ${on ? styles.switchOn : ''}`}
-                      aria-hidden="true"
+          <>
+            <section className={styles.section}>
+              <h2 className={styles.sectionTitle}>Paleta de cores</h2>
+              <p className={styles.sectionHint}>
+                O tema vale para o app inteiro e fica salvo neste dispositivo.
+              </p>
+              <div className={styles.sectionBody}>
+                {THEMES.map((theme) => {
+                  const active = videoPrefs.theme === theme.id;
+                  return (
+                    <button
+                      key={theme.id}
+                      className={`${styles.option} ${active ? styles.active : ''}`}
+                      onClick={() => setVideoPref('theme', theme.id)}
                     >
-                      <span className={styles.switchThumb} />
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+                      <span>{theme.name}</span>
+                      <span className={styles.badge}>
+                        {active ? 'ativo' : 'usar'}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section className={styles.section}>
+              <h2 className={styles.sectionTitle}>Telemetria</h2>
+              <p className={styles.sectionHint}>
+                Escolha quais cardzinhos aparecem no topo da tela.
+              </p>
+              <div className={styles.sectionBody}>
+                {VIDEO_TOGGLES.map((toggle) => {
+                  const on = videoPrefs[toggle.key];
+                  return (
+                    <button
+                      key={toggle.key}
+                      className={styles.option}
+                      role="switch"
+                      aria-checked={on}
+                      onClick={() => setVideoPref(toggle.key, !on)}
+                    >
+                      <span>{toggle.name}</span>
+                      <span
+                        className={`${styles.switch} ${on ? styles.switchOn : ''}`}
+                        aria-hidden="true"
+                      >
+                        <span className={styles.switchThumb} />
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          </>
         )}
       </div>
     </div>

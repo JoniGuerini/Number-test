@@ -86,3 +86,24 @@
   --serif: 'Fraunces Variable', 'Fraunces', Georgia, serif;
   --mono: 'JetBrains Mono Variable', 'JetBrains Mono', 'Courier New', monospace;
 }
+
+/* ============================================================
+   TEMA: Azul meia-noite — a paleta original portada do Coders
+   (aplicado via data-theme no <html>; o padrão é o dark neutro)
+   ============================================================ */
+:root[data-theme='midnight'] {
+  --bg: #0c0e12;
+  --paper: #131620;
+  --surface: #1a1e2a;
+  --surface-hover: #232838;
+  --surface-deep: #2a3045;
+
+  --ink: #d8dce2;
+  --ink-soft: #b0b6c0;
+  --ink-muted: #8b96a3;
+  --ink-faint: #545d6e;
+
+  --border: #2a3045;
+  --border-soft: #1d2230;
+  --border-faint: #14181f;
+}

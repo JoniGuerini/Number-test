@@ -1,18 +1,46 @@
-/** Preferências de vídeo/telemetria (quais cardzinhos do topo aparecem).
-    Vive na mesma chave de config do som — os dois módulos gravam por merge. */
+/** Preferências de vídeo: telemetria (quais cardzinhos do topo aparecem) e
+    tema de cores. Vive na mesma chave de config do som — os módulos gravam
+    por merge. */
 
 const CONFIG_KEY = 'number-test:config';
+
+/* ===== Tema de cores ===== */
+
+export type ThemeId = 'neutro' | 'midnight';
+
+export const THEMES: { id: ThemeId; name: string }[] = [
+  { id: 'neutro', name: 'Dark neutro' },
+  { id: 'midnight', name: 'Azul meia-noite' },
+];
+
+/** Cor da moldura do navegador (theme-color) por tema. */
+const THEME_BG: Record<ThemeId, string> = {
+  neutro: '#070707',
+  midnight: '#0c0e12',
+};
+
+function applyTheme(theme: ThemeId): void {
+  // O tema padrão (neutro) vive no :root; os demais via data-theme
+  if (theme === 'neutro') delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = theme;
+
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute('content', THEME_BG[theme]);
+}
 
 export interface VideoPrefs {
   showFps: boolean;
   showFrameTime: boolean;
   showBattery: boolean;
+  theme: ThemeId;
 }
 
 const DEFAULTS: VideoPrefs = {
   showFps: true,
   showFrameTime: true,
   showBattery: true,
+  theme: 'neutro',
 };
 
 function readStored(): Partial<VideoPrefs> {
@@ -26,6 +54,9 @@ function readStored(): Partial<VideoPrefs> {
 
 let prefs: VideoPrefs = { ...DEFAULTS, ...readStored() };
 const listeners = new Set<() => void>();
+
+// Aplica o tema salvo assim que o módulo carrega (antes do primeiro paint)
+applyTheme(prefs.theme);
 
 export function getVideoPrefs(): VideoPrefs {
   return prefs;
@@ -43,6 +74,7 @@ export function setVideoPref<K extends keyof VideoPrefs>(
   } catch {
     // Sem localStorage — vale só pra sessão
   }
+  if (key === 'theme') applyTheme(value as ThemeId);
   listeners.forEach((fn) => fn());
 }
 
