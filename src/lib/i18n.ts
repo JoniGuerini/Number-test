@@ -128,7 +128,7 @@ const pt = {
 
   // Config: Idioma
   'lang.title': 'Idioma',
-  'lang.hint': 'A escolha vale para o app inteiro.',
+  'lang.hint': 'Selecione o idioma.',
 };
 
 export type TKey = keyof typeof pt;
@@ -232,7 +232,7 @@ const en: Record<TKey, string> = {
   'video.battery': 'Battery',
 
   'lang.title': 'Language',
-  'lang.hint': 'Applies to the whole app.',
+  'lang.hint': 'Select the language.',
 };
 
 const DICTS: Record<Locale, Record<TKey, string>> = { pt, en };
