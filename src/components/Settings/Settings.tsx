@@ -10,7 +10,12 @@ import {
 } from '../../lib/sound';
 import styles from './Settings.module.css';
 
-export default function Settings() {
+interface SettingsProps {
+  guides: { vertical: boolean; horizontal: boolean };
+  onToggleGuide: (axis: 'vertical' | 'horizontal') => void;
+}
+
+export default function Settings({ guides, onToggleGuide }: SettingsProps) {
   const [themeId, setThemeId] = useState(getSoundThemeId());
   const [volume, setVolume] = useState(getSoundVolume());
 
@@ -67,6 +72,27 @@ export default function Settings() {
             />
             <span className={styles.volumeValue}>{Math.round(volume * 100)}%</span>
           </div>
+        </div>
+
+        <div className={styles.section}>
+          <span className={styles.sectionLabel}>guias de alinhamento</span>
+          <button
+            className={`${styles.option} ${guides.vertical ? styles.active : ''}`}
+            onClick={() => onToggleGuide('vertical')}
+          >
+            <span>Linha vertical</span>
+            <span className={styles.badge}>{guides.vertical ? 'on' : 'off'}</span>
+          </button>
+          <button
+            className={`${styles.option} ${guides.horizontal ? styles.active : ''}`}
+            onClick={() => onToggleGuide('horizontal')}
+          >
+            <span>Linha horizontal</span>
+            <span className={styles.badge}>{guides.horizontal ? 'on' : 'off'}</span>
+          </button>
+          <p className={styles.hint}>
+            Traça linhas no centro exato da tela para conferir o alinhamento visual.
+          </p>
         </div>
       </div>
     </div>

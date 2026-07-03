@@ -55,6 +55,29 @@ export default function App() {
   }, []);
 
   const [page, setPage] = useState<Page>('ciclos');
+
+  // Guias de alinhamento (ferramenta de teste visual, ligada na Config)
+  const [guides, setGuides] = useState<{ vertical: boolean; horizontal: boolean }>(
+    () => {
+      try {
+        const raw = localStorage.getItem('number-test:guides');
+        return raw ? JSON.parse(raw) : { vertical: false, horizontal: false };
+      } catch {
+        return { vertical: false, horizontal: false };
+      }
+    }
+  );
+  const toggleGuide = (axis: 'vertical' | 'horizontal') => {
+    setGuides((g) => {
+      const next = { ...g, [axis]: !g[axis] };
+      try {
+        localStorage.setItem('number-test:guides', JSON.stringify(next));
+      } catch {
+        // Sem localStorage — vale só pra sessão
+      }
+      return next;
+    });
+  };
   // Trocar a key remonta o componente da aba, zerando só aquele jogo.
   const [resetKeys, setResetKeys] = useState({
     contador: 0,
@@ -92,8 +115,14 @@ export default function App() {
       <main
         className={`${styles.contentCenter} ${page !== 'config' ? styles.hidden : ''}`}
       >
-        <Settings />
+        <Settings guides={guides} onToggleGuide={toggleGuide} />
       </main>
+
+      {/* Guias de alinhamento: cruz no centro exato da tela */}
+      {guides.vertical && <div className={styles.guideVertical} aria-hidden="true" />}
+      {guides.horizontal && (
+        <div className={styles.guideHorizontal} aria-hidden="true" />
+      )}
 
       <footer className={styles.footer}>
         <nav className={styles.tabs}>
