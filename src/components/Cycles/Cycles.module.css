@@ -25,10 +25,11 @@
   top: 50%;
   transform: translateY(-50%);
   height: 4px;
-  /* Pontas achatadas com cantos suaves, como os cards; tom próximo ao do
-     card pra parte vazia não roubar atenção */
+  /* Pontas achatadas com cantos suaves, como os cards; meio-termo entre o
+     fundo da página (escuro demais) e a superfície (sumia no card) */
   border-radius: 3px;
-  background: var(--surface);
+  background: var(--bg);
+  background: color-mix(in srgb, var(--bg) 50%, var(--paper));
   box-shadow: var(--card-edge-press);
 }
 

@@ -10,11 +10,11 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
-    version: 'v0.7.2',
+    version: 'v0.7.2 – v0.7.3',
     date: '03/07/2026',
-    title: 'Canaleta discreta',
+    title: 'Canaleta calibrada',
     notes: [
-      'A parte vazia da barra de ciclo ficou num tom mais próximo ao do card, para não roubar atenção do preenchimento.',
+      'A parte vazia da barra de ciclo foi calibrada num meio-termo: visível sem roubar atenção do preenchimento.',
     ],
   },
   {
