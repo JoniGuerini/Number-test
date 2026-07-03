@@ -518,7 +518,7 @@ export default function Cycles() {
 
                   <div className={styles.stat}>
                     <span className={styles.statLabel}>
-                      produz {target} · ciclo {cycleSecondsOf(i)}s
+                      produz {target} · ciclo {fmtTime(cycleSecondsOf(i))}
                     </span>
                     <span className={styles.statValue}>
                       +{fmt(gen.amount.mul(prodPerCycleOf(i)))} / ciclo
