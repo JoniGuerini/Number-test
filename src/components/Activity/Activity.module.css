@@ -2,15 +2,9 @@
   width: 100%;
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
-  scrollbar-width: none;
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding-bottom: 24px;
-}
-.wrap::-webkit-scrollbar {
-  display: none;
 }
 
 .hint {
@@ -30,13 +24,8 @@
   padding: 24px;
 }
 
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 .entry {
+  flex-shrink: 0;
   background: var(--paper);
   border: none;
   border-radius: 4px;
