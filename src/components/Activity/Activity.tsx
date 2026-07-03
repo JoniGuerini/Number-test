@@ -136,7 +136,7 @@ export default function Activity() {
           <span className={styles.summaryValue}>
             {avgInterval !== undefined ? fmtTime(avgInterval) : '—'}
           </span>
-          <span className={styles.summaryLabel}>intervalo médio</span>
+          <span className={styles.summaryLabel}>média do “tempo desde o anterior”</span>
         </div>
         <div className={styles.summaryItem}>
           <span className={styles.summaryValue}>{fmtTime(sinceLast)}</span>
