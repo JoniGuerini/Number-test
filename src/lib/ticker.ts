@@ -1,9 +1,9 @@
-/** Frame loop that follows the "uncapFps" preference live.
+/** Frame loop that follows the "vsync" preference live.
 
-    Off (default): requestAnimationFrame — one tick per monitor refresh
-    (vsync), the browser's normal pacing.
+    On (default): requestAnimationFrame — one tick per monitor refresh,
+    the browser's normal pacing.
 
-    On: a self-posting MessageChannel — each tick schedules the next via
+    Off: a self-posting MessageChannel — each tick schedules the next via
     postMessage, which fires as fast as the event loop allows (no vsync, no
     setTimeout 4ms clamp). The deterministic simulation is unaffected either
     way: ticks only decide how often the wall clock is checked. */
@@ -17,8 +17,8 @@ export function startTicker(tick: (now: number) => void): () => void {
 
   const schedule = () => {
     if (stopped) return;
-    if (getVideoPrefs().uncapFps) channel.port2.postMessage(null);
-    else rafId = requestAnimationFrame(run);
+    if (getVideoPrefs().vsync) rafId = requestAnimationFrame(run);
+    else channel.port2.postMessage(null);
   };
 
   const run = () => {
