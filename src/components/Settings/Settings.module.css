@@ -174,6 +174,37 @@
   color: var(--paper);
 }
 
+/* ===== Switch (liga/desliga) ===== */
+.switch {
+  flex-shrink: 0;
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--surface-deep);
+  box-shadow: var(--card-edge-pill);
+  position: relative;
+  transition: background 0.18s;
+}
+
+.switchThumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ink-muted);
+  transition: transform 0.18s, background 0.18s;
+}
+
+.switchOn {
+  background: var(--brass-deep);
+}
+.switchOn .switchThumb {
+  transform: translateX(18px);
+  background: var(--paper);
+}
+
 /* ===== Volume ===== */
 .volumeRow {
   display: flex;

@@ -184,11 +184,18 @@ export default function Settings({
                 return (
                   <button
                     key={toggle.key}
-                    className={`${styles.option} ${on ? styles.active : ''}`}
+                    className={styles.option}
+                    role="switch"
+                    aria-checked={on}
                     onClick={() => setVideoPref(toggle.key, !on)}
                   >
                     <span>{toggle.name}</span>
-                    <span className={styles.badge}>{on ? 'on' : 'off'}</span>
+                    <span
+                      className={`${styles.switch} ${on ? styles.switchOn : ''}`}
+                      aria-hidden="true"
+                    >
+                      <span className={styles.switchThumb} />
+                    </span>
                   </button>
                 );
               })}
