@@ -47,14 +47,22 @@ const START_BASE = new Decimal(1);
 
 /** Timestep fixo (mesma arquitetura determinística dos Geradores). */
 const SIM_STEP_S = 0.25;
-/** Duração de um ciclo completo. */
-const CYCLE_S = 5;
-const CYCLE_STEPS = CYCLE_S / SIM_STEP_S;
-/** Produção por unidade ao fim de cada ciclo (0.5 / 5s = média de 0.1/s,
-    comparável à aba Geradores — mas entregue em rajadas). */
-const PROD_PER_CYCLE = new Decimal(0.5);
+/** Ciclo do Gerador 1; cada gerador seguinte tem ciclo proporcionalmente
+    mais longo: ciclo do gerador N = 5s × N (5s, 10s, 15s...). */
+const CYCLE_BASE_S = 5;
+/** Taxa média por unidade (0.1/s): a entrega por ciclo cresce na mesma
+    proporção da duração, então todo gerador rende o mesmo na média — o que
+    muda é a cadência (lotes mais raros e mais gordos no fundo da cadeia). */
+const AVG_RATE = new Decimal(0.1);
 /** Teto de passos por frame no catch-up. */
 const MAX_STEPS_PER_FRAME = 2_000;
+
+/** Duração do ciclo do gerador de índice i, em segundos. */
+const cycleSecondsOf = (i: number): number => CYCLE_BASE_S * (i + 1);
+/** Duração do ciclo em passos de simulação. */
+const cycleStepsOf = (i: number): number => cycleSecondsOf(i) / SIM_STEP_S;
+/** Entrega por unidade ao completar o ciclo: 0.1/s × duração (0.5, 1.0, 1.5...). */
+const prodPerCycleOf = (i: number): Decimal => AVG_RATE.mul(cycleSecondsOf(i));
 
 const newGen = (): Gen => ({ amount: new Decimal(0), bought: 0, cycleStep: 0 });
 
@@ -77,15 +85,15 @@ function advance(g: Game, nSteps: number): Game {
     if (gens[0].bought > 0) uptime += SIM_STEP_S;
 
     // Do topo da cadeia para a base: cada gerador cumpre seu ciclo e, ao
-    // completar, entrega amount × 0.5 ao nível de baixo de uma vez.
+    // completar, entrega o lote inteiro ao nível de baixo de uma vez.
     for (let i = gens.length - 1; i >= 0; i--) {
       const gen = gens[i];
       if (gen.amount.lte(0)) continue;
 
       gen.cycleStep += 1;
-      if (gen.cycleStep >= CYCLE_STEPS) {
+      if (gen.cycleStep >= cycleStepsOf(i)) {
         gen.cycleStep = 0;
-        const out = gen.amount.mul(PROD_PER_CYCLE);
+        const out = gen.amount.mul(prodPerCycleOf(i));
         if (i === 0) base = base.add(out);
         else gens[i - 1].amount = gens[i - 1].amount.add(out);
       }
@@ -272,9 +280,9 @@ export default function Cycles() {
       : 0;
 
   /** Progresso do ciclo do gerador i (0..1), extrapolado dentro do passo. */
-  const cycleProgress = (gen: Gen): number => {
+  const cycleProgress = (gen: Gen, i: number): number => {
     if (gen.amount.lte(0)) return 0;
-    return Math.min((gen.cycleStep + partial / SIM_STEP_S) / CYCLE_STEPS, 1);
+    return Math.min((gen.cycleStep + partial / SIM_STEP_S) / cycleStepsOf(i), 1);
   };
 
   const dispUptime = game.uptime + (game.gens[0].bought > 0 ? partial : 0);
@@ -289,16 +297,16 @@ export default function Cycles() {
     lines.push(`tempo_de_jogo_s,${game.uptime.toFixed(1)}`);
     lines.push(`tempo_de_jogo_fmt,${fmtTime(game.uptime)}`);
     lines.push(`modo,${game.mode}`);
-    lines.push(`ciclo_s,${CYCLE_S}`);
+    lines.push(`ciclo_base_s,${CYCLE_BASE_S}`);
     lines.push(`numero_base,${game.base.toString()}`);
     lines.push(`numero_base_fmt,${fmt(game.base)}`);
     lines.push('');
 
     lines.push(
-      'gerador,comprados,possui,possui_fmt,produz_por_ciclo,produz_fmt,desbloqueio_s,desbloqueio_fmt,delta_desde_anterior_s,delta_fmt,aceleracao_s'
+      'gerador,comprados,possui,possui_fmt,ciclo_s,produz_por_ciclo,produz_fmt,desbloqueio_s,desbloqueio_fmt,delta_desde_anterior_s,delta_fmt,aceleracao_s'
     );
     game.gens.forEach((gen, i) => {
-      const perCycle = gen.amount.mul(PROD_PER_CYCLE);
+      const perCycle = gen.amount.mul(prodPerCycleOf(i));
       const prev = i === 0 ? 0 : game.gens[i - 1].unlockedAt;
       const prevPrev = i <= 1 ? 0 : game.gens[i - 2].unlockedAt;
       const delta =
@@ -318,6 +326,7 @@ export default function Cycles() {
           gen.bought,
           gen.amount.toString(),
           fmt(gen.amount),
+          cycleSecondsOf(i),
           perCycle.toString(),
           fmt(perCycle),
           gen.unlockedAt !== undefined ? gen.unlockedAt.toFixed(1) : '',
@@ -415,7 +424,8 @@ export default function Cycles() {
         <span className={styles.baseLabel}>número base</span>
         <span className={styles.baseValue}>{fmt(game.base)}</span>
         <span className={styles.baseRate}>
-          +{fmtRate(game.gens[0].amount.mul(PROD_PER_CYCLE))} / ciclo ({CYCLE_S}s)
+          +{fmtRate(game.gens[0].amount.mul(prodPerCycleOf(0)))} / ciclo (
+          {cycleSecondsOf(0)}s)
         </span>
       </div>
 
@@ -490,9 +500,11 @@ export default function Cycles() {
                   </div>
 
                   <div className={styles.stat}>
-                    <span className={styles.statLabel}>produz {target}</span>
+                    <span className={styles.statLabel}>
+                      produz {target} · ciclo {cycleSecondsOf(i)}s
+                    </span>
                     <span className={styles.statValue}>
-                      +{fmt(gen.amount.mul(PROD_PER_CYCLE))} / ciclo
+                      +{fmt(gen.amount.mul(prodPerCycleOf(i)))} / ciclo
                     </span>
                   </div>
 
@@ -512,7 +524,7 @@ export default function Cycles() {
 
                 <span
                   className={cyc.cycleBar}
-                  style={{ width: `${cycleProgress(gen) * 100}%` }}
+                  style={{ width: `${cycleProgress(gen, i) * 100}%` }}
                   aria-hidden="true"
                 />
               </div>
