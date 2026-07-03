@@ -83,7 +83,7 @@ const fmtSlotDate = (ms: number): string =>
   });
 
 interface SettingsProps {
-  onReset: (game: GameTab) => void;
+  onReset: (slotId: string, game: GameTab) => void;
   slots: SlotMeta[];
   activeSlotId: string;
   onCreateSlot: () => void;
@@ -100,6 +100,8 @@ export default function Settings({
   onDeleteSlot,
 }: SettingsProps) {
   const [tab, setTab] = useState<ConfigTab>('saves');
+  // Slot com as opções (carregar / zerar) abertas abaixo dele
+  const [expandedSlotId, setExpandedSlotId] = useState<string | null>(null);
   const [volume, setVolume] = useState(getSoundVolume());
   const videoPrefs = useSyncExternalStore(subscribeVideoPrefs, getVideoPrefs);
 
@@ -124,21 +126,25 @@ export default function Settings({
 
       <div className={styles.body}>
         {tab === 'saves' && (
-          <>
-            <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Saves</h2>
-              <p className={styles.sectionHint}>
-                Cada save guarda os três modos. Criar um novo começa do zero sem
-                perder os anteriores; o ✕ exclui (só saves inativos).
-              </p>
-              <div className={styles.sectionBody}>
-                {slots.map((slot) => {
-                  const active = slot.id === activeSlotId;
-                  return (
-                    <div key={slot.id} className={styles.slotRow}>
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>Saves</h2>
+            <p className={styles.sectionHint}>
+              Cada save guarda os três modos. Clique num save para abrir as
+              opções: carregar ou zerar o progresso de um modo. O ✕ exclui (só
+              saves inativos).
+            </p>
+            <div className={styles.sectionBody}>
+              {slots.map((slot) => {
+                const active = slot.id === activeSlotId;
+                const expanded = slot.id === expandedSlotId;
+                return (
+                  <div key={slot.id} className={styles.slotBlock}>
+                    <div className={styles.slotRow}>
                       <button
                         className={`${styles.option} ${active ? styles.active : ''}`}
-                        onClick={() => onSwitchSlot(slot.id)}
+                        onClick={() =>
+                          setExpandedSlotId(expanded ? null : slot.id)
+                        }
                       >
                         <span>
                           {slot.name}
@@ -148,7 +154,8 @@ export default function Settings({
                           </span>
                         </span>
                         <span className={styles.badge}>
-                          {active ? 'ativo' : 'usar'}
+                          {active && 'ativo '}
+                          {expanded ? '▴' : '▾'}
                         </span>
                       </button>
                       <button
@@ -160,34 +167,42 @@ export default function Settings({
                         ✕
                       </button>
                     </div>
-                  );
-                })}
-                <button className={styles.option} onClick={onCreateSlot}>
-                  <span>Criar novo save</span>
-                  <span className={styles.badge}>+</span>
-                </button>
-              </div>
-            </section>
 
-            <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Zerar progresso</h2>
-              <p className={styles.sectionHint}>
-                Apaga e recomeça do zero apenas o modo escolhido, no save ativo.
-              </p>
-              <div className={styles.sectionBody}>
-                {GAMES.map((game) => (
-                  <button
-                    key={game.id}
-                    className={`${styles.option} ${styles.dangerOption}`}
-                    onClick={() => onReset(game.id)}
-                  >
-                    <span>{game.name}</span>
-                    <span className={styles.badge}>zerar</span>
-                  </button>
-                ))}
-              </div>
-            </section>
-          </>
+                    {expanded && (
+                      <div className={styles.slotOptions}>
+                        {!active && (
+                          <button
+                            className={styles.option}
+                            onClick={() => {
+                              onSwitchSlot(slot.id);
+                              setExpandedSlotId(null);
+                            }}
+                          >
+                            <span>Carregar save</span>
+                            <span className={styles.badge}>usar</span>
+                          </button>
+                        )}
+                        {GAMES.map((game) => (
+                          <button
+                            key={game.id}
+                            className={`${styles.option} ${styles.dangerOption}`}
+                            onClick={() => onReset(slot.id, game.id)}
+                          >
+                            <span>Zerar {game.name}</span>
+                            <span className={styles.badge}>zerar</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              <button className={styles.option} onClick={onCreateSlot}>
+                <span>Criar novo save</span>
+                <span className={styles.badge}>+</span>
+              </button>
+            </div>
+          </section>
         )}
 
         {tab === 'som' && (

@@ -14,7 +14,7 @@ import {
   deleteSlot,
   getActiveSlotId,
   listSlots,
-  saveKeyFor,
+  saveKeyForSlot,
   switchSlot,
 } from './lib/storage';
 import styles from './App.module.css';
@@ -82,14 +82,17 @@ export default function App() {
     ciclos: 0,
   });
 
-  const resetGame = (game: GameTab) => {
-    clearSave(saveKeyFor(game));
-    setResetKeys((keys) => ({ ...keys, [game]: keys[game] + 1 }));
-  };
-
   // ===== Slots de save =====
   const [slots, setSlots] = useState(listSlots);
   const [activeSlotId, setActiveSlotId] = useState(getActiveSlotId);
+
+  // Zera um modo de um slot específico; se for o ativo, remonta o jogo.
+  const resetGame = (slotId: string, game: GameTab) => {
+    clearSave(saveKeyForSlot(slotId, game));
+    if (slotId === activeSlotId) {
+      setResetKeys((keys) => ({ ...keys, [game]: keys[game] + 1 }));
+    }
+  };
   // Muda a cada troca de slot: remonta os jogos, que carregam do slot novo
   const [slotEpoch, setSlotEpoch] = useState(0);
 
@@ -98,11 +101,10 @@ export default function App() {
     setActiveSlotId(getActiveSlotId());
   };
 
+  // Cria sem trocar: o jogador carrega o save novo quando quiser
   const handleCreateSlot = () => {
-    const slot = createSlot();
-    switchSlot(slot.id);
+    createSlot();
     refreshSlots();
-    setSlotEpoch((e) => e + 1);
   };
 
   const handleSwitchSlot = (id: string) => {

@@ -89,6 +89,11 @@ export function saveKeyFor(game: SaveGame): string {
   return slotKey(ensureMeta().activeId, game);
 }
 
+/** Chave de save do jogo num slot específico (ativo ou não). */
+export function saveKeyForSlot(slotId: string, game: SaveGame): string {
+  return slotKey(slotId, game);
+}
+
 export function getActiveSlotId(): string {
   return ensureMeta().activeId;
 }

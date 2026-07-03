@@ -10,6 +10,16 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.14.0',
+    date: '03/07/2026',
+    title: 'Saves com calma',
+    notes: [
+      'Clicar num save não troca mais na hora: abre um painel abaixo dele com as opções de carregar e de zerar cada modo.',
+      'Os botões de zerar progresso saíram da seção solta e agora vivem dentro do save escolhido — dá até para zerar um modo de um save inativo.',
+      'Criar um novo save também ficou mais calmo: ele entra na lista sem assumir o lugar do atual; carregue quando quiser.',
+    ],
+  },
+  {
     version: 'v0.13.x',
     date: '03/07/2026',
     title: 'Aba Temas e faixas exorcizadas',
