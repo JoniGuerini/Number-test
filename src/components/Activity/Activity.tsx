@@ -80,10 +80,14 @@ export default function Activity() {
   const scrollToEnd = () =>
     animateScroll((el) => el.scrollHeight - el.clientHeight);
 
+  // "Colado no fim": segue os registros novos, a menos que o usuário tenha
+  // rolado para cima para ler o histórico.
+  const stickRef = useRef(true);
+
   // Entrada nova no log → rola até ela (o mais recente fica no fim da lista)
   const entryCount = entries.length;
   useEffect(() => {
-    scrollToEnd();
+    if (stickRef.current) scrollToEnd();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entryCount]);
 
@@ -96,11 +100,25 @@ export default function Activity() {
     const below = el.scrollTop + el.clientHeight < el.scrollHeight - 4;
     setEdges((e) => (e.above === above && e.below === below ? e : { above, below }));
   };
+
+  const onListScroll = () => {
+    const el = listRef.current;
+    if (el) {
+      stickRef.current = el.scrollTop + el.clientHeight >= el.scrollHeight - 8;
+    }
+    updateEdges();
+  };
+
   useEffect(() => {
     updateEdges();
     const el = listRef.current;
     if (!el) return;
-    const observer = new ResizeObserver(updateEdges);
+    const observer = new ResizeObserver(() => {
+      // A aba oculta tem altura 0; ao ficar visível a lista ganha tamanho e,
+      // se estávamos colados no fim, recola direto (sem animação).
+      if (stickRef.current) el.scrollTop = el.scrollHeight;
+      updateEdges();
+    });
     observer.observe(el);
     return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -155,7 +173,7 @@ export default function Activity() {
           </button>
         )}
 
-        <div className={gstyles.list} ref={listRef} onScroll={updateEdges}>
+        <div className={gstyles.list} ref={listRef} onScroll={onListScroll}>
           {entries.map((entry) => (
             <div key={entry.gen} className={styles.entry}>
               <span className={styles.entryTitle}>Gerador {entry.gen}</span>
