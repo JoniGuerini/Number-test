@@ -424,8 +424,7 @@ export default function Cycles() {
         <span className={styles.baseLabel}>número base</span>
         <span className={styles.baseValue}>{fmt(game.base)}</span>
         <span className={styles.baseRate}>
-          +{fmtRate(game.gens[0].amount.mul(prodPerCycleOf(0)))} / ciclo (
-          {cycleSecondsOf(0)}s)
+          +{fmtRate(game.gens[0].amount.mul(AVG_RATE))} / s
         </span>
       </div>
 
