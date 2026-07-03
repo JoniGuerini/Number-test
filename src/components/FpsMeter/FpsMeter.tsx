@@ -7,9 +7,53 @@ interface FrameStats {
   maxMs: number;
 }
 
+/** Battery Status API (Chrome/Edge; Safari e Firefox não expõem). */
+interface BatteryManager extends EventTarget {
+  level: number;
+  charging: boolean;
+}
+
+function useBattery() {
+  const [battery, setBattery] = useState<{ level: number; charging: boolean } | null>(
+    null
+  );
+
+  useEffect(() => {
+    const nav = navigator as Navigator & {
+      getBattery?: () => Promise<BatteryManager>;
+    };
+    if (!nav.getBattery) return;
+
+    let disposed = false;
+    let manager: BatteryManager | null = null;
+    const update = () => {
+      if (manager && !disposed) {
+        setBattery({ level: manager.level, charging: manager.charging });
+      }
+    };
+
+    void nav.getBattery().then((m) => {
+      if (disposed) return;
+      manager = m;
+      update();
+      m.addEventListener('levelchange', update);
+      m.addEventListener('chargingchange', update);
+    });
+
+    return () => {
+      disposed = true;
+      manager?.removeEventListener('levelchange', update);
+      manager?.removeEventListener('chargingchange', update);
+    };
+  }, []);
+
+  return battery;
+}
+
 /** Mede FPS e frame time via requestAnimationFrame, atualizando o display 2x por segundo. */
 export default function FpsMeter() {
   const [stats, setStats] = useState<FrameStats>({ fps: 0, avgMs: 0, maxMs: 0 });
+  const battery = useBattery();
 
   useEffect(() => {
     let rafId: number;
@@ -59,6 +103,19 @@ export default function FpsMeter() {
         <span className={styles.label}>máx</span>
         <span className={styles.value}>{stats.maxMs.toFixed(1)}</span>
       </div>
+      {battery && (
+        <div className={styles.pill}>
+          <span
+            className={`${styles.value} ${
+              battery.level <= 0.2 && !battery.charging ? styles.batteryLow : ''
+            }`}
+          >
+            {battery.charging ? '⚡' : ''}
+            {Math.round(battery.level * 100)}%
+          </span>
+          <span className={styles.label}>bat</span>
+        </div>
+      )}
     </div>
   );
 }
