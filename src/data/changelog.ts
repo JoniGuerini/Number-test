@@ -15,6 +15,7 @@ export const CHANGELOG: PatchNote[] = [
     title: 'Less chatter in Settings',
     notes: [
       'Settings descriptions trimmed to the essentials — shorter hints for Saves, Themes, Sound, Video and Language.',
+      'The active save no longer shows a delete button (it was disabled anyway) — its card now takes the full row.',
     ],
   },
   {

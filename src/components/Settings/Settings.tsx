@@ -183,28 +183,31 @@ export default function Settings({
                           </svg>
                         </span>
                       </button>
-                      <button
-                        className={`${styles.slotDelete} ${active ? '' : styles.slotDeleteOn}`}
-                        disabled={active}
-                        onClick={() => onDeleteSlot(slot.id)}
-                        aria-label={t('saves.deleteAria', { name: slot.name })}
-                      >
-                        {/* SVG no lugar do caractere ✕: o glifo variava de
-                            tamanho entre macOS e Windows (fonte de fallback) */}
-                        <svg
-                          width="8"
-                          height="8"
-                          viewBox="0 0 10 10"
-                          aria-hidden="true"
+                      {/* The active save can't be deleted, so its button
+                          doesn't render — the card takes the full row */}
+                      {!active && (
+                        <button
+                          className={`${styles.slotDelete} ${styles.slotDeleteOn}`}
+                          onClick={() => onDeleteSlot(slot.id)}
+                          aria-label={t('saves.deleteAria', { name: slot.name })}
                         >
-                          <path
-                            d="M1 1 L9 9 M9 1 L1 9"
-                            stroke="currentColor"
-                            strokeWidth="1.6"
-                            strokeLinecap="round"
-                          />
-                        </svg>
-                      </button>
+                          {/* SVG instead of the ✕ character: the glyph size
+                              varied between macOS and Windows (fallback font) */}
+                          <svg
+                            width="8"
+                            height="8"
+                            viewBox="0 0 10 10"
+                            aria-hidden="true"
+                          >
+                            <path
+                              d="M1 1 L9 9 M9 1 L1 9"
+                              stroke="currentColor"
+                              strokeWidth="1.6"
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                        </button>
+                      )}
                     </div>
 
                     {expanded && (

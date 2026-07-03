@@ -242,10 +242,6 @@
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
-.slotDelete:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
 .slotDeleteOn {
   color: var(--accent);
 }
