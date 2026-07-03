@@ -2,6 +2,7 @@ import { useEffect, useReducer, useRef, useState } from 'react';
 import Decimal from 'break_eternity.js';
 import { useVirtualRows } from '../../hooks/useVirtualRows';
 import { fmt, fmtRate, fmtTime } from '../../lib/format';
+import { getDateLocale, useI18n } from '../../lib/i18n';
 import { loadSave, saveKeyFor, writeSave } from '../../lib/storage';
 import styles from './Generators.module.css';
 
@@ -160,6 +161,7 @@ function advance(g: Game, nSteps: number): Game {
 }
 
 export default function Generators() {
+  const { t } = useI18n();
   // Amarra a instância ao slot ativo do momento da montagem
   const [saveKey] = useState(() => saveKeyFor('geradores'));
   const [game, setGame] = useState<Game>(() => loadGame(saveKey));
@@ -387,25 +389,23 @@ export default function Generators() {
     return (
       <div className={styles.modeScreen}>
         <div className={styles.modeCard}>
-          <h2 className={styles.modeTitle}>Modo de jogo</h2>
+          <h2 className={styles.modeTitle}>{t('mode.title')}</h2>
           <div className={styles.modeOptions}>
             <button
               className={`${styles.modeBtn} ${!isAuto ? styles.modeActive : ''}`}
               onClick={() => setGame((g) => ({ ...g, mode: 'manual' }))}
             >
-              Manual
+              {t('mode.manual')}
             </button>
             <button
               className={`${styles.modeBtn} ${isAuto ? styles.modeActive : ''}`}
               onClick={() => setGame((g) => ({ ...g, mode: 'auto' }))}
             >
-              Automático
+              {t('mode.auto')}
             </button>
           </div>
           <p className={styles.modeHint}>
-            {isAuto
-              ? 'O jogo compra sozinho 1 unidade de cada gerador assim que alcançar o custo.'
-              : 'Você faz todas as compras manualmente.'}
+            {isAuto ? t('mode.hintAuto') : t('mode.hintManual')}
           </p>
           <button
             className="btn-primary"
@@ -413,7 +413,7 @@ export default function Generators() {
               setGame((g) => ({ ...g, started: true, startedAt: Date.now(), steps: 0 }))
             }
           >
-            Iniciar
+            {t('common.start')}
           </button>
         </div>
       </div>
@@ -426,7 +426,7 @@ export default function Generators() {
         <div className={styles.timePill}>
           <span className={styles.timeValue}>
             {game.startedAt !== undefined
-              ? new Date(game.startedAt).toLocaleString('pt-BR', {
+              ? new Date(game.startedAt).toLocaleString(getDateLocale(), {
                   day: '2-digit',
                   month: '2-digit',
                   hour: '2-digit',
@@ -435,18 +435,18 @@ export default function Generators() {
                 })
               : '—'}
           </span>
-          <span className={styles.timeLabel}>início</span>
+          <span className={styles.timeLabel}>{t('common.startLabel')}</span>
         </div>
         <div className={styles.timePill}>
           <span className={styles.timeValue}>{fmtTime(dispUptime)}</span>
-          <span className={styles.timeLabel}>tempo</span>
+          <span className={styles.timeLabel}>{t('common.time')}</span>
         </div>
         <div className={styles.timePill}>
           <span className={styles.timeValue}>{fmt(dispTotal)}</span>
-          <span className={styles.timeLabel}>produzido</span>
+          <span className={styles.timeLabel}>{t('common.produced')}</span>
         </div>
         <button className={styles.exportBtn} onClick={exportCsv}>
-          Exportar CSV
+          {t('common.exportCsv')}
         </button>
         <button
           className={`${styles.exportBtn} ${isAuto ? styles.toggleOn : ''}`}
@@ -454,12 +454,12 @@ export default function Generators() {
             setGame((g) => ({ ...g, mode: g.mode === 'auto' ? 'manual' : 'auto' }))
           }
         >
-          Automático: {isAuto ? 'on' : 'off'}
+          {t('gen.autoToggle', { state: isAuto ? 'on' : 'off' })}
         </button>
       </div>
 
       <div className={styles.baseBlock}>
-        <span className={styles.baseLabel}>número base</span>
+        <span className={styles.baseLabel}>{t('gen.baseNumber')}</span>
         <span className={styles.baseValue}>{fmt(dispBase)}</span>
         <span className={styles.baseRate}>
           +{fmtRate(dispAmount(0).mul(PROD_PER_UNIT))} / s
@@ -471,7 +471,7 @@ export default function Generators() {
           <button
             className={`${styles.fade} ${styles.fadeTop}`}
             onClick={scrollToStart}
-            aria-label="Ir para o começo"
+            aria-label={t('common.toStart')}
           >
             ↑
           </button>
@@ -521,12 +521,14 @@ export default function Generators() {
 
               <div className={styles.statsRow}>
                 <div className={styles.stat}>
-                  <span className={styles.statLabel}>possui</span>
+                  <span className={styles.statLabel}>{t('gen.owns')}</span>
                   <span className={styles.statValue}>{fmt(dispAmount(i))}</span>
                 </div>
 
                 <div className={styles.stat}>
-                  <span className={styles.statLabel}>produz {target}</span>
+                  <span className={styles.statLabel}>
+                    {t('gen.produces', { target })}
+                  </span>
                   <span className={styles.statValue}>
                     +{fmtRate(dispAmount(i).mul(PROD_PER_UNIT))} / s
                   </span>
@@ -549,7 +551,7 @@ export default function Generators() {
           <button
             className={`${styles.fade} ${styles.fadeBottom}`}
             onClick={scrollToEnd}
-            aria-label="Ir para o fim"
+            aria-label={t('common.toEnd')}
           >
             ↓
           </button>

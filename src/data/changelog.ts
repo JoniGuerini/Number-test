@@ -10,6 +10,17 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.16.0',
+    date: '03/07/2026',
+    title: 'O laboratório fala inglês',
+    notes: [
+      'Suporte a idiomas (i18n): toda a interface agora existe em Português e English, com dicionários próprios e chaves tipadas.',
+      'Nova aba Idioma na Config para trocar a língua — a escolha fica salva no dispositivo e vale para o app inteiro.',
+      'Datas e horários acompanham o idioma (dd/mm vs. mm/dd).',
+      'As notas de patch permanecem no idioma original, como documentos históricos que são.',
+    ],
+  },
+  {
     version: 'v0.15.0',
     date: '03/07/2026',
     title: 'Saves com nome próprio',

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Decimal from 'break_eternity.js';
 import { fmt, fmtRate, fmtTime } from '../../lib/format';
+import { getDateLocale, useI18n } from '../../lib/i18n';
 import { loadSave, saveKeyFor, writeSave } from '../../lib/storage';
 import styles from './Counter.module.css';
 // Reusa o visual dos cardzinhos do topo (padrão das abas Geradores/Ciclos)
@@ -53,6 +54,7 @@ function loadCounter(saveKey: string) {
 }
 
 export default function Counter() {
+  const { t } = useI18n();
   // Amarra a instância ao slot ativo do momento da montagem
   // (trocar de slot remonta o componente)
   const [saveKey] = useState(() => saveKeyFor('contador'));
@@ -163,7 +165,7 @@ export default function Counter() {
         <div className={hub.timePill}>
           <span className={hub.timeValue}>
             {startedAt !== undefined
-              ? new Date(startedAt).toLocaleString('pt-BR', {
+              ? new Date(startedAt).toLocaleString(getDateLocale(), {
                   day: '2-digit',
                   month: '2-digit',
                   hour: '2-digit',
@@ -172,14 +174,14 @@ export default function Counter() {
                 })
               : '—'}
           </span>
-          <span className={hub.timeLabel}>início</span>
+          <span className={hub.timeLabel}>{t('common.startLabel')}</span>
         </div>
         <div className={hub.timePill}>
           <span className={hub.timeValue}>{fmtTime(uptime)}</span>
-          <span className={hub.timeLabel}>tempo</span>
+          <span className={hub.timeLabel}>{t('common.time')}</span>
         </div>
         <button className={hub.exportBtn} onClick={exportCsv}>
-          Exportar CSV
+          {t('common.exportCsv')}
         </button>
       </div>
 
@@ -195,10 +197,10 @@ export default function Counter() {
           onPointerCancel={stopHold}
           onContextMenu={(e) => e.preventDefault()}
         >
-          Dobrar produção
+          {t('counter.double')}
         </button>
         <button className="btn-primary" onClick={toggleRunning}>
-          {running ? 'Pausar' : 'Iniciar'}
+          {running ? t('counter.pause') : t('common.start')}
         </button>
       </div>
     </div>

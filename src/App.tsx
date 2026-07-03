@@ -7,6 +7,7 @@ import PatchNotes from './components/PatchNotes/PatchNotes';
 import Settings from './components/Settings/Settings';
 import FpsMeter from './components/FpsMeter/FpsMeter';
 import { useWakeLock } from './hooks/useWakeLock';
+import { useI18n } from './lib/i18n';
 import { playPress, playRelease } from './lib/sound';
 import {
   clearSave,
@@ -39,6 +40,7 @@ function readStoredPage(): Page {
 
 export default function App() {
   useWakeLock();
+  const { t } = useI18n();
 
   // Feedback sonoro global: um som ao pressionar qualquer botão habilitado e
   // outro (variação mais leve) ao soltar — sensação de tecla física.
@@ -176,42 +178,15 @@ export default function App() {
 
       <footer className={styles.footer}>
         <nav className={styles.tabs}>
-          <button
-            className={`${styles.tab} ${page === 'contador' ? styles.active : ''}`}
-            onClick={() => setPage('contador')}
-          >
-            Contador
-          </button>
-          <button
-            className={`${styles.tab} ${page === 'geradores' ? styles.active : ''}`}
-            onClick={() => setPage('geradores')}
-          >
-            Geradores
-          </button>
-          <button
-            className={`${styles.tab} ${page === 'ciclos' ? styles.active : ''}`}
-            onClick={() => setPage('ciclos')}
-          >
-            Ciclos
-          </button>
-          <button
-            className={`${styles.tab} ${page === 'atividade' ? styles.active : ''}`}
-            onClick={() => setPage('atividade')}
-          >
-            Atividade
-          </button>
-          <button
-            className={`${styles.tab} ${page === 'notas' ? styles.active : ''}`}
-            onClick={() => setPage('notas')}
-          >
-            Notas
-          </button>
-          <button
-            className={`${styles.tab} ${page === 'config' ? styles.active : ''}`}
-            onClick={() => setPage('config')}
-          >
-            Config
-          </button>
+          {PAGES.map((p) => (
+            <button
+              key={p}
+              className={`${styles.tab} ${page === p ? styles.active : ''}`}
+              onClick={() => setPage(p)}
+            >
+              {t(`nav.${p}`)}
+            </button>
+          ))}
         </nav>
       </footer>
     </div>

@@ -1,5 +1,6 @@
 import { useState, useSyncExternalStore } from 'react';
 import type { GameTab } from '../../App';
+import { LOCALES, setLocale, useI18n, type TKey } from '../../lib/i18n';
 import {
   getVideoPrefs,
   setVideoPref,
@@ -11,29 +12,20 @@ import { getSoundVolume, playPress, setSoundVolume } from '../../lib/sound';
 import { nextSlotName, type SlotMeta } from '../../lib/storage';
 import styles from './Settings.module.css';
 
-const GAMES: { id: GameTab; name: string }[] = [
-  { id: 'contador', name: 'Contador' },
-  { id: 'geradores', name: 'Geradores' },
-  { id: 'ciclos', name: 'Ciclos' },
-];
+const GAMES: GameTab[] = ['contador', 'geradores', 'ciclos'];
 
 const VIDEO_TOGGLES: {
   key: Exclude<keyof VideoPrefs, 'theme'>;
-  name: string;
+  label: TKey;
 }[] = [
-  { key: 'showFps', name: 'Card de FPS' },
-  { key: 'showFrameTime', name: 'Card de frame time (ms / máx)' },
-  { key: 'showBattery', name: 'Card de bateria' },
+  { key: 'showFps', label: 'video.fps' },
+  { key: 'showFrameTime', label: 'video.frameTime' },
+  { key: 'showBattery', label: 'video.battery' },
 ];
 
-type ConfigTab = 'saves' | 'temas' | 'som' | 'video';
+type ConfigTab = 'saves' | 'temas' | 'som' | 'video' | 'idioma';
 
-const TABS: { id: ConfigTab; name: string }[] = [
-  { id: 'saves', name: 'Saves' },
-  { id: 'temas', name: 'Temas' },
-  { id: 'som', name: 'Som' },
-  { id: 'video', name: 'Vídeo' },
-];
+const TABS: ConfigTab[] = ['saves', 'temas', 'som', 'video', 'idioma'];
 
 /** Card de tema pintado com as cores dele mesmo, com mini-mockup dentro. */
 function ThemeCard({
@@ -45,6 +37,7 @@ function ThemeCard({
   active?: boolean;
   onSelect?: () => void;
 }) {
+  const { t } = useI18n();
   const [bg, paper, accentColor, ink] = theme.preview;
   return (
     <button
@@ -68,14 +61,14 @@ function ThemeCard({
       </span>
 
       <span className={styles.themeName} style={{ color: ink }}>
-        {theme.name}
+        {t(`theme.${theme.id}`)}
       </span>
     </button>
   );
 }
 
-const fmtSlotDate = (ms: number): string =>
-  new Date(ms).toLocaleString('pt-BR', {
+const fmtSlotDate = (ms: number, dateLocale: string): string =>
+  new Date(ms).toLocaleString(dateLocale, {
     day: '2-digit',
     month: '2-digit',
     hour: '2-digit',
@@ -101,6 +94,7 @@ export default function Settings({
   onDeleteSlot,
   onRenameSlot,
 }: SettingsProps) {
+  const { t, locale } = useI18n();
   const [tab, setTab] = useState<ConfigTab>('saves');
   // Slot com as opções (carregar / renomear / zerar) abertas abaixo dele
   const [expandedSlotId, setExpandedSlotId] = useState<string | null>(null);
@@ -125,13 +119,13 @@ export default function Settings({
   return (
     <div className={styles.panel}>
       <nav className={styles.tabs}>
-        {TABS.map((t) => (
+        {TABS.map((id) => (
           <button
-            key={t.id}
-            className={`${styles.tab} ${tab === t.id ? styles.tabActive : ''}`}
-            onClick={() => setTab(t.id)}
+            key={id}
+            className={`${styles.tab} ${tab === id ? styles.tabActive : ''}`}
+            onClick={() => setTab(id)}
           >
-            {t.name}
+            {t(`tab.${id}`)}
           </button>
         ))}
       </nav>
@@ -139,12 +133,8 @@ export default function Settings({
       <div className={styles.body}>
         {tab === 'saves' && (
           <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Saves</h2>
-            <p className={styles.sectionHint}>
-              Cada save guarda os três modos. Clique num save para abrir as
-              opções: carregar ou zerar o progresso de um modo. O ✕ exclui (só
-              saves inativos).
-            </p>
+            <h2 className={styles.sectionTitle}>{t('saves.title')}</h2>
+            <p className={styles.sectionHint}>{t('saves.hint')}</p>
             <div className={styles.sectionBody}>
               {slots.map((slot) => {
                 const active = slot.id === activeSlotId;
@@ -167,11 +157,14 @@ export default function Settings({
                           {slot.name}
                           <span className={styles.slotDate}>
                             {' · '}
-                            {fmtSlotDate(slot.lastPlayedAt)}
+                            {fmtSlotDate(
+                              slot.lastPlayedAt,
+                              locale === 'pt' ? 'pt-BR' : 'en-US'
+                            )}
                           </span>
                         </span>
                         <span className={styles.badge}>
-                          {active && 'ativo'}
+                          {active && t('saves.active')}
                           <svg
                             className={`${styles.caret} ${expanded ? styles.caretUp : ''}`}
                             width="9"
@@ -194,7 +187,7 @@ export default function Settings({
                         className={`${styles.slotDelete} ${active ? '' : styles.slotDeleteOn}`}
                         disabled={active}
                         onClick={() => onDeleteSlot(slot.id)}
-                        aria-label={`Excluir ${slot.name}`}
+                        aria-label={t('saves.deleteAria', { name: slot.name })}
                       >
                         {/* SVG no lugar do caractere ✕: o glifo variava de
                             tamanho entre macOS e Windows (fonte de fallback) */}
@@ -226,7 +219,7 @@ export default function Settings({
                               if (e.key === 'Enter')
                                 onRenameSlot(slot.id, renameDraft);
                             }}
-                            aria-label={`Nome do ${slot.name}`}
+                            aria-label={t('saves.nameAria', { name: slot.name })}
                           />
                           <button
                             className="btn-secondary"
@@ -236,7 +229,7 @@ export default function Settings({
                             }
                             onClick={() => onRenameSlot(slot.id, renameDraft)}
                           >
-                            Renomear
+                            {t('saves.rename')}
                           </button>
                         </div>
                         {!active && (
@@ -247,16 +240,16 @@ export default function Settings({
                               setExpandedSlotId(null);
                             }}
                           >
-                            Carregar save
+                            {t('saves.load')}
                           </button>
                         )}
                         {GAMES.map((game) => (
                           <button
-                            key={game.id}
+                            key={game}
                             className={styles.dangerBtn}
-                            onClick={() => onReset(slot.id, game.id)}
+                            onClick={() => onReset(slot.id, game)}
                           >
-                            Zerar {game.name}
+                            {t('saves.reset', { game: t(`nav.${game}`) })}
                           </button>
                         ))}
                       </div>
@@ -276,16 +269,16 @@ export default function Settings({
                       if (e.key === 'Enter') confirmCreate();
                       if (e.key === 'Escape') setCreating(false);
                     }}
-                    aria-label="Nome do novo save"
+                    aria-label={t('saves.newNameAria')}
                   />
                   <button className="btn-primary" onClick={confirmCreate}>
-                    Criar
+                    {t('saves.confirmCreate')}
                   </button>
                   <button
                     className="btn-secondary"
                     onClick={() => setCreating(false)}
                   >
-                    Cancelar
+                    {t('saves.cancel')}
                   </button>
                 </div>
               ) : (
@@ -296,7 +289,7 @@ export default function Settings({
                     setCreating(true);
                   }}
                 >
-                  Criar novo save +
+                  {t('saves.create')}
                 </button>
               )}
             </div>
@@ -305,10 +298,8 @@ export default function Settings({
 
         {tab === 'som' && (
           <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Som</h2>
-            <p className={styles.sectionHint}>
-              Volume do click dos botões. Solte o controle para ouvir uma prévia.
-            </p>
+            <h2 className={styles.sectionTitle}>{t('sound.title')}</h2>
+            <p className={styles.sectionHint}>{t('sound.hint')}</p>
             <div className={styles.sectionBody}>
               <div className={styles.volumeRow}>
                 <div className={styles.sliderShell}>
@@ -327,7 +318,7 @@ export default function Settings({
                     value={Math.round(volume * 100)}
                     onChange={(e) => changeVolume(Number(e.target.value) / 100)}
                     onPointerUp={() => playPress()}
-                    aria-label="Volume do som dos botões"
+                    aria-label={t('sound.volumeAria')}
                   />
                 </div>
                 <span className={styles.volumeValue}>
@@ -340,22 +331,19 @@ export default function Settings({
 
         {tab === 'temas' && (
           <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Temas</h2>
-            <p className={styles.sectionHint}>
-              Cada card usa as cores do próprio tema. A escolha vale para o app
-              inteiro e fica salva neste dispositivo.
-            </p>
+            <h2 className={styles.sectionTitle}>{t('themes.title')}</h2>
+            <p className={styles.sectionHint}>{t('themes.hint')}</p>
 
-            <span className={styles.subLabel}>tema ativo</span>
+            <span className={styles.subLabel}>{t('themes.active')}</span>
             {(() => {
               const active =
-                THEMES.find((t) => t.id === videoPrefs.theme) ?? THEMES[0];
+                THEMES.find((th) => th.id === videoPrefs.theme) ?? THEMES[0];
               return <ThemeCard theme={active} active />;
             })()}
 
-            <span className={styles.subLabel}>disponíveis</span>
+            <span className={styles.subLabel}>{t('themes.available')}</span>
             <div className={styles.themeGrid}>
-              {THEMES.filter((t) => t.id !== videoPrefs.theme).map((theme) => (
+              {THEMES.filter((th) => th.id !== videoPrefs.theme).map((theme) => (
                 <ThemeCard
                   key={theme.id}
                   theme={theme}
@@ -368,10 +356,8 @@ export default function Settings({
 
         {tab === 'video' && (
           <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Telemetria</h2>
-            <p className={styles.sectionHint}>
-              Escolha quais cardzinhos aparecem no topo da tela.
-            </p>
+            <h2 className={styles.sectionTitle}>{t('video.title')}</h2>
+            <p className={styles.sectionHint}>{t('video.hint')}</p>
             <div className={styles.sectionBody}>
               {VIDEO_TOGGLES.map((toggle) => {
                 const on = videoPrefs[toggle.key];
@@ -383,13 +369,37 @@ export default function Settings({
                     aria-checked={on}
                     onClick={() => setVideoPref(toggle.key, !on)}
                   >
-                    <span>{toggle.name}</span>
+                    <span>{t(toggle.label)}</span>
                     <span
                       className={`${styles.switch} ${on ? styles.switchOn : ''}`}
                       aria-hidden="true"
                     >
                       <span className={styles.switchThumb} />
                     </span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {tab === 'idioma' && (
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>{t('lang.title')}</h2>
+            <p className={styles.sectionHint}>{t('lang.hint')}</p>
+            <div className={styles.sectionBody}>
+              {LOCALES.map((l) => {
+                const active = l.id === locale;
+                return (
+                  <button
+                    key={l.id}
+                    className={`${styles.option} ${active ? styles.active : ''}`}
+                    onClick={() => setLocale(l.id)}
+                  >
+                    <span>{l.name}</span>
+                    {active && (
+                      <span className={styles.badge}>{t('saves.active')}</span>
+                    )}
                   </button>
                 );
               })}

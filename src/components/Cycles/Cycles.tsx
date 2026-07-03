@@ -2,6 +2,7 @@ import { useEffect, useReducer, useRef, useState } from 'react';
 import Decimal from 'break_eternity.js';
 import { useVirtualRows } from '../../hooks/useVirtualRows';
 import { fmt, fmtRate, fmtTime } from '../../lib/format';
+import { getDateLocale, useI18n } from '../../lib/i18n';
 import { loadSave, saveKeyFor, writeSave } from '../../lib/storage';
 import styles from '../Generators/Generators.module.css';
 import cyc from './Cycles.module.css';
@@ -163,6 +164,7 @@ function loadGame(saveKey: string): Game {
 }
 
 export default function Cycles() {
+  const { t } = useI18n();
   // Amarra a instância ao slot ativo do momento da montagem
   const [saveKey] = useState(() => saveKeyFor('ciclos'));
   const [game, setGame] = useState<Game>(() => loadGame(saveKey));
@@ -365,25 +367,23 @@ export default function Cycles() {
     return (
       <div className={styles.modeScreen}>
         <div className={styles.modeCard}>
-          <h2 className={styles.modeTitle}>Modo de jogo</h2>
+          <h2 className={styles.modeTitle}>{t('mode.title')}</h2>
           <div className={styles.modeOptions}>
             <button
               className={`${styles.modeBtn} ${!isAuto ? styles.modeActive : ''}`}
               onClick={() => setGame((g) => ({ ...g, mode: 'manual' }))}
             >
-              Manual
+              {t('mode.manual')}
             </button>
             <button
               className={`${styles.modeBtn} ${isAuto ? styles.modeActive : ''}`}
               onClick={() => setGame((g) => ({ ...g, mode: 'auto' }))}
             >
-              Automático
+              {t('mode.auto')}
             </button>
           </div>
           <p className={styles.modeHint}>
-            {isAuto
-              ? 'O jogo compra sozinho 1 unidade de cada gerador assim que alcançar o custo.'
-              : 'Você faz todas as compras manualmente.'}
+            {isAuto ? t('mode.hintAuto') : t('mode.hintManual')}
           </p>
           <button
             className="btn-primary"
@@ -391,7 +391,7 @@ export default function Cycles() {
               setGame((g) => ({ ...g, started: true, startedAt: Date.now(), steps: 0 }))
             }
           >
-            Iniciar
+            {t('common.start')}
           </button>
         </div>
       </div>
@@ -404,7 +404,7 @@ export default function Cycles() {
         <div className={styles.timePill}>
           <span className={styles.timeValue}>
             {game.startedAt !== undefined
-              ? new Date(game.startedAt).toLocaleString('pt-BR', {
+              ? new Date(game.startedAt).toLocaleString(getDateLocale(), {
                   day: '2-digit',
                   month: '2-digit',
                   hour: '2-digit',
@@ -413,18 +413,18 @@ export default function Cycles() {
                 })
               : '—'}
           </span>
-          <span className={styles.timeLabel}>início</span>
+          <span className={styles.timeLabel}>{t('common.startLabel')}</span>
         </div>
         <div className={styles.timePill}>
           <span className={styles.timeValue}>{fmtTime(dispUptime)}</span>
-          <span className={styles.timeLabel}>tempo</span>
+          <span className={styles.timeLabel}>{t('common.time')}</span>
         </div>
         <div className={styles.timePill}>
           <span className={styles.timeValue}>{fmt(game.totalProduced)}</span>
-          <span className={styles.timeLabel}>produzido</span>
+          <span className={styles.timeLabel}>{t('common.produced')}</span>
         </div>
         <button className={styles.exportBtn} onClick={exportCsv}>
-          Exportar CSV
+          {t('common.exportCsv')}
         </button>
         <button
           className={`${styles.exportBtn} ${isAuto ? styles.toggleOn : ''}`}
@@ -432,12 +432,12 @@ export default function Cycles() {
             setGame((g) => ({ ...g, mode: g.mode === 'auto' ? 'manual' : 'auto' }))
           }
         >
-          Automático: {isAuto ? 'on' : 'off'}
+          {t('gen.autoToggle', { state: isAuto ? 'on' : 'off' })}
         </button>
       </div>
 
       <div className={styles.baseBlock}>
-        <span className={styles.baseLabel}>número base</span>
+        <span className={styles.baseLabel}>{t('gen.baseNumber')}</span>
         <span className={styles.baseValue}>{fmt(game.base)}</span>
         <span className={styles.baseRate}>
           +{fmtRate(game.gens[0].amount.mul(AVG_RATE))} / s
@@ -449,7 +449,7 @@ export default function Cycles() {
           <button
             className={`${styles.fade} ${styles.fadeTop}`}
             onClick={scrollToStart}
-            aria-label="Ir para o começo"
+            aria-label={t('common.toStart')}
           >
             ↑
           </button>
@@ -507,20 +507,23 @@ export default function Cycles() {
 
                 <div className={styles.statsRow}>
                   <div className={styles.stat}>
-                    <span className={styles.statLabel}>possui</span>
+                    <span className={styles.statLabel}>{t('gen.owns')}</span>
                     <span className={styles.statValue}>{fmt(gen.amount)}</span>
                   </div>
 
                   <div className={styles.stat}>
-                    <span className={styles.statLabel}>produz {target}</span>
+                    <span className={styles.statLabel}>
+                      {t('gen.produces', { target })}
+                    </span>
                     <span className={styles.statValue}>
-                      +{fmt(gen.amount.mul(prodPerCycleOf(i)))} / ciclo
+                      +{fmt(gen.amount.mul(prodPerCycleOf(i)))}{' '}
+                      {t('cyc.perCycleSuffix')}
                     </span>
                   </div>
 
                   <div className={styles.stat}>
                     <span className={styles.statLabel}>
-                      ciclo {fmtTime(cycleSecondsOf(i))}
+                      {t('cyc.cycleEvery', { time: fmtTime(cycleSecondsOf(i)) })}
                     </span>
                     <span className={styles.statValue}>
                       {fmtTime(Math.ceil(remaining))}
@@ -554,7 +557,7 @@ export default function Cycles() {
           <button
             className={`${styles.fade} ${styles.fadeBottom}`}
             onClick={scrollToEnd}
-            aria-label="Ir para o fim"
+            aria-label={t('common.toEnd')}
           >
             ↓
           </button>

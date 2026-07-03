@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { fmtTime } from '../../lib/format';
+import { useI18n } from '../../lib/i18n';
 import { loadSave, saveKeyFor } from '../../lib/storage';
 // Reusa o esqueleto visual das listas de geradores (scroll, fades)
 import gstyles from '../Generators/Generators.module.css';
@@ -7,10 +8,7 @@ import styles from './Activity.module.css';
 
 type LogGame = 'ciclos' | 'geradores';
 
-const GAMES: { id: LogGame; name: string }[] = [
-  { id: 'ciclos', name: 'Ciclos' },
-  { id: 'geradores', name: 'Geradores' },
-];
+const GAMES: LogGame[] = ['ciclos', 'geradores'];
 
 /** Campos comuns aos saves dos dois modos que interessam ao log. */
 interface GameSaveLite {
@@ -57,6 +55,7 @@ interface ActivityProps {
 
 /** Log de desbloqueios, com abas por modo e cada tempo explicado. */
 export default function Activity({ onNavigate }: ActivityProps) {
+  const { t } = useI18n();
   // Chaves dos saves do slot ativo (trocar de slot remonta o componente)
   const [keys] = useState(() => ({
     ciclos: saveKeyFor('ciclos'),
@@ -155,18 +154,18 @@ export default function Activity({ onNavigate }: ActivityProps) {
     entries.length > 1 ? last.unlockedAt / (entries.length - 1) : undefined;
   const sinceLast = last ? Math.max(uptime - last.unlockedAt, 0) : 0;
 
-  const gameName = GAMES.find((g) => g.id === game)?.name ?? game;
+  const gameName = t(`nav.${game}`);
 
   return (
     <div className={styles.wrap}>
       <nav className={styles.tabs}>
         {GAMES.map((g) => (
           <button
-            key={g.id}
-            className={`${styles.tab} ${game === g.id ? styles.tabActive : ''}`}
-            onClick={() => setGame(g.id)}
+            key={g}
+            className={`${styles.tab} ${game === g ? styles.tabActive : ''}`}
+            onClick={() => setGame(g)}
           >
-            {g.name}
+            {t(`nav.${g}`)}
           </button>
         ))}
       </nav>
@@ -174,10 +173,10 @@ export default function Activity({ onNavigate }: ActivityProps) {
       {entries.length === 0 ? (
         <div className={styles.empty}>
           <p className={styles.emptyText}>
-            Nenhum desbloqueio registrado no modo {gameName} ainda.
+            {t('activity.empty', { game: gameName })}
           </p>
           <button className="btn-primary" onClick={() => onNavigate(game)}>
-            Começar a jogar {gameName}
+            {t('activity.cta', { game: gameName })}
           </button>
         </div>
       ) : (
@@ -185,23 +184,23 @@ export default function Activity({ onNavigate }: ActivityProps) {
           <div className={styles.summary}>
             <div className={styles.summaryItem}>
               <span className={styles.summaryValue}>{entries.length}</span>
-              <span className={styles.summaryLabel}>geradores desbloqueados</span>
+              <span className={styles.summaryLabel}>{t('activity.unlocked')}</span>
             </div>
             <div className={styles.summaryItem}>
               <span className={styles.summaryValue}>{fmtTime(uptime)}</span>
-              <span className={styles.summaryLabel}>tempo de jogo</span>
+              <span className={styles.summaryLabel}>{t('activity.playTime')}</span>
             </div>
             <div className={styles.summaryItem}>
               <span className={styles.summaryValue}>
                 {avgInterval !== undefined ? fmtTime(avgInterval) : '—'}
               </span>
               <span className={styles.summaryLabel}>
-                média do “tempo desde o anterior”
+                {t('activity.avgInterval')}
               </span>
             </div>
             <div className={styles.summaryItem}>
               <span className={styles.summaryValue}>{fmtTime(sinceLast)}</span>
-              <span className={styles.summaryLabel}>desde o último</span>
+              <span className={styles.summaryLabel}>{t('activity.sinceLast')}</span>
             </div>
           </div>
 
@@ -210,7 +209,7 @@ export default function Activity({ onNavigate }: ActivityProps) {
               <button
                 className={`${gstyles.fade} ${gstyles.fadeTop}`}
                 onClick={scrollToStart}
-                aria-label="Ir para o começo"
+                aria-label={t('common.toStart')}
               >
                 ↑
               </button>
@@ -219,35 +218,41 @@ export default function Activity({ onNavigate }: ActivityProps) {
             <div className={gstyles.list} ref={listRef} onScroll={onListScroll}>
               {entries.map((entry) => (
                 <div key={entry.gen} className={styles.entry}>
-                  <span className={styles.entryTitle}>Gerador {entry.gen}</span>
+                  <span className={styles.entryTitle}>
+                    {t('activity.generator', { n: entry.gen })}
+                  </span>
 
                   <div className={styles.fields}>
                     <div className={styles.field}>
-                      <span className={styles.fieldLabel}>desbloqueado com</span>
+                      <span className={styles.fieldLabel}>
+                        {t('activity.unlockedWith')}
+                      </span>
                       <span className={styles.fieldValue}>
-                        {fmtTime(entry.unlockedAt)} de jogo
+                        {t('activity.ofPlay', { time: fmtTime(entry.unlockedAt) })}
                       </span>
                     </div>
 
                     <div className={styles.field}>
                       <span className={styles.fieldLabel}>
-                        tempo desde o anterior
+                        {t('activity.sincePrev')}
                       </span>
                       <span className={styles.fieldValue}>
                         {entry.gen === 1
-                          ? 'início do jogo'
+                          ? t('activity.gameStart')
                           : `+${fmtTime(entry.delta ?? 0)}`}
                       </span>
                     </div>
 
                     <div className={styles.field}>
                       <span className={styles.fieldLabel}>
-                        ritmo vs. desbloqueio anterior
+                        {t('activity.pace')}
                       </span>
                       {entry.accel === undefined ? (
                         <span className={styles.fieldValue}>—</span>
                       ) : entry.accel === 0 ? (
-                        <span className={styles.fieldValue}>mesmo ritmo</span>
+                        <span className={styles.fieldValue}>
+                          {t('activity.samePace')}
+                        </span>
                       ) : (
                         <span
                           className={`${styles.fieldValue} ${
@@ -256,7 +261,9 @@ export default function Activity({ onNavigate }: ActivityProps) {
                         >
                           {entry.accel > 0 ? '+' : '−'}
                           {fmtTime(Math.abs(entry.accel))}{' '}
-                          {entry.accel > 0 ? 'mais lento' : 'mais rápido'}
+                          {entry.accel > 0
+                            ? t('activity.slower')
+                            : t('activity.faster')}
                         </span>
                       )}
                     </div>
@@ -269,7 +276,7 @@ export default function Activity({ onNavigate }: ActivityProps) {
               <button
                 className={`${gstyles.fade} ${gstyles.fadeBottom}`}
                 onClick={scrollToEnd}
-                aria-label="Ir para o fim"
+                aria-label={t('common.toEnd')}
               >
                 ↓
               </button>

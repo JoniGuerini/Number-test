@@ -1,4 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useI18n } from '../../lib/i18n';
 import { getVideoPrefs, subscribeVideoPrefs } from '../../lib/prefs';
 import styles from './FpsMeter.module.css';
 
@@ -106,6 +107,7 @@ function useUpdateAvailable() {
 }
 
 export default function FpsMeter() {
+  const { t } = useI18n();
   const [stats, setStats] = useState<FrameStats>({ fps: 0, avgMs: 0, maxMs: 0 });
   const battery = useBattery();
   const updateAvailable = useUpdateAvailable();
@@ -145,7 +147,7 @@ export default function FpsMeter() {
     <div className={styles.bar}>
       <div className={styles.pill}>
         <span className={import.meta.env.DEV ? styles.envDev : styles.envProd}>
-          {import.meta.env.DEV ? 'localhost' : 'produção'}
+          {import.meta.env.DEV ? 'localhost' : t('fps.production')}
         </span>
       </div>
       {prefs.showFps && (
@@ -159,7 +161,7 @@ export default function FpsMeter() {
           <span className={styles.value}>{stats.avgMs.toFixed(1)}</span>
           <span className={styles.label}>ms</span>
           <span className={styles.divider} />
-          <span className={styles.label}>máx</span>
+          <span className={styles.label}>{t('fps.max')}</span>
           <span className={styles.value}>{stats.maxMs.toFixed(1)}</span>
         </div>
       )}
@@ -181,7 +183,7 @@ export default function FpsMeter() {
           className={`${styles.pill} ${styles.updatePill}`}
           onClick={() => window.location.reload()}
         >
-          Nova versão pendente
+          {t('fps.newVersion')}
         </button>
       ) : (
         <div className={styles.pill}>
