@@ -362,6 +362,30 @@ export default function Settings({
             <h2 className={styles.sectionTitle}>{t('video.title')}</h2>
             <p className={styles.sectionHint}>{t('video.hint')}</p>
             <div className={styles.sectionBody}>
+              {/* Master switch: on when every card is on; toggles all at once */}
+              {(() => {
+                const allOn = VIDEO_TOGGLES.every((tg) => videoPrefs[tg.key]);
+                return (
+                  <button
+                    className={styles.option}
+                    role="switch"
+                    aria-checked={allOn}
+                    onClick={() =>
+                      VIDEO_TOGGLES.forEach((tg) =>
+                        setVideoPref(tg.key, !allOn)
+                      )
+                    }
+                  >
+                    <span>{t('video.all')}</span>
+                    <span
+                      className={`${styles.switch} ${allOn ? styles.switchOn : ''}`}
+                      aria-hidden="true"
+                    >
+                      <span className={styles.switchThumb} />
+                    </span>
+                  </button>
+                );
+              })()}
               {VIDEO_TOGGLES.map((toggle) => {
                 const on = videoPrefs[toggle.key];
                 return (

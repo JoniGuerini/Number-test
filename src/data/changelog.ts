@@ -10,6 +10,14 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.16.4',
+    date: '03/07/2026',
+    title: 'One switch to rule them all',
+    notes: [
+      'Video tab gained an "All cards" master switch at the top: turns every telemetry card on or off at once.',
+    ],
+  },
+  {
     version: 'v0.16.3',
     date: '03/07/2026',
     title: 'Less chatter in Settings',

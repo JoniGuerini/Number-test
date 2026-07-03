@@ -118,6 +118,7 @@ const pt = {
   // Config: Vídeo
   'video.title': 'Telemetria',
   'video.hint': 'Escolha o que aparece no topo da tela.',
+  'video.all': 'Todos os cards',
   'video.fps': 'Card de FPS',
   'video.frameTime': 'Card de frame time (ms / máx)',
   'video.battery': 'Card de bateria',
@@ -219,6 +220,7 @@ const en: Record<TKey, string> = {
 
   'video.title': 'Telemetry',
   'video.hint': 'Choose what appears at the top of the screen.',
+  'video.all': 'All cards',
   'video.fps': 'FPS card',
   'video.frameTime': 'Frame time card (ms / max)',
   'video.battery': 'Battery card',
