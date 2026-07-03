@@ -1,9 +1,11 @@
 :root {
   /* ============================================================
      FUNDOS — base graduada do mais profundo ao mais elevado
-     (dark neutro: pretos/cinzas puros, sem o tom azulado original)
+     (dark neutro: pretos/cinzas puros, sem o tom azulado original.
+     O bg é preto puro de propósito: valores quase-pretos sofrem
+     banding de conversão P3 por tile no Chrome/macOS)
      ============================================================ */
-  --bg: #070707;
+  --bg: #000000;
   --paper: #111111;
   --surface: #1a1a1a;
   --surface-hover: #232323;
@@ -90,7 +92,7 @@
 /* Fim transparente dos gradientes de fade, casado com o --bg de cada tema
    (transparent puro esverdeia/escurece a interpolação) */
 :root {
-  --bg-fade: rgba(7, 7, 7, 0);
+  --bg-fade: rgba(0, 0, 0, 0);
 }
 
 /* ============================================================
