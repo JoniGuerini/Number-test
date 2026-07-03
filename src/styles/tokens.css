@@ -149,6 +149,34 @@
 }
 
 /* ============================================================
+   TEMA: Verde musgo — base esverdeada escura com acento em
+   amarelo queimado (mostarda)
+   ============================================================ */
+:root[data-theme='verde'] {
+  --bg: #0a0f0a;
+  --paper: #111811;
+  --surface: #192219;
+  --surface-hover: #212d21;
+  --surface-deep: #2b392b;
+  --bg-fade: rgba(10, 15, 10, 0);
+
+  /* Amarelo queimado assume o papel do latão */
+  --brass-light: #5a5230;
+  --brass: #8a7a3a;
+  --brass-deep: #cfa63a;
+  --brass-bright: #e0b84a;
+
+  --ink: #dde3dd;
+  --ink-soft: #b2bcb2;
+  --ink-muted: #8b988b;
+  --ink-faint: #566056;
+
+  --border: #2b392b;
+  --border-soft: #1e291e;
+  --border-faint: #151d15;
+}
+
+/* ============================================================
    TEMA: Azul meia-noite — a paleta original portada do Coders
    (aplicado via data-theme no <html>; o padrão é o dark neutro)
    ============================================================ */

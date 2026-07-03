@@ -6,12 +6,13 @@ const CONFIG_KEY = 'number-test:config';
 
 /* ===== Tema de cores ===== */
 
-export type ThemeId = 'neutro' | 'midnight' | 'creme';
+export type ThemeId = 'neutro' | 'midnight' | 'creme' | 'verde';
 
 export const THEMES: { id: ThemeId; name: string }[] = [
   { id: 'neutro', name: 'Dark neutro' },
   { id: 'midnight', name: 'Azul meia-noite' },
   { id: 'creme', name: 'Creme terracota' },
+  { id: 'verde', name: 'Verde musgo' },
 ];
 
 /** Cor da moldura do navegador (theme-color) por tema. */
@@ -19,6 +20,7 @@ const THEME_BG: Record<ThemeId, string> = {
   neutro: '#070707',
   midnight: '#0c0e12',
   creme: '#e8dcc8',
+  verde: '#0a0f0a',
 };
 
 function applyTheme(theme: ThemeId): void {
