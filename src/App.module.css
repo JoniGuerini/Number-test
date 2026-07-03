@@ -92,9 +92,9 @@
   .footer {
     bottom: 8px;
   }
+  /* Mesma largura dos cards da lista */
   .tabs {
     width: 100%;
-    padding: 0 4px;
   }
   .tab {
     flex: 1;
