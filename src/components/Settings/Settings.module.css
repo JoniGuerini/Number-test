@@ -226,37 +226,42 @@
   text-align: right;
 }
 
-/* Slider no visual do design system */
+/* Slider: trilho em baixo relevo (canaleta) e pegador em pill, no mesmo
+   tratamento de relevo do switch */
 .slider {
   flex: 1;
   appearance: none;
   -webkit-appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--surface-deep);
-  box-shadow: var(--card-edge-pill);
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg);
+  box-shadow: var(--card-edge-press);
   cursor: pointer;
 }
 .slider::-webkit-slider-thumb {
   appearance: none;
   -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
+  width: 28px;
+  height: 14px;
+  border-radius: 999px;
   background: var(--brass-deep);
-  box-shadow: var(--card-edge-pill);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 2px 4px rgba(0, 0, 0, 0.55);
   transition: background 0.15s;
 }
 .slider::-webkit-slider-thumb:hover {
   background: var(--brass-bright);
 }
 .slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: 28px;
+  height: 14px;
   border: none;
-  border-radius: 50%;
+  border-radius: 999px;
   background: var(--brass-deep);
-  box-shadow: var(--card-edge-pill);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 2px 4px rgba(0, 0, 0, 0.55);
 }
 
 @media (max-width: 640px) {
