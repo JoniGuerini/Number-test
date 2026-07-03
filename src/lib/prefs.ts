@@ -44,8 +44,6 @@ export interface VideoPrefs {
   showFps: boolean;
   showFrameTime: boolean;
   showBattery: boolean;
-  /** Run the frame loop past the monitor refresh (no vsync). */
-  uncapFps: boolean;
   theme: ThemeId;
 }
 
@@ -53,7 +51,6 @@ const DEFAULTS: VideoPrefs = {
   showFps: true,
   showFrameTime: true,
   showBattery: true,
-  uncapFps: false,
   theme: 'neutro',
 };
 

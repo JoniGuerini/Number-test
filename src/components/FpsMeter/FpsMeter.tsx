@@ -1,7 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useI18n } from '../../lib/i18n';
 import { getVideoPrefs, subscribeVideoPrefs } from '../../lib/prefs';
-import { startTicker } from '../../lib/ticker';
 import styles from './FpsMeter.module.css';
 
 const BUILD_TIME_MS = new Date(__BUILD_TIME__).getTime();
@@ -115,14 +114,13 @@ export default function FpsMeter() {
   const prefs = useSyncExternalStore(subscribeVideoPrefs, getVideoPrefs);
 
   useEffect(() => {
+    let rafId: number;
     let frames = 0;
     let maxDelta = 0;
     let windowStart = performance.now();
     let lastFrame = windowStart;
 
-    // startTicker segue o pref de FPS ilimitado: com ele ligado, o medidor
-    // conta os ticks do loop destravado (pode passar do refresh do monitor)
-    return startTicker((now) => {
+    const tick = (now: number) => {
       frames++;
       maxDelta = Math.max(maxDelta, now - lastFrame);
       lastFrame = now;
@@ -138,7 +136,11 @@ export default function FpsMeter() {
         maxDelta = 0;
         windowStart = now;
       }
-    });
+      rafId = requestAnimationFrame(tick);
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
   }, []);
 
   return (

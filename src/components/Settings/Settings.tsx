@@ -433,22 +433,6 @@ export default function Settings({
                   </button>
                 );
               })}
-
-              <span className={styles.subLabel}>{t('video.performance')}</span>
-              <button
-                className={styles.option}
-                role="switch"
-                aria-checked={videoPrefs.uncapFps}
-                onClick={() => setVideoPref('uncapFps', !videoPrefs.uncapFps)}
-              >
-                <span>{t('video.uncap')}</span>
-                <span
-                  className={`${styles.switch} ${videoPrefs.uncapFps ? styles.switchOn : ''}`}
-                  aria-hidden="true"
-                >
-                  <span className={styles.switchThumb} />
-                </span>
-              </button>
             </div>
           </section>
         )}
