@@ -154,20 +154,25 @@ export default function Settings({
             </p>
             <div className={styles.sectionBody}>
               <div className={styles.volumeRow}>
-                <input
-                  type="range"
-                  className={styles.slider}
-                  min={0}
-                  max={100}
-                  value={Math.round(volume * 100)}
-                  // Preenche o trilho até a posição da pill, na cor dela
-                  style={{
-                    background: `linear-gradient(to right, var(--brass-deep) ${Math.round(volume * 100)}%, var(--bg) ${Math.round(volume * 100)}%)`,
-                  }}
-                  onChange={(e) => changeVolume(Number(e.target.value) / 100)}
-                  onPointerUp={() => playPress()}
-                  aria-label="Volume do som dos botões"
-                />
+                <div className={styles.sliderShell}>
+                  {/* Canaleta (baixo relevo) e preenchimento (alto relevo) */}
+                  <div className={styles.trackGroove} aria-hidden="true" />
+                  <div
+                    className={styles.trackFill}
+                    style={{ width: `${Math.round(volume * 100)}%` }}
+                    aria-hidden="true"
+                  />
+                  <input
+                    type="range"
+                    className={styles.slider}
+                    min={0}
+                    max={100}
+                    value={Math.round(volume * 100)}
+                    onChange={(e) => changeVolume(Number(e.target.value) / 100)}
+                    onPointerUp={() => playPress()}
+                    aria-label="Volume do som dos botões"
+                  />
+                </div>
                 <span className={styles.volumeValue}>
                   {Math.round(volume * 100)}%
                 </span>
