@@ -171,8 +171,23 @@ export default function Settings({
                           </span>
                         </span>
                         <span className={styles.badge}>
-                          {active && 'ativo '}
-                          {expanded ? '▴' : '▾'}
+                          {active && 'ativo'}
+                          <svg
+                            className={`${styles.caret} ${expanded ? styles.caretUp : ''}`}
+                            width="9"
+                            height="6"
+                            viewBox="0 0 9 6"
+                            aria-hidden="true"
+                          >
+                            <path
+                              d="M1 1.5 L4.5 4.5 L8 1.5"
+                              stroke="currentColor"
+                              strokeWidth="1.4"
+                              fill="none"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
                         </span>
                       </button>
                       <button
@@ -181,7 +196,21 @@ export default function Settings({
                         onClick={() => onDeleteSlot(slot.id)}
                         aria-label={`Excluir ${slot.name}`}
                       >
-                        ✕
+                        {/* SVG no lugar do caractere ✕: o glifo variava de
+                            tamanho entre macOS e Windows (fonte de fallback) */}
+                        <svg
+                          width="10"
+                          height="10"
+                          viewBox="0 0 10 10"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="M1 1 L9 9 M9 1 L1 9"
+                            stroke="currentColor"
+                            strokeWidth="1.6"
+                            strokeLinecap="round"
+                          />
+                        </svg>
                       </button>
                     </div>
 
