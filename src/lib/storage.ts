@@ -102,22 +102,38 @@ export function listSlots(): SlotMeta[] {
   return [...ensureMeta().slots].sort((a, b) => a.createdAt - b.createdAt);
 }
 
-/** Cria um slot vazio (sem trocar para ele). */
-export function createSlot(): SlotMeta {
+/** Próximo nome genérico disponível ("Save N"). */
+export function nextSlotName(): string {
   const meta = ensureMeta();
   const maxN = meta.slots.reduce((max, s) => {
     const m = /^Save (\d+)$/.exec(s.name);
     return m ? Math.max(max, Number(m[1])) : max;
   }, 0);
+  return `Save ${maxN + 1}`;
+}
 
+/** Cria um slot vazio (sem trocar para ele), com nome opcional. */
+export function createSlot(name?: string): SlotMeta {
+  const meta = ensureMeta();
   const slot: SlotMeta = {
     id: genId(),
-    name: `Save ${maxN + 1}`,
+    name: name?.trim() || nextSlotName(),
     createdAt: Date.now(),
     lastPlayedAt: Date.now(),
   };
   writeMeta({ ...meta, slots: [...meta.slots, slot] });
   return slot;
+}
+
+/** Renomeia um slot (nome vazio é ignorado). */
+export function renameSlot(id: string, name: string): void {
+  const meta = ensureMeta();
+  const trimmed = name.trim();
+  if (!trimmed) return;
+  writeMeta({
+    ...meta,
+    slots: meta.slots.map((s) => (s.id === id ? { ...s, name: trimmed } : s)),
+  });
 }
 
 export function switchSlot(id: string): void {

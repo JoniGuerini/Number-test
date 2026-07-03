@@ -14,6 +14,7 @@ import {
   deleteSlot,
   getActiveSlotId,
   listSlots,
+  renameSlot,
   saveKeyForSlot,
   switchSlot,
 } from './lib/storage';
@@ -102,8 +103,13 @@ export default function App() {
   };
 
   // Cria sem trocar: o jogador carrega o save novo quando quiser
-  const handleCreateSlot = () => {
-    createSlot();
+  const handleCreateSlot = (name?: string) => {
+    createSlot(name);
+    refreshSlots();
+  };
+
+  const handleRenameSlot = (id: string, name: string) => {
+    renameSlot(id, name);
     refreshSlots();
   };
 
@@ -164,6 +170,7 @@ export default function App() {
           onCreateSlot={handleCreateSlot}
           onSwitchSlot={handleSwitchSlot}
           onDeleteSlot={handleDeleteSlot}
+          onRenameSlot={handleRenameSlot}
         />
       </main>
 

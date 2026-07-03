@@ -154,6 +154,32 @@
   box-shadow: var(--card-edge-press);
 }
 
+/* Linha de nome (renomear / criar): input afundado + botão de confirmar */
+.nameRow {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.nameInput {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg);
+  border: none;
+  box-shadow: var(--card-edge-press);
+  border-radius: 4px;
+  padding: 11px 14px;
+  font: 500 13px var(--mono);
+  color: var(--ink);
+  outline: none;
+  transition: box-shadow 0.15s;
+}
+.nameInput:focus {
+  box-shadow:
+    var(--card-edge-press),
+    0 0 0 1px var(--brass-deep);
+}
+
 /* Botão compacto de ação destrutiva (zerar um modo do save) */
 .dangerBtn {
   background: var(--surface);

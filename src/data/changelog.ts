@@ -10,6 +10,16 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.15.0',
+    date: '03/07/2026',
+    title: 'Saves com nome próprio',
+    notes: [
+      'Criar um save agora abre um campo de nome já preenchido com o genérico (Save N) — é só apagar e batizar como quiser antes de confirmar.',
+      'Todo save pode ser renomeado: o campo fica no painel expandido, junto das outras opções.',
+      'Enter confirma, Esc cancela a criação.',
+    ],
+  },
+  {
     version: 'v0.14.0',
     date: '03/07/2026',
     title: 'Saves com calma',

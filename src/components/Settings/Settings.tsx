@@ -8,7 +8,7 @@ import {
   type VideoPrefs,
 } from '../../lib/prefs';
 import { getSoundVolume, playPress, setSoundVolume } from '../../lib/sound';
-import type { SlotMeta } from '../../lib/storage';
+import { nextSlotName, type SlotMeta } from '../../lib/storage';
 import styles from './Settings.module.css';
 
 const GAMES: { id: GameTab; name: string }[] = [
@@ -86,9 +86,10 @@ interface SettingsProps {
   onReset: (slotId: string, game: GameTab) => void;
   slots: SlotMeta[];
   activeSlotId: string;
-  onCreateSlot: () => void;
+  onCreateSlot: (name?: string) => void;
   onSwitchSlot: (id: string) => void;
   onDeleteSlot: (id: string) => void;
+  onRenameSlot: (id: string, name: string) => void;
 }
 
 export default function Settings({
@@ -98,11 +99,22 @@ export default function Settings({
   onCreateSlot,
   onSwitchSlot,
   onDeleteSlot,
+  onRenameSlot,
 }: SettingsProps) {
   const [tab, setTab] = useState<ConfigTab>('saves');
-  // Slot com as opções (carregar / zerar) abertas abaixo dele
+  // Slot com as opções (carregar / renomear / zerar) abertas abaixo dele
   const [expandedSlotId, setExpandedSlotId] = useState<string | null>(null);
+  // Rascunho do nome no painel expandido (renomear)
+  const [renameDraft, setRenameDraft] = useState('');
+  // Criação de save: input com nome pré-preenchido antes de confirmar
+  const [creating, setCreating] = useState(false);
+  const [createName, setCreateName] = useState('');
   const [volume, setVolume] = useState(getSoundVolume());
+
+  const confirmCreate = () => {
+    onCreateSlot(createName);
+    setCreating(false);
+  };
   const videoPrefs = useSyncExternalStore(subscribeVideoPrefs, getVideoPrefs);
 
   const changeVolume = (value: number) => {
@@ -142,9 +154,14 @@ export default function Settings({
                     <div className={styles.slotRow}>
                       <button
                         className={`${styles.option} ${active ? styles.active : ''}`}
-                        onClick={() =>
-                          setExpandedSlotId(expanded ? null : slot.id)
-                        }
+                        onClick={() => {
+                          if (expanded) {
+                            setExpandedSlotId(null);
+                          } else {
+                            setExpandedSlotId(slot.id);
+                            setRenameDraft(slot.name);
+                          }
+                        }}
                       >
                         <span>
                           {slot.name}
@@ -170,6 +187,29 @@ export default function Settings({
 
                     {expanded && (
                       <div className={styles.slotOptions}>
+                        <div className={styles.nameRow}>
+                          <input
+                            className={styles.nameInput}
+                            value={renameDraft}
+                            maxLength={40}
+                            onChange={(e) => setRenameDraft(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter')
+                                onRenameSlot(slot.id, renameDraft);
+                            }}
+                            aria-label={`Nome do ${slot.name}`}
+                          />
+                          <button
+                            className="btn-secondary"
+                            disabled={
+                              !renameDraft.trim() ||
+                              renameDraft.trim() === slot.name
+                            }
+                            onClick={() => onRenameSlot(slot.id, renameDraft)}
+                          >
+                            Renomear
+                          </button>
+                        </div>
                         {!active && (
                           <button
                             className="btn-primary"
@@ -195,9 +235,41 @@ export default function Settings({
                   </div>
                 );
               })}
-              <button className="btn-primary" onClick={onCreateSlot}>
-                Criar novo save +
-              </button>
+              {creating ? (
+                <div className={styles.nameRow}>
+                  <input
+                    className={styles.nameInput}
+                    value={createName}
+                    maxLength={40}
+                    autoFocus
+                    onChange={(e) => setCreateName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') confirmCreate();
+                      if (e.key === 'Escape') setCreating(false);
+                    }}
+                    aria-label="Nome do novo save"
+                  />
+                  <button className="btn-primary" onClick={confirmCreate}>
+                    Criar
+                  </button>
+                  <button
+                    className="btn-secondary"
+                    onClick={() => setCreating(false)}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="btn-primary"
+                  onClick={() => {
+                    setCreateName(nextSlotName());
+                    setCreating(true);
+                  }}
+                >
+                  Criar novo save +
+                </button>
+              )}
             </div>
           </section>
         )}
