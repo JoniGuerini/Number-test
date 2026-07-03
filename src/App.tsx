@@ -3,6 +3,7 @@ import Counter from './components/Counter/Counter';
 import Generators from './components/Generators/Generators';
 import Cycles from './components/Cycles/Cycles';
 import Activity from './components/Activity/Activity';
+import PatchNotes from './components/PatchNotes/PatchNotes';
 import Settings from './components/Settings/Settings';
 import FpsMeter from './components/FpsMeter/FpsMeter';
 import { useWakeLock } from './hooks/useWakeLock';
@@ -19,7 +20,7 @@ import {
 import styles from './App.module.css';
 
 export type GameTab = 'contador' | 'geradores' | 'ciclos';
-type Page = GameTab | 'atividade' | 'config';
+type Page = GameTab | 'atividade' | 'notas' | 'config';
 
 export default function App() {
   useWakeLock();
@@ -123,6 +124,11 @@ export default function App() {
         <Activity key={`${slotEpoch}:${resetKeys.ciclos}`} />
       </main>
       <main
+        className={`${styles.contentFull} ${page !== 'notas' ? styles.hidden : ''}`}
+      >
+        <PatchNotes />
+      </main>
+      <main
         className={`${styles.contentFull} ${page !== 'config' ? styles.hidden : ''}`}
       >
         <Settings
@@ -160,6 +166,12 @@ export default function App() {
             onClick={() => setPage('atividade')}
           >
             Atividade
+          </button>
+          <button
+            className={`${styles.tab} ${page === 'notas' ? styles.active : ''}`}
+            onClick={() => setPage('notas')}
+          >
+            Notas
           </button>
           <button
             className={`${styles.tab} ${page === 'config' ? styles.active : ''}`}
