@@ -20,15 +20,15 @@ interface Entry {
   accel?: number;
 }
 
-function readEntries(): Entry[] {
+function readLog(): { entries: Entry[]; uptime: number } {
   const save = loadSave<CycSaveLite>(CYCLES_SAVE_KEY);
-  if (!save) return [];
+  if (!save) return { entries: [], uptime: 0 };
 
   const unlocked = save.gens
     .map((g, i) => ({ gen: i + 1, unlockedAt: g.unlockedAt }))
     .filter((e): e is { gen: number; unlockedAt: number } => e.unlockedAt !== undefined);
 
-  return unlocked.map((e, idx) => {
+  const entries = unlocked.map((e, idx) => {
     const prev = idx === 0 ? 0 : unlocked[idx - 1].unlockedAt;
     const prevPrev = idx <= 1 ? 0 : unlocked[idx - 2].unlockedAt;
     const delta = e.unlockedAt - prev;
@@ -39,16 +39,19 @@ function readEntries(): Entry[] {
       accel: prevDelta !== undefined ? delta - prevDelta : undefined,
     };
   });
+
+  return { entries, uptime: save.uptime };
 }
 
 /** Log de desbloqueios do modo Ciclos, com cada tempo explicado. */
 export default function Activity() {
-  const [entries, setEntries] = useState<Entry[]>(readEntries);
+  const [log, setLog] = useState(readLog);
+  const { entries, uptime } = log;
   const listRef = useRef<HTMLDivElement>(null);
 
   // O save dos Ciclos é gravado 1x/s; reler no mesmo ritmo mantém o log vivo.
   useEffect(() => {
-    const id = setInterval(() => setEntries(readEntries()), 1000);
+    const id = setInterval(() => setLog(readLog()), 1000);
     return () => clearInterval(id);
   }, []);
 
@@ -111,9 +114,35 @@ export default function Activity() {
     );
   }
 
+  // ===== Resumo do header =====
+  const last = entries[entries.length - 1];
+  // Intervalo médio entre desbloqueios (do 1º ao último)
+  const avgInterval =
+    entries.length > 1 ? last.unlockedAt / (entries.length - 1) : undefined;
+  const sinceLast = Math.max(uptime - last.unlockedAt, 0);
+
   return (
     <div className={styles.wrap}>
-      <p className={styles.hint}>Histórico de desbloqueios do modo Ciclos.</p>
+      <div className={styles.summary}>
+        <div className={styles.summaryItem}>
+          <span className={styles.summaryValue}>{entries.length}</span>
+          <span className={styles.summaryLabel}>desbloqueados</span>
+        </div>
+        <div className={styles.summaryItem}>
+          <span className={styles.summaryValue}>{fmtTime(uptime)}</span>
+          <span className={styles.summaryLabel}>tempo de jogo</span>
+        </div>
+        <div className={styles.summaryItem}>
+          <span className={styles.summaryValue}>
+            {avgInterval !== undefined ? fmtTime(avgInterval) : '—'}
+          </span>
+          <span className={styles.summaryLabel}>intervalo médio</span>
+        </div>
+        <div className={styles.summaryItem}>
+          <span className={styles.summaryValue}>{fmtTime(sinceLast)}</span>
+          <span className={styles.summaryLabel}>desde o último</span>
+        </div>
+      </div>
 
       <div className={gstyles.listWrap}>
         {edges.above && (
