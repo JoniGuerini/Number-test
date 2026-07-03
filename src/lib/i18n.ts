@@ -112,7 +112,8 @@ const pt = {
 
   // Config: Som
   'sound.title': 'Som',
-  'sound.hint': 'Volume do click dos botões.',
+  'sound.hint': 'Som do click dos botões.',
+  'sound.enabled': 'Som',
   'sound.volumeAria': 'Volume do som dos botões',
 
   // Config: Vídeo
@@ -216,7 +217,8 @@ const en: Record<TKey, string> = {
   'theme.verde': 'Moss green',
 
   'sound.title': 'Sound',
-  'sound.hint': 'Button click volume.',
+  'sound.hint': 'Button click sound.',
+  'sound.enabled': 'Sound',
   'sound.volumeAria': 'Button sound volume',
 
   'video.title': 'Telemetry',

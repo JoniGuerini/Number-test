@@ -10,6 +10,15 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.16.5',
+    date: '03/07/2026',
+    title: 'Sound switch',
+    notes: [
+      'Sound tab gained an on/off switch alongside the volume slider — mute without losing your volume level.',
+      'Simpler labels on the Video toggles (FPS, Frame time, Battery), grouped under an "individual cards" label.',
+    ],
+  },
+  {
     version: 'v0.16.4',
     date: '03/07/2026',
     title: 'One switch to rule them all',

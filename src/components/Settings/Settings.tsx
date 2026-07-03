@@ -8,7 +8,13 @@ import {
   THEMES,
   type VideoPrefs,
 } from '../../lib/prefs';
-import { getSoundVolume, playPress, setSoundVolume } from '../../lib/sound';
+import {
+  getSoundVolume,
+  isSoundOn,
+  playPress,
+  setSoundOn,
+  setSoundVolume,
+} from '../../lib/sound';
 import { nextSlotName, type SlotMeta } from '../../lib/storage';
 import styles from './Settings.module.css';
 
@@ -104,6 +110,12 @@ export default function Settings({
   const [creating, setCreating] = useState(false);
   const [createName, setCreateName] = useState('');
   const [volume, setVolume] = useState(getSoundVolume());
+  const [soundOn, setSoundOnState] = useState(isSoundOn());
+
+  const toggleSound = () => {
+    setSoundOn(!soundOn);
+    setSoundOnState(!soundOn);
+  };
 
   const confirmCreate = () => {
     onCreateSlot(createName);
@@ -304,6 +316,20 @@ export default function Settings({
             <h2 className={styles.sectionTitle}>{t('sound.title')}</h2>
             <p className={styles.sectionHint}>{t('sound.hint')}</p>
             <div className={styles.sectionBody}>
+              <button
+                className={styles.option}
+                role="switch"
+                aria-checked={soundOn}
+                onClick={toggleSound}
+              >
+                <span>{t('sound.enabled')}</span>
+                <span
+                  className={`${styles.switch} ${soundOn ? styles.switchOn : ''}`}
+                  aria-hidden="true"
+                >
+                  <span className={styles.switchThumb} />
+                </span>
+              </button>
               <div className={styles.volumeRow}>
                 <div className={styles.sliderShell}>
                   {/* Canaleta (baixo relevo) e preenchimento (alto relevo) */}

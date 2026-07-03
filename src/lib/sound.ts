@@ -14,6 +14,7 @@ const CONFIG_KEY = 'number-test:config';
 
 interface SoundConfig {
   volume?: number;
+  soundOn?: boolean;
 }
 
 function readConfig(): SoundConfig {
@@ -27,6 +28,8 @@ function readConfig(): SoundConfig {
 
 /** Volume mestre dos sons de botão (0..1). */
 let currentVolume: number = readConfig().volume ?? 1;
+/** Master on/off switch, independent of the volume level. */
+let soundOn: boolean = readConfig().soundOn ?? true;
 
 export function getSoundVolume(): number {
   return currentVolume;
@@ -38,6 +41,22 @@ export function setSoundVolume(volume: number): void {
     localStorage.setItem(
       CONFIG_KEY,
       JSON.stringify({ ...readConfig(), volume: currentVolume })
+    );
+  } catch {
+    // Sem localStorage — a escolha vale só pra sessão
+  }
+}
+
+export function isSoundOn(): boolean {
+  return soundOn;
+}
+
+export function setSoundOn(on: boolean): void {
+  soundOn = on;
+  try {
+    localStorage.setItem(
+      CONFIG_KEY,
+      JSON.stringify({ ...readConfig(), soundOn: on })
     );
   } catch {
     // Sem localStorage — a escolha vale só pra sessão
@@ -67,7 +86,7 @@ function noiseClick(): void {
 
 /** Som ao PRESSIONAR um botão. */
 export function playPress(): void {
-  if (currentVolume <= 0) return;
+  if (!soundOn || currentVolume <= 0) return;
   try {
     noiseClick();
   } catch {
@@ -77,7 +96,7 @@ export function playPress(): void {
 
 /** Som ao SOLTAR o botão. */
 export function playRelease(): void {
-  if (currentVolume <= 0) return;
+  if (!soundOn || currentVolume <= 0) return;
   try {
     noiseClick();
   } catch {
