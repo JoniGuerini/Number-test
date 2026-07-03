@@ -138,15 +138,6 @@
   transform: rotate(180deg);
 }
 
-/* Light divider between the master switch and the individual toggles */
-.separator {
-  height: 1px;
-  margin: 4px 2px;
-  border-radius: 999px;
-  background: var(--ink-faint);
-  opacity: 0.45;
-}
-
 /* ===== Slots de save ===== */
 .slotBlock {
   display: flex;
