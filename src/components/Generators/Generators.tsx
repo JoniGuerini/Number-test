@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import Decimal from 'break_eternity.js';
 import { fmt, fmtRate, fmtTime } from '../../lib/format';
 import { GENERATORS_SAVE_KEY, loadSave, writeSave } from '../../lib/storage';
@@ -151,6 +151,9 @@ function advance(g: Game, nSteps: number): Game {
 
 export default function Generators() {
   const [game, setGame] = useState<Game>(loadGame);
+  // Re-render a cada frame para a extrapolação visual (a simulação em si só
+  // avança nos passos fixos — isto é pura cosmética de display).
+  const [, bumpFrame] = useReducer((x: number) => x + 1, 0);
   const listRef = useRef<HTMLDivElement>(null);
 
   // Animação de scroll própria: o smooth nativo congela o alvo na chamada e o
@@ -250,6 +253,7 @@ export default function Generators() {
         const todo = Math.min(target - g.steps, MAX_STEPS_PER_FRAME);
         return todo > 0 ? advance(g, todo) : g;
       });
+      bumpFrame();
 
       rafId = requestAnimationFrame(tick);
     };
@@ -275,6 +279,33 @@ export default function Generators() {
   };
 
   const isAuto = game.mode === 'auto';
+
+  // ===== Extrapolação visual entre passos fixos =====
+  // Fração de segundo desde o último passo executado; os valores exibidos
+  // avançam suavemente com ela, sem tocar no estado determinístico.
+  const partial =
+    game.started && game.startedAt !== undefined
+      ? Math.min(
+          Math.max((Date.now() - game.startedAt) / 1000 - game.steps * SIM_STEP_S, 0),
+          SIM_STEP_S
+        )
+      : 0;
+
+  /** Quantidade exibida do gerador i: real + o que o gerador i+1 produziu
+      desde o último passo. */
+  const dispAmount = (i: number): Decimal => {
+    const gen = game.gens[i];
+    const feeder = game.gens[i + 1];
+    if (!feeder || partial === 0) return gen.amount;
+    return gen.amount.add(feeder.amount.mul(PROD_PER_UNIT).mul(partial));
+  };
+
+  const dispBase =
+    partial === 0
+      ? game.base
+      : game.base.add(game.gens[0].amount.mul(PROD_PER_UNIT).mul(partial));
+
+  const dispUptime = game.uptime + (game.gens[0].bought > 0 ? partial : 0);
 
   /** Baixa um .csv com a progressão atual: metadados + uma linha por gerador,
       com valores brutos (análise) e formatados (leitura). */
@@ -396,7 +427,7 @@ export default function Generators() {
           <span className={styles.timeLabel}>início</span>
         </div>
         <div className={styles.timePill}>
-          <span className={styles.timeValue}>{fmtTime(game.uptime)}</span>
+          <span className={styles.timeValue}>{fmtTime(dispUptime)}</span>
           <span className={styles.timeLabel}>tempo</span>
         </div>
         <button className={styles.exportBtn} onClick={exportCsv}>
@@ -414,9 +445,9 @@ export default function Generators() {
 
       <div className={styles.baseBlock}>
         <span className={styles.baseLabel}>número base</span>
-        <span className={styles.baseValue}>{fmt(game.base)}</span>
+        <span className={styles.baseValue}>{fmt(dispBase)}</span>
         <span className={styles.baseRate}>
-          +{fmtRate(game.gens[0].amount.mul(PROD_PER_UNIT))} / s
+          +{fmtRate(dispAmount(0).mul(PROD_PER_UNIT))} / s
         </span>
       </div>
 
@@ -439,7 +470,7 @@ export default function Generators() {
           // Gerador recém-desbloqueado (nunca comprado): só o botão, centralizado,
           // com barra de progresso mostrando o quão perto o jogador está do custo.
           if (gen.bought === 0) {
-            const progress = Math.min(game.base.div(cost).toNumber(), 1);
+            const progress = Math.min(dispBase.div(cost).toNumber(), 1);
             return (
               <div key={i} className={`${styles.row} ${styles.rowLocked}`}>
                 <button
@@ -490,13 +521,13 @@ export default function Generators() {
               <div className={styles.statsRow}>
                 <div className={styles.stat}>
                   <span className={styles.statLabel}>possui</span>
-                  <span className={styles.statValue}>{fmt(gen.amount)}</span>
+                  <span className={styles.statValue}>{fmt(dispAmount(i))}</span>
                 </div>
 
                 <div className={styles.stat}>
                   <span className={styles.statLabel}>produz {target}</span>
                   <span className={styles.statValue}>
-                    +{fmtRate(gen.amount.mul(PROD_PER_UNIT))} / s
+                    +{fmtRate(dispAmount(i).mul(PROD_PER_UNIT))} / s
                   </span>
                 </div>
 
