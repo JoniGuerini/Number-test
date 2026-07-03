@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import Counter from './components/Counter/Counter';
 import Generators from './components/Generators/Generators';
 import Cycles from './components/Cycles/Cycles';
-import SoundLab from './components/SoundLab/SoundLab';
 import Settings from './components/Settings/Settings';
 import FpsMeter from './components/FpsMeter/FpsMeter';
 import { useWakeLock } from './hooks/useWakeLock';
@@ -22,7 +21,7 @@ const SAVE_KEYS: Partial<Record<Page, string>> = {
   ciclos: CYCLES_SAVE_KEY,
 };
 
-type Page = 'contador' | 'geradores' | 'ciclos' | 'sons' | 'config';
+type Page = 'contador' | 'geradores' | 'ciclos' | 'config';
 
 export default function App() {
   useWakeLock();
@@ -65,7 +64,7 @@ export default function App() {
 
   const resetActive = () => {
     const key = SAVE_KEYS[page];
-    if (!key || page === 'sons' || page === 'config') return;
+    if (!key || page === 'config') return;
     clearSave(key);
     setResetKeys((keys) => ({ ...keys, [page]: keys[page] + 1 }));
   };
@@ -89,11 +88,6 @@ export default function App() {
         className={`${styles.contentFull} ${page !== 'ciclos' ? styles.hidden : ''}`}
       >
         <Cycles key={resetKeys.ciclos} />
-      </main>
-      <main
-        className={`${styles.contentFull} ${page !== 'sons' ? styles.hidden : ''}`}
-      >
-        <SoundLab />
       </main>
       <main
         className={`${styles.contentCenter} ${page !== 'config' ? styles.hidden : ''}`}
@@ -120,12 +114,6 @@ export default function App() {
             onClick={() => setPage('ciclos')}
           >
             Ciclos
-          </button>
-          <button
-            className={`${styles.tab} ${page === 'sons' ? styles.active : ''}`}
-            onClick={() => setPage('sons')}
-          >
-            Sons
           </button>
           <button
             className={`${styles.tab} ${page === 'config' ? styles.active : ''}`}
