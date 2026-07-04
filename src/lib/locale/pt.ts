@@ -26,7 +26,7 @@ export const pt = {
   'mode.manual': 'Manual',
   'mode.auto': 'Automático',
   'mode.hintAuto':
-    'O jogo compra sozinho 1 unidade de cada gerador assim que alcançar o custo.',
+    'O jogo compra sozinho o gerador de maior nível que couber no saldo: desbloqueia o próximo ou empilha o mais alto já desbloqueado.',
   'mode.hintManual': 'Você faz todas as compras manualmente.',
 
   // Geradores / Ciclos

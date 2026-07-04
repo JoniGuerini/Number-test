@@ -23,7 +23,7 @@ export const en: Dict = {
   'mode.manual': 'Manual',
   'mode.auto': 'Automatic',
   'mode.hintAuto':
-    'The game buys 1 unit of each generator on its own as soon as the cost is reached.',
+    'The game buys the highest-tier generator you can afford on its own: unlocking the next one or stacking the highest you already have.',
   'mode.hintManual': 'You make every purchase yourself.',
 
   'gen.autoToggle': 'Auto: {state}',

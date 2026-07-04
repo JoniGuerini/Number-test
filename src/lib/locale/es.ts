@@ -23,7 +23,7 @@ export const es: Dict = {
   'mode.manual': 'Manual',
   'mode.auto': 'Automático',
   'mode.hintAuto':
-    'El juego compra solo 1 unidad de cada generador en cuanto alcanza el costo.',
+    'El juego compra solo el generador de mayor nivel que puedas pagar: desbloquea el siguiente o apila el más alto que ya tengas.',
   'mode.hintManual': 'Tú haces todas las compras manualmente.',
 
   'gen.autoToggle': 'Automático: {state}',

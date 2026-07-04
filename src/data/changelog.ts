@@ -32,6 +32,18 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.16.11',
+    date: '04/07/2026',
+    time: '20:19',
+    title: 'Smarter auto mode',
+    summary:
+      'Auto mode now stacks the highest generator, not just unlocks the next.',
+    qol: [
+      'Auto mode now keeps progressing like a player would: each step it either unlocks the next generator or stacks another copy of the highest one you already own — and it never touches lower tiers. If it can afford neither, it waits.',
+      'This fixes Kingdom auto mode stalling once the finite chain was fully unlocked — it now reinforces the top generator instead of idling.',
+    ],
+  },
+  {
     version: 'v0.16.10',
     date: '04/07/2026',
     time: '20:01',

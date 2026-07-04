@@ -143,16 +143,25 @@ function advance(g: Game, nSteps: number): Game {
     base = base.add(income);
     totalProduced = totalProduced.add(income);
 
-    // Modo automático: compra 1x o próximo gerador assim que alcançar o custo.
+    // Modo automático (estrito): só desbloqueia o próximo bloqueado ou empilha
+    // o mais alto já desbloqueado — nunca níveis abaixo; se não couber, espera.
     if (g.mode === 'auto') {
       const last = gens.length - 1;
-      const cost = costOf(last, 0);
-      if (gens[last].bought === 0 && base.gte(cost)) {
+      const lastLocked = gens[last].bought === 0;
+      const candidates = lastLocked ? [last, last - 1] : [last];
+      for (const i of candidates) {
+        if (i < 0) continue;
+        const cost = costOf(i, gens[i].bought);
+        if (base.lt(cost)) continue;
+        const wasLocked = gens[i].bought === 0;
         base = base.sub(cost);
-        gens[last].bought = 1;
-        gens[last].amount = gens[last].amount.add(1);
-        gens[last].unlockedAt = uptime;
-        gens.push(newGen());
+        gens[i].bought += 1;
+        gens[i].amount = gens[i].amount.add(1);
+        if (wasLocked) {
+          gens[i].unlockedAt = uptime;
+          if (i === last) gens.push(newGen());
+        }
+        break;
       }
     }
   }
