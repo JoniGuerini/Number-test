@@ -1,6 +1,12 @@
 import { useState, useSyncExternalStore } from 'react';
 import type { GameTab } from '../../App';
-import { LOCALES, setLocale, useI18n, type TKey } from '../../lib/i18n';
+import {
+  getDateLocale,
+  LOCALES,
+  setLocale,
+  useI18n,
+  type TKey,
+} from '../../lib/i18n';
 import {
   getVideoPrefs,
   setVideoPref,
@@ -169,10 +175,7 @@ export default function Settings({
                           {slot.name}
                           <span className={styles.slotDate}>
                             {' · '}
-                            {fmtSlotDate(
-                              slot.lastPlayedAt,
-                              locale === 'pt' ? 'pt-BR' : 'en-US'
-                            )}
+                            {fmtSlotDate(slot.lastPlayedAt, getDateLocale())}
                           </span>
                         </span>
                         <span className={styles.badge}>

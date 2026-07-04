@@ -56,8 +56,9 @@ are read/written, so deterministic sync stays intact.
 A lightweight typed i18n module (`src/lib/i18n.ts`): per-locale dictionaries
 with compile-time-checked keys, a `useSyncExternalStore`-based hook so the
 whole app re-renders instantly on language change, and locale-aware dates.
-Available languages: English and Português (Brasil). The choice is persisted
-per device; patch notes stay in the language they were written in.
+Available languages: English, Português (Brasil) and Español — auto-detected
+from the OS/browser language on first visit. The choice is persisted per
+device; patch notes stay in the language they were written in.
 
 ## Telemetry and utilities
 

@@ -5,7 +5,7 @@
 
 import { useSyncExternalStore } from 'react';
 
-export type Locale = 'pt' | 'en';
+export type Locale = 'pt' | 'en' | 'es';
 
 const LOCALE_KEY = 'number-test:locale';
 
@@ -13,6 +13,7 @@ const LOCALE_KEY = 'number-test:locale';
 export const LOCALES: { id: Locale; name: string }[] = [
   { id: 'pt', name: 'Português (Brasil)' },
   { id: 'en', name: 'English' },
+  { id: 'es', name: 'Español' },
 ];
 
 /* ============================================================
@@ -234,7 +235,109 @@ const en: Record<TKey, string> = {
   'lang.hint': 'Select the language.',
 };
 
-const DICTS: Record<Locale, Record<TKey, string>> = { pt, en };
+/* ============================================================
+   Español
+   ============================================================ */
+const es: Record<TKey, string> = {
+  'nav.contador': 'Contador',
+  'nav.geradores': 'Generadores',
+  'nav.ciclos': 'Ciclos',
+  'nav.atividade': 'Actividad',
+  'nav.notas': 'Notas',
+  'nav.config': 'Ajustes',
+
+  'common.exportCsv': 'Exportar CSV',
+  'common.start': 'Iniciar',
+  'common.startLabel': 'inicio',
+  'common.time': 'tiempo',
+  'common.produced': 'producido',
+  'common.toStart': 'Ir al comienzo',
+  'common.toEnd': 'Ir al final',
+
+  'counter.double': 'Duplicar producción',
+  'counter.pause': 'Pausar',
+
+  'mode.title': 'Modo de juego',
+  'mode.manual': 'Manual',
+  'mode.auto': 'Automático',
+  'mode.hintAuto':
+    'El juego compra solo 1 unidad de cada generador en cuanto alcanza el costo.',
+  'mode.hintManual': 'Tú haces todas las compras manualmente.',
+
+  'gen.autoToggle': 'Automático: {state}',
+  'gen.baseNumber': 'número base',
+  'gen.owns': 'posee',
+  'gen.produces': 'produce {target}',
+  'cyc.cycleEvery': 'ciclo {time}',
+  'cyc.perCycleSuffix': '/ ciclo',
+
+  'activity.empty': 'Ningún desbloqueo registrado en el modo {game} todavía.',
+  'activity.cta': 'Empezar a jugar {game}',
+  'activity.unlocked': 'generadores desbloqueados',
+  'activity.playTime': 'tiempo de juego',
+  'activity.avgInterval': 'promedio del “tiempo desde el anterior”',
+  'activity.sinceLast': 'desde el último',
+  'activity.generator': 'Generador {n}',
+  'activity.unlockedWith': 'desbloqueado con',
+  'activity.ofPlay': '{time} de juego',
+  'activity.sincePrev': 'tiempo desde el anterior',
+  'activity.gameStart': 'inicio del juego',
+  'activity.pace': 'ritmo vs. desbloqueo anterior',
+  'activity.samePace': 'mismo ritmo',
+  'activity.slower': 'más lento',
+  'activity.faster': 'más rápido',
+
+  'fps.production': 'producción',
+  'fps.max': 'máx',
+  'fps.newVersion': 'Nueva versión pendiente',
+
+  'tab.saves': 'Partidas',
+  'tab.temas': 'Temas',
+  'tab.som': 'Sonido',
+  'tab.video': 'Vídeo',
+  'tab.idioma': 'Idioma',
+
+  'saves.title': 'Partidas guardadas',
+  'saves.hint': 'Tus partidas guardadas.',
+  'saves.active': 'activa',
+  'saves.load': 'Cargar partida',
+  'saves.reset': 'Reiniciar {game}',
+  'saves.rename': 'Renombrar',
+  'saves.create': 'Crear nueva partida +',
+  'saves.confirmCreate': 'Crear',
+  'saves.cancel': 'Cancelar',
+  'saves.deleteAria': 'Eliminar {name}',
+  'saves.nameAria': 'Nombre de {name}',
+  'saves.newNameAria': 'Nombre de la nueva partida',
+  'saves.defaultName': 'Partida {n}',
+
+  'themes.title': 'Temas',
+  'themes.hint': 'Biblioteca de temas.',
+  'themes.active': 'tema activo',
+  'themes.available': 'disponibles',
+  'theme.neutro': 'Oscuro neutro',
+  'theme.midnight': 'Azul medianoche',
+  'theme.creme': 'Crema terracota',
+  'theme.verde': 'Verde musgo',
+
+  'sound.title': 'Sonido',
+  'sound.hint': 'Sonido del click de los botones.',
+  'sound.enabled': 'Sonido',
+  'sound.volumeAria': 'Volumen del sonido de los botones',
+
+  'video.title': 'Telemetría',
+  'video.hint': 'Opciones que aparecen en la parte superior de la pantalla.',
+  'video.all': 'Todas las tarjetas',
+  'video.individual': 'tarjetas individuales',
+  'video.fps': 'FPS',
+  'video.frameTime': 'Frame time',
+  'video.battery': 'Batería',
+
+  'lang.title': 'Idioma',
+  'lang.hint': 'Selecciona el idioma.',
+};
+
+const DICTS: Record<Locale, Record<TKey, string>> = { pt, en, es };
 
 /* ============================================================
    Store (mesmo padrão de prefs.ts)
@@ -245,15 +348,19 @@ function detectLocale(): Locale {
   const langs = navigator.languages ?? [navigator.language];
   for (const lang of langs) {
     if (lang?.toLowerCase().startsWith('pt')) return 'pt';
+    if (lang?.toLowerCase().startsWith('es')) return 'es';
     if (lang?.toLowerCase().startsWith('en')) return 'en';
   }
   return 'en';
 }
 
+const isLocale = (v: string | null): v is Locale =>
+  v === 'pt' || v === 'en' || v === 'es';
+
 function readStored(): Locale {
   try {
     const stored = localStorage.getItem(LOCALE_KEY);
-    if (stored === 'pt' || stored === 'en') return stored;
+    if (isLocale(stored)) return stored;
   } catch {
     // No localStorage — fall through to detection
   }
@@ -264,8 +371,10 @@ function readStored(): Locale {
 let locale: Locale = readStored();
 const listeners = new Set<() => void>();
 
+const HTML_LANG: Record<Locale, string> = { pt: 'pt-BR', en: 'en', es: 'es' };
+
 function applyLocale(l: Locale): void {
-  document.documentElement.lang = l === 'pt' ? 'pt-BR' : 'en';
+  document.documentElement.lang = HTML_LANG[l];
 }
 
 applyLocale(locale);
@@ -290,9 +399,15 @@ export function subscribeLocale(fn: () => void): () => void {
   return () => listeners.delete(fn);
 }
 
+const DATE_LOCALE: Record<Locale, string> = {
+  pt: 'pt-BR',
+  en: 'en-US',
+  es: 'es-ES',
+};
+
 /** Locale de datas (toLocaleString) correspondente ao idioma da UI. */
 export function getDateLocale(): string {
-  return locale === 'pt' ? 'pt-BR' : 'en-US';
+  return DATE_LOCALE[locale];
 }
 
 /** Tradução pura (sem reatividade) — para uso fora de componentes. */

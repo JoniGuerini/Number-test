@@ -104,11 +104,12 @@ export function listSlots(): SlotMeta[] {
   return [...ensureMeta().slots].sort((a, b) => a.createdAt - b.createdAt);
 }
 
-/** Next available generic name, localized ("Save N" / "Jogo salvo N"). */
+/** Next available generic name, localized
+    ("Save N" / "Jogo salvo N" / "Partida N"). */
 export function nextSlotName(): string {
   const meta = ensureMeta();
   const maxN = meta.slots.reduce((max, s) => {
-    const m = /^(?:Save|Jogo salvo) (\d+)$/.exec(s.name);
+    const m = /^(?:Save|Jogo salvo|Partida) (\d+)$/.exec(s.name);
     return m ? Math.max(max, Number(m[1])) : max;
   }, 0);
   return translate('saves.defaultName', { n: maxN + 1 });

@@ -10,6 +10,15 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.17.0',
+    date: '03/07/2026',
+    title: 'Ahora en español',
+    notes: [
+      'Third UI language: Español — full dictionary, auto-detection for Spanish systems, localized dates and default save names (Partida N).',
+      'The 1.0 language trio is set: English, Português (Brasil) and Español.',
+    ],
+  },
+  {
     version: 'v0.16.6',
     date: '03/07/2026',
     title: 'Jogos salvos',
