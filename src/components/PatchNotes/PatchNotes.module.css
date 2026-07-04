@@ -10,8 +10,7 @@
 }
 
 .list {
-  max-width: 720px;
-  margin: 0 auto;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -65,8 +64,21 @@
   border-left: 2px solid var(--brass-deep);
 }
 
-/* ===== Seções por categoria ===== */
+/* ===== Seções por categoria: colunas de largura FIXA dentro do card =====
+   Cada tipo presente vira uma coluna com a mesma largura fixa (layout
+   consistente entre versões); os ausentes somem e as demais empacotam à
+   esquerda, quebrando para a linha de baixo quando não couberem. */
+.sections {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 24px 32px;
+}
+
 .section {
+  flex: 0 0 300px;
+  width: 300px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -139,6 +151,15 @@
   }
   .date {
     margin-left: 0;
+    width: 100%;
+  }
+  /* Colunas viram pilha no mobile (largura total) */
+  .sections {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .section {
+    flex-basis: auto;
     width: 100%;
   }
 }

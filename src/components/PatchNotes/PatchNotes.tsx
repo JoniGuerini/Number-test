@@ -20,30 +20,34 @@ export default function PatchNotes() {
             <header className={styles.header}>
               <h2 className={styles.version}>{patch.version}</h2>
               <span className={styles.title}>{patch.title}</span>
-              <span className={styles.date}>{patch.date}</span>
+              <span className={styles.date}>
+                {patch.date} · {patch.time ?? '—'}
+              </span>
             </header>
 
             <p className={styles.summary}>{patch.summary}</p>
 
-            {SECTIONS.map(({ key, label }) => {
-              const items = patch[key] as string[] | undefined;
-              if (!items || items.length === 0) return null;
-              return (
-                <section key={key} className={styles.section}>
-                  <div className={styles.sectionLabel} data-cat={key}>
-                    <span className={styles.dot} aria-hidden="true" />
-                    {label}
-                  </div>
-                  <ul className={styles.items}>
-                    {items.map((note, i) => (
-                      <li key={i} className={styles.note} data-cat={key}>
-                        {note}
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              );
-            })}
+            <div className={styles.sections}>
+              {SECTIONS.map(({ key, label }) => {
+                const items = patch[key] as string[] | undefined;
+                if (!items || items.length === 0) return null;
+                return (
+                  <section key={key} className={styles.section}>
+                    <div className={styles.sectionLabel} data-cat={key}>
+                      <span className={styles.dot} aria-hidden="true" />
+                      {label}
+                    </div>
+                    <ul className={styles.items}>
+                      {items.map((note, i) => (
+                        <li key={i} className={styles.note} data-cat={key}>
+                          {note}
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                );
+              })}
+            </div>
           </article>
         ))}
       </div>

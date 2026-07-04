@@ -6,13 +6,16 @@
     - qol:   qualidade de vida e polimento
     - fixes: correções de bugs
 
-    Entradas até a v0.16.0 permanecem em português; a partir da v0.16.1 o
+    Entradas até a v0.12.0 permanecem em português; a partir da v0.12.1 o
     inglês é a língua canônica do projeto (as notas antigas ficam no idioma
     original, como documentos históricos que são). */
 
 export interface PatchNote {
   version: string;
   date: string;
+  /** Hora do patch (HH:MM). Não dá para recuperar retroativamente, então as
+      entradas antigas não têm — a UI mostra "—" no lugar. */
+  time?: string;
   title: string;
   /** Uma linha que resume o patch. */
   summary: string;
@@ -29,7 +32,20 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
-    version: 'v0.23.0',
+    version: 'v0.17.1',
+    date: '04/07/2026',
+    time: '19:05',
+    title: 'Patch notes, laid out',
+    summary:
+      'The patch notes get a wider layout with a patch time, and the whole version history is renumbered.',
+    qol: [
+      'Each release now spans the full page width, with its Major, Minor, Quality-of-life and Fixes categories side by side in fixed-width columns (empty categories are skipped) — much easier to scan.',
+      'Entries now show the patch time next to the date; historical entries with no recorded time show a "—" instead.',
+      'Housekeeping: the entire version history was renumbered to a MAJOR.MINOR.PATCH scheme — PATCH for small fixes/QoL, MINOR for new content, MAJOR reserved for massive expansions. The game stays on 0.x until the 1.0 launch.',
+    ],
+  },
+  {
+    version: 'v0.17.0',
     date: '04/07/2026',
     title: 'Kingdom in Activity',
     summary: 'The Activity tab now tracks Kingdom unlocks too.',
@@ -38,7 +54,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.22.0',
+    version: 'v0.16.3',
     date: '04/07/2026',
     title: 'Toggleable cycle bars',
     summary:
@@ -49,7 +65,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.21.0',
+    version: 'v0.16.2',
     date: '04/07/2026',
     title: 'Patch notes revamp',
     summary:
@@ -61,7 +77,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.20.0',
+    version: 'v0.16.1',
     date: '04/07/2026',
     title: 'Settings modal & Counter removal',
     summary:
@@ -74,7 +90,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.19.0',
+    version: 'v0.16.0',
     date: '04/07/2026',
     title: 'Kingdom mode (medieval production lines)',
     summary:
@@ -94,7 +110,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.18.3',
+    version: 'v0.15.3',
     date: '04/07/2026',
     title: 'Consistent Settings labels',
     summary: 'Settings tab labels now match their section titles.',
@@ -103,7 +119,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.18.2',
+    version: 'v0.15.2',
     date: '04/07/2026',
     title: 'Fullscreen persistence & empty saves',
     summary:
@@ -114,7 +130,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.18.1',
+    version: 'v0.15.1',
     date: '04/07/2026',
     title: 'Save reset tweaks',
     summary: 'Reset buttons behave better inside the save panel.',
@@ -124,7 +140,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.18.0',
+    version: 'v0.15.0',
     date: '04/07/2026',
     title: 'Fullscreen & tidier Settings',
     summary: 'A fullscreen toggle arrives and Settings gets tidier.',
@@ -136,7 +152,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.17.1',
+    version: 'v0.14.1',
     date: '03/07/2026',
     title: 'Locale housekeeping',
     summary: 'Internal locale refactor — nothing changes in game.',
@@ -145,7 +161,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.17.0',
+    version: 'v0.14.0',
     date: '03/07/2026',
     title: 'Ahora en español',
     summary: 'Español joins the UI, completing the 1.0 language trio.',
@@ -157,7 +173,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.16.6',
+    version: 'v0.13.4',
     date: '03/07/2026',
     title: 'Jogos salvos',
     summary: 'The Portuguese UI drops the "saves" loanword for "jogos salvos".',
@@ -166,7 +182,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.16.5',
+    version: 'v0.13.3',
     date: '03/07/2026',
     title: 'Sound switch',
     summary: 'A sound on/off switch and simpler Video labels.',
@@ -178,7 +194,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.16.4',
+    version: 'v0.13.2',
     date: '03/07/2026',
     title: 'One switch to rule them all',
     summary: 'A master switch toggles every telemetry card at once.',
@@ -187,7 +203,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.16.3',
+    version: 'v0.13.1',
     date: '03/07/2026',
     title: 'Less chatter in Settings',
     summary: 'Trimmed Settings copy and a cleaner active-save row.',
@@ -197,7 +213,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.16.2',
+    version: 'v0.13.0',
     date: '03/07/2026',
     title: 'The app speaks your language',
     summary: 'First-visit language now follows the OS/browser.',
@@ -209,7 +225,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.16.1',
+    version: 'v0.12.1',
     date: '03/07/2026',
     title: 'English as the canonical language',
     summary: 'English becomes the project\u2019s canonical language.',
@@ -220,7 +236,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.16.0',
+    version: 'v0.12.0',
     date: '03/07/2026',
     title: 'O laboratório fala inglês',
     summary: 'i18n chega: toda a interface em Português e English.',
@@ -234,7 +250,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.15.0',
+    version: 'v0.11.0',
     date: '03/07/2026',
     title: 'Saves com nome próprio',
     summary: 'Saves agora podem ser batizados e renomeados.',
@@ -253,7 +269,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.14.0',
+    version: 'v0.10.1',
     date: '03/07/2026',
     title: 'Saves com calma',
     summary: 'O fluxo de saves ficou mais calmo, sem trocas acidentais.',
@@ -267,7 +283,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.13.x',
+    version: 'v0.10.0',
     date: '03/07/2026',
     title: 'Aba Temas e faixas exorcizadas',
     summary: 'Config ganha a aba Temas e o Chrome/macOS para de listrar o preto.',
@@ -288,7 +304,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.12.0',
+    version: 'v0.9.0',
     date: '03/07/2026',
     title: 'Atividade para os dois modos',
     summary: 'A Atividade passa a cobrir Ciclos e Geradores.',
@@ -301,7 +317,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.11.x',
+    version: 'v0.8.0',
     date: '03/07/2026',
     title: 'Verde musgo e amostras',
     summary: 'Quarto tema (verde-musgo) e amostras de cor no seletor.',
@@ -313,7 +329,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.10.0',
+    version: 'v0.7.0',
     date: '03/07/2026',
     title: 'Creme terracota',
     summary: 'Terceiro tema, agora claro: creme com terracota.',
@@ -322,7 +338,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.9.0',
+    version: 'v0.6.0',
     date: '03/07/2026',
     title: 'Sistema de temas',
     summary: 'Nasce o sistema de temas escolhíveis.',
@@ -331,7 +347,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.8.0',
+    version: 'v0.5.3',
     date: '03/07/2026',
     title: 'Dark neutro',
     summary: 'Dark mode de verdade: pretos e cinzas puros.',
@@ -340,7 +356,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.7.2 – v0.7.3',
+    version: 'v0.5.2',
     date: '03/07/2026',
     title: 'Canaleta calibrada',
     summary: 'A canaleta da barra de ciclo foi calibrada.',
@@ -349,7 +365,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.7.1',
+    version: 'v0.5.1',
     date: '03/07/2026',
     title: 'Setinhas honestas',
     summary: 'Correção nas setinhas de navegação da lista.',
@@ -358,7 +374,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.7.0',
+    version: 'v0.5.0',
     date: '03/07/2026',
     title: 'Notas de patch',
     summary: 'Estreia a aba Notas — esta página.',
@@ -367,7 +383,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.6.x',
+    version: 'v0.4.1',
     date: '03/07/2026',
     title: 'Barra de ciclo interna',
     summary: 'A fitinha de ciclo virou uma barra interna dedicada.',
@@ -379,7 +395,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.5.x',
+    version: 'v0.4.0',
     date: '03/07/2026',
     title: 'Config de gente grande',
     summary: 'Config vira painel único com tabs internas.',
@@ -395,7 +411,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.4.x',
+    version: 'v0.3.0',
     date: '03/07/2026',
     title: 'Saves múltiplos',
     summary: 'Sistema de slots de save com migração automática.',
@@ -408,7 +424,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.3.0',
+    version: 'v0.2.1',
     date: '03/07/2026',
     title: 'Virtualização',
     summary: 'Virtualização da lista leva o frame rate ao teto do monitor.',
@@ -420,7 +436,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.2.x',
+    version: 'v0.2.0',
     date: '03/07/2026',
     title: 'Identidade de versão',
     summary: 'Pill de versão e detector de deploy pendente.',
