@@ -74,6 +74,7 @@ export const es: Dict = {
   'saves.nameAria': 'Nombre de {name}',
   'saves.newNameAria': 'Nombre de la nueva partida',
   'saves.defaultName': 'Partida {n}',
+  'saves.noData': 'sin datos',
 
   'themes.title': 'Temas',
   'themes.hint': 'Biblioteca de temas.',

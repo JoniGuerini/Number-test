@@ -83,6 +83,7 @@ export const pt = {
   'saves.nameAria': 'Nome do {name}',
   'saves.newNameAria': 'Nome do novo jogo salvo',
   'saves.defaultName': 'Jogo salvo {n}',
+  'saves.noData': 'sem dados',
 
   // Config: Temas
   'themes.title': 'Temas',

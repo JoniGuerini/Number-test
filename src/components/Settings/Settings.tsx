@@ -181,6 +181,8 @@ export default function Settings({
               {slots.map((slot) => {
                 const active = slot.id === activeSlotId;
                 const expanded = slot.id === expandedSlotId;
+                // Nenhum dos 3 modos iniciado: save vazio (sem data pra mostrar)
+                const empty = !GAMES.some((g) => hasProgress(slot.id, g));
                 return (
                   <div key={slot.id} className={styles.slotBlock}>
                     <div className={styles.slotRow}>
@@ -199,7 +201,9 @@ export default function Settings({
                           {slot.name}
                           <span className={styles.slotDate}>
                             {' · '}
-                            {fmtSlotDate(slot.lastPlayedAt, getDateLocale())}
+                            {empty
+                              ? t('saves.noData')
+                              : fmtSlotDate(slot.lastPlayedAt, getDateLocale())}
                           </span>
                         </span>
                         <span className={styles.badge}>

@@ -74,6 +74,7 @@ export const en: Dict = {
   'saves.nameAria': 'Name of {name}',
   'saves.newNameAria': 'New save name',
   'saves.defaultName': 'Save {n}',
+  'saves.noData': 'no data',
 
   'themes.title': 'Themes',
   'themes.hint': 'Theme library.',

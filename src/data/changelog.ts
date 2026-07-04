@@ -10,6 +10,15 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.18.2',
+    date: '04/07/2026',
+    title: 'Fullscreen persistence & empty saves',
+    notes: [
+      'Fullscreen now survives a refresh: the app re-enters fullscreen on your first click or keypress after reloading (browsers block auto-fullscreen without a gesture).',
+      'Saves with no progress in any mode show "no data" instead of a meaningless date.',
+    ],
+  },
+  {
     version: 'v0.18.1',
     date: '04/07/2026',
     title: 'Save reset tweaks',
