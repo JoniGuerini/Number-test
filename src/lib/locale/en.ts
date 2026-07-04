@@ -90,7 +90,7 @@ export const en: Dict = {
   'sound.enabled': 'Sound',
   'sound.volumeAria': 'Button sound volume',
 
-  'video.title': 'Telemetry',
+  'video.title': 'Video',
   'video.hint': 'Options shown at the top of the screen.',
   'video.all': 'All cards',
   'video.individual': 'individual cards',

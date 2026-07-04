@@ -55,7 +55,7 @@ export const es: Dict = {
   'fps.max': 'máx',
   'fps.newVersion': 'Nueva versión pendiente',
 
-  'tab.saves': 'Partidas',
+  'tab.saves': 'Partidas guardadas',
   'tab.temas': 'Temas',
   'tab.som': 'Sonido',
   'tab.video': 'Vídeo',
@@ -90,7 +90,7 @@ export const es: Dict = {
   'sound.enabled': 'Sonido',
   'sound.volumeAria': 'Volumen del sonido de los botones',
 
-  'video.title': 'Telemetría',
+  'video.title': 'Vídeo',
   'video.hint': 'Opciones que aparecen en la parte superior de la pantalla.',
   'video.all': 'Todas las tarjetas',
   'video.individual': 'tarjetas individuales',

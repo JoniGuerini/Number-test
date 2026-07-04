@@ -10,6 +10,14 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.18.3',
+    date: '04/07/2026',
+    title: 'Consistent Settings labels',
+    notes: [
+      'Settings tab labels now match their section titles — the Saves tab reads "Jogos salvos" and the Video section is no longer titled "Telemetria".',
+    ],
+  },
+  {
     version: 'v0.18.2',
     date: '04/07/2026',
     title: 'Fullscreen persistence & empty saves',

@@ -63,7 +63,7 @@ export const pt = {
   'fps.newVersion': 'Nova versão pendente',
 
   // Config: tabs
-  'tab.saves': 'Salvos',
+  'tab.saves': 'Jogos salvos',
   'tab.temas': 'Temas',
   'tab.som': 'Som',
   'tab.video': 'Vídeo',
@@ -102,7 +102,7 @@ export const pt = {
   'sound.volumeAria': 'Volume do som dos botões',
 
   // Config: Vídeo
-  'video.title': 'Telemetria',
+  'video.title': 'Vídeo',
   'video.hint': 'Opções que aparecem no topo da tela.',
   'video.all': 'Todos os cards',
   'video.individual': 'cards individuais',
