@@ -84,7 +84,9 @@
 .corner {
   position: fixed;
   top: 12px;
-  left: 12px;
+  /* Reserva o espaço do botão de tela cheia (fixo em left:12, ~32px de largura)
+     para os cardzinhos começarem logo depois dele, sem sobreposição */
+  left: 52px;
   display: flex;
   align-items: stretch;
   gap: 8px;

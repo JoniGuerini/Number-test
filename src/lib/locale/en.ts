@@ -99,4 +99,7 @@ export const en: Dict = {
 
   'lang.title': 'Language',
   'lang.hint': 'Select the language.',
+
+  'fullscreen.enter': 'Fullscreen',
+  'fullscreen.exit': 'Exit fullscreen',
 };

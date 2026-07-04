@@ -6,6 +6,7 @@ import Activity from './components/Activity/Activity';
 import PatchNotes from './components/PatchNotes/PatchNotes';
 import Settings from './components/Settings/Settings';
 import FpsMeter from './components/FpsMeter/FpsMeter';
+import FullscreenToggle from './components/FullscreenToggle/FullscreenToggle';
 import { useWakeLock } from './hooks/useWakeLock';
 import { useI18n } from './lib/locale';
 import { playPress, playRelease } from './lib/sound';
@@ -130,6 +131,7 @@ export default function App() {
 
   return (
     <div className={styles.frame}>
+      <FullscreenToggle />
       <FpsMeter />
 
       {/* As duas telas ficam sempre montadas para o progresso não resetar ao trocar de aba. */}

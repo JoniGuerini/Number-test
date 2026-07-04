@@ -112,6 +112,10 @@ export const pt = {
   // Config: Idioma
   'lang.title': 'Idioma',
   'lang.hint': 'Selecione o idioma.',
+
+  // Botão de tela cheia (topo)
+  'fullscreen.enter': 'Tela cheia',
+  'fullscreen.exit': 'Sair da tela cheia',
 };
 
 export type TKey = keyof typeof pt;

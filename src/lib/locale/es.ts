@@ -99,4 +99,7 @@ export const es: Dict = {
 
   'lang.title': 'Idioma',
   'lang.hint': 'Selecciona el idioma.',
+
+  'fullscreen.enter': 'Pantalla completa',
+  'fullscreen.exit': 'Salir de pantalla completa',
 };

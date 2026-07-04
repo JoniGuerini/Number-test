@@ -10,6 +10,15 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.18.0',
+    date: '04/07/2026',
+    title: 'Fullscreen & tidier Settings',
+    notes: [
+      'New fullscreen toggle at the top-left corner — enter or leave fullscreen with a single click (hidden where the browser has no Fullscreen API).',
+      'Settings tabs now sit above the panel as standalone cards (like Activity), leaving the content card shorter and less boxed-in.',
+    ],
+  },
+  {
     version: 'v0.17.1',
     date: '03/07/2026',
     title: 'Locale housekeeping',

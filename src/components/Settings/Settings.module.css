@@ -1,19 +1,14 @@
-/* Painel único ocupando toda a área da aba Config */
+/* Container da aba Config: abas soltas acima + card do conteúdo (igual Atividade) */
 .panel {
   width: 100%;
   flex: 1;
   min-height: 0;
-  background: var(--paper);
-  border: none;
-  border-radius: 4px;
-  box-shadow: var(--card-edge);
-  padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
 }
 
-/* Tabs internas de navegação entre os tipos de config (largura total) */
+/* Abas de navegação: cards soltos por fora, acima do conteúdo */
 .tabs {
   display: flex;
   gap: 8px;
@@ -24,7 +19,7 @@
 .tab {
   flex: 1;
   text-align: center;
-  background: var(--surface);
+  background: var(--paper);
   border: none;
   box-shadow: var(--card-edge);
   border-radius: 4px;
@@ -37,7 +32,7 @@
   transition: background 0.15s, color 0.15s, box-shadow 0.15s, transform 0.08s;
 }
 .tab:hover {
-  background: var(--surface-hover);
+  background: var(--surface);
   color: var(--ink);
 }
 .tab:active {
@@ -51,12 +46,16 @@
   color: var(--brass-deep);
 }
 
-/* Conteúdo da tab ativa, com rolagem própria e largura total */
+/* Card do conteúdo da tab ativa, com rolagem própria */
 .body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   scrollbar-width: none;
+  background: var(--paper);
+  border-radius: 4px;
+  box-shadow: var(--card-edge);
+  padding: 20px 24px;
   display: flex;
   flex-direction: column;
   gap: 24px;
