@@ -239,9 +239,12 @@
   padding: 14px 18px;
 }
 
-.rowLocked {
-  display: flex;
-  justify-content: center;
+/* Gerador ainda bloqueado: sem card de fundo, só o botão-barra "solto" na
+   lista. Ao comprar, vira o card completo do gerador. */
+.unlockBtn {
+  flex-shrink: 0;
+  width: 100%;
+  padding: 15px 18px;
 }
 
 /* Botão-barra de progresso: o preenchimento cresce conforme o recurso se
@@ -259,7 +262,9 @@
   color: var(--paper);
 }
 
-/* Preenchimento semitransparente atrás do rótulo, na largura do progresso.
+/* Preenchimento na largura do progresso: mesma cor cheia do botão de comprar
+   (--brass-deep, sem transparência), para dar sensação de "estrada percorrida"
+   e completude — contra a parte vazia (cinza) do botão desabilitado.
    Elemento real (não pseudo) com width inline: repaint confiável em todos os
    navegadores — variável CSS em pseudo-elemento não atualizava no Chromium/Win. */
 .progressFill {
@@ -268,7 +273,6 @@
   bottom: 0;
   left: 0;
   background: var(--brass-deep);
-  opacity: 0.6;
 }
 
 .progressLabel {
@@ -373,10 +377,5 @@
   .row button {
     width: 100%;
     padding: 12px 0;
-  }
-
-  /* Card bloqueado: só o botão-barra, largura total */
-  .rowLocked {
-    flex-direction: row;
   }
 }

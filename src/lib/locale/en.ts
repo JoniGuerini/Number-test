@@ -6,6 +6,7 @@ export const en: Dict = {
   'nav.contador': 'Counter',
   'nav.geradores': 'Generators',
   'nav.ciclos': 'Cycles',
+  'nav.reino': 'Kingdom',
   'nav.atividade': 'Activity',
   'nav.notas': 'Notes',
   'nav.config': 'Settings',
@@ -103,4 +104,24 @@ export const en: Dict = {
 
   'fullscreen.enter': 'Fullscreen',
   'fullscreen.exit': 'Exit fullscreen',
+
+  'reino.line.comida': 'Food',
+  'reino.line.mineracao': 'Mining',
+  'reino.line.remedios': 'Medicine',
+  'reino.line.militar': 'Military',
+  'reino.soon': 'Coming soon',
+
+  'reino.base.comida': 'Wheat',
+  'reino.gen.comida.1': 'Reaper',
+  'reino.gen.comida.2': 'Peasant',
+  'reino.gen.comida.3': 'Farmer',
+  'reino.gen.comida.4': 'Foreman',
+  'reino.gen.comida.5': 'Hamlet',
+  'reino.gen.comida.6': 'Village',
+  'reino.gen.comida.7': 'Fief',
+  'reino.gen.comida.8': 'Noble',
+  'reino.gen.comida.9': 'Baron',
+  'reino.gen.comida.10': 'Count',
+  'reino.gen.comida.11': 'Duke',
+  'reino.gen.comida.12': 'Kingdom',
 };

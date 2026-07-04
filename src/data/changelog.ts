@@ -10,6 +10,20 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.19.0',
+    date: '04/07/2026',
+    title: 'Kingdom mode (medieval production lines)',
+    notes: [
+      'New "Kingdom" mode: a medieval theme with several production lines you switch between via sub-tabs.',
+      'The Food line is fully playable — harvest Wheat through a finite chain of 12 named generators (Reaper, Peasant, Farmer… up to Kingdom), each a deterministic cycle just like Cycles mode.',
+      'Deliberately slow, medieval economy: cycles start at 2s and grow 3× per tier (minutes-long at the top), while per-cycle output is decoupled from cycle length (+0.1 per tier) — deeper tiers run long cycles for a modest yield, so their effective rate keeps dropping. The idea is to stack many copies of the same generator, so repeat purchases get gradually pricier.',
+      'Every line runs its own independent, frame-rate-proof simulation anchored to wall-clock time, so progress stays perfectly reproducible.',
+      'Mining, Medicine and Military lines are in as placeholders ("coming soon") for now.',
+      'Auto mode no longer blocks manual purchases — it still auto-buys the next generator, but you can also buy on your own at any time.',
+      'Locked generators now read as a progress bar (across Generators, Cycles and Kingdom): no card, just a filling bar toward the unlock cost, with the filled part in the same brass as the buy button. Costs show decimals so incremental price bumps are visible.',
+    ],
+  },
+  {
     version: 'v0.18.3',
     date: '04/07/2026',
     title: 'Consistent Settings labels',

@@ -6,6 +6,7 @@ export const es: Dict = {
   'nav.contador': 'Contador',
   'nav.geradores': 'Generadores',
   'nav.ciclos': 'Ciclos',
+  'nav.reino': 'Reino',
   'nav.atividade': 'Actividad',
   'nav.notas': 'Notas',
   'nav.config': 'Ajustes',
@@ -103,4 +104,24 @@ export const es: Dict = {
 
   'fullscreen.enter': 'Pantalla completa',
   'fullscreen.exit': 'Salir de pantalla completa',
+
+  'reino.line.comida': 'Comida',
+  'reino.line.mineracao': 'Minería',
+  'reino.line.remedios': 'Medicinas',
+  'reino.line.militar': 'Militar',
+  'reino.soon': 'Próximamente',
+
+  'reino.base.comida': 'Trigo',
+  'reino.gen.comida.1': 'Segador',
+  'reino.gen.comida.2': 'Campesino',
+  'reino.gen.comida.3': 'Granjero',
+  'reino.gen.comida.4': 'Capataz',
+  'reino.gen.comida.5': 'Aldea',
+  'reino.gen.comida.6': 'Villa',
+  'reino.gen.comida.7': 'Feudo',
+  'reino.gen.comida.8': 'Noble',
+  'reino.gen.comida.9': 'Barón',
+  'reino.gen.comida.10': 'Conde',
+  'reino.gen.comida.11': 'Duque',
+  'reino.gen.comida.12': 'Reino',
 };

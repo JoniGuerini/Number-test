@@ -29,13 +29,15 @@ import {
 } from '../../lib/storage';
 import styles from './Settings.module.css';
 
-const GAMES: GameTab[] = ['contador', 'geradores', 'ciclos'];
+const GAMES: GameTab[] = ['contador', 'geradores', 'ciclos', 'reino'];
 
 /** Campos que sinalizam progresso iniciado em cada tipo de save. */
 interface SaveProbe {
   started?: boolean;
   startedAt?: number;
   uptime?: number;
+  /** Reino: uma linha por chave; conta se qualquer linha foi iniciada. */
+  lines?: Record<string, { started?: boolean } | undefined>;
 }
 
 /** Há progresso para zerar naquele modo? (jogo de fato iniciado, não só o
@@ -46,6 +48,9 @@ function hasProgress(slotId: string, game: GameTab): boolean {
   if (!s) return false;
   if (game === 'contador') {
     return s.startedAt !== undefined || (s.uptime ?? 0) > 0;
+  }
+  if (game === 'reino') {
+    return Object.values(s.lines ?? {}).some((l) => l?.started === true);
   }
   return s.started === true;
 }

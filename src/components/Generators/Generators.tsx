@@ -498,20 +498,19 @@ export default function Generators() {
           if (gen.bought === 0) {
             const progress = Math.min(dispBase.div(cost).toNumber(), 1);
             return (
-              <div key={i} className={`${styles.row} ${styles.rowLocked}`}>
-                <button
-                  className={`btn-primary ${styles.progressBtn}`}
-                  disabled={isAuto || progress < 1}
-                  onClick={() => buy(i)}
-                >
-                  <span
-                    className={styles.progressFill}
-                    style={{ width: `${progress * 100}%` }}
-                    aria-hidden="true"
-                  />
-                  <span className={styles.progressLabel}>{fmt(cost)}</span>
-                </button>
-              </div>
+              <button
+                key={i}
+                className={`btn-primary ${styles.progressBtn} ${styles.unlockBtn}`}
+                disabled={isAuto || progress < 1}
+                onClick={() => buy(i)}
+              >
+                <span
+                  className={styles.progressFill}
+                  style={{ width: `${progress * 100}%` }}
+                  aria-hidden="true"
+                />
+                <span className={styles.progressLabel}>{fmt(cost)}</span>
+              </button>
             );
           }
 

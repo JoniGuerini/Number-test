@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Counter from './components/Counter/Counter';
 import Generators from './components/Generators/Generators';
 import Cycles from './components/Cycles/Cycles';
+import Reino from './components/Reino/Reino';
 import Activity from './components/Activity/Activity';
 import PatchNotes from './components/PatchNotes/PatchNotes';
 import Settings from './components/Settings/Settings';
@@ -22,12 +23,20 @@ import {
 } from './lib/storage';
 import styles from './App.module.css';
 
-export type GameTab = 'contador' | 'geradores' | 'ciclos';
+export type GameTab = 'contador' | 'geradores' | 'ciclos' | 'reino';
 type Page = GameTab | 'atividade' | 'notas' | 'config';
 
 /* A última página visitada sobrevive ao refresh */
 const PAGE_KEY = 'number-test:page';
-const PAGES: Page[] = ['contador', 'geradores', 'ciclos', 'atividade', 'notas', 'config'];
+const PAGES: Page[] = [
+  'contador',
+  'geradores',
+  'ciclos',
+  'reino',
+  'atividade',
+  'notas',
+  'config',
+];
 
 function readStoredPage(): Page {
   try {
@@ -84,6 +93,7 @@ export default function App() {
     contador: 0,
     geradores: 0,
     ciclos: 0,
+    reino: 0,
   });
 
   // ===== Slots de save =====
@@ -149,6 +159,11 @@ export default function App() {
         className={`${styles.contentFull} ${page !== 'ciclos' ? styles.hidden : ''}`}
       >
         <Cycles key={`${slotEpoch}:${resetKeys.ciclos}`} />
+      </main>
+      <main
+        className={`${styles.contentFull} ${page !== 'reino' ? styles.hidden : ''}`}
+      >
+        <Reino key={`${slotEpoch}:${resetKeys.reino}`} />
       </main>
       <main
         className={`${styles.contentFull} ${page !== 'atividade' ? styles.hidden : ''}`}

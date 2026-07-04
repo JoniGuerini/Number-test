@@ -59,6 +59,16 @@ export function fmtMoney(n: Decimal | number): string {
   return '$ ' + fmt(n);
 }
 
+/** Preço de compra: mantém 2 casas decimais enquanto o valor é pequeno
+    (< 1000), pra que o encarecimento em % por compra apareça no botão; acima
+    disso delega pro formatador curto com sufixo (K, M…), onde os centavos
+    seriam irrelevantes. */
+export function fmtCost(n: Decimal | number): string {
+  const d = n instanceof Decimal ? n : new Decimal(n);
+  if (d.lt(1000)) return truncTo(d.toNumber(), 2);
+  return fmt(d);
+}
+
 /** Taxa por segundo, sempre com 1 casa quando pequena */
 export function fmtRate(n: Decimal | number): string {
   const d = n instanceof Decimal ? n : new Decimal(n);

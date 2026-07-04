@@ -7,6 +7,7 @@ export const pt = {
   'nav.contador': 'Contador',
   'nav.geradores': 'Geradores',
   'nav.ciclos': 'Ciclos',
+  'nav.reino': 'Reino',
   'nav.atividade': 'Atividade',
   'nav.notas': 'Notas',
   'nav.config': 'Config',
@@ -117,6 +118,28 @@ export const pt = {
   // Botão de tela cheia (topo)
   'fullscreen.enter': 'Tela cheia',
   'fullscreen.exit': 'Sair da tela cheia',
+
+  // Modo Reino: sub-abas (linhas de produção)
+  'reino.line.comida': 'Comida',
+  'reino.line.mineracao': 'Mineração',
+  'reino.line.remedios': 'Remédios',
+  'reino.line.militar': 'Militar',
+  'reino.soon': 'Em breve',
+
+  // Modo Reino: linha de Comida (recurso base + 12 geradores nomeados)
+  'reino.base.comida': 'Trigo',
+  'reino.gen.comida.1': 'Ceifeiro',
+  'reino.gen.comida.2': 'Camponês',
+  'reino.gen.comida.3': 'Lavrador',
+  'reino.gen.comida.4': 'Feitor',
+  'reino.gen.comida.5': 'Aldeia',
+  'reino.gen.comida.6': 'Vila',
+  'reino.gen.comida.7': 'Feudo',
+  'reino.gen.comida.8': 'Nobre',
+  'reino.gen.comida.9': 'Barão',
+  'reino.gen.comida.10': 'Conde',
+  'reino.gen.comida.11': 'Duque',
+  'reino.gen.comida.12': 'Reino',
 };
 
 export type TKey = keyof typeof pt;
