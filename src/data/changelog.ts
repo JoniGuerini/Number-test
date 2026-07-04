@@ -10,6 +10,15 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.18.1',
+    date: '04/07/2026',
+    title: 'Save reset tweaks',
+    notes: [
+      'Reset buttons are now disabled for modes with no progress yet — nothing to wipe, nothing to click.',
+      'The three reset buttons (and the load button) now span the full width of the expanded save panel.',
+    ],
+  },
+  {
     version: 'v0.18.0',
     date: '04/07/2026',
     title: 'Fullscreen & tidier Settings',

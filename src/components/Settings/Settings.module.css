@@ -199,6 +199,20 @@
   background: var(--surface);
 }
 
+/* Carregar save e os 3 botões de zerar ocupam a largura toda da linha */
+.loadBtn {
+  width: 100%;
+}
+
+.resetRow {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+.resetRow .dangerBtn {
+  flex: 1;
+}
+
 /* Botão compacto de ação destrutiva (zerar um modo do save) */
 .dangerBtn {
   background: var(--surface);
@@ -221,6 +235,18 @@
 .dangerBtn:active {
   box-shadow: var(--card-edge-press);
   transform: translateY(1px);
+}
+/* Sem progresso naquele modo: nada a zerar */
+.dangerBtn:disabled {
+  opacity: 0.4;
+  color: var(--ink-faint);
+  cursor: default;
+}
+.dangerBtn:disabled:hover {
+  background: var(--surface);
+  color: var(--ink-faint);
+  box-shadow: var(--card-edge-pill);
+  transform: none;
 }
 
 .slotDate {

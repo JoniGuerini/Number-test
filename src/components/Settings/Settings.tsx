@@ -21,10 +21,34 @@ import {
   setSoundOn,
   setSoundVolume,
 } from '../../lib/sound';
-import { nextSlotName, type SlotMeta } from '../../lib/storage';
+import {
+  loadSave,
+  nextSlotName,
+  saveKeyForSlot,
+  type SlotMeta,
+} from '../../lib/storage';
 import styles from './Settings.module.css';
 
 const GAMES: GameTab[] = ['contador', 'geradores', 'ciclos'];
+
+/** Campos que sinalizam progresso iniciado em cada tipo de save. */
+interface SaveProbe {
+  started?: boolean;
+  startedAt?: number;
+  uptime?: number;
+}
+
+/** Há progresso para zerar naquele modo? (jogo de fato iniciado, não só o
+    save gravado automaticamente). Contador conta pelo primeiro Iniciar;
+    Geradores/Ciclos pela saída da tela de escolha de modo. */
+function hasProgress(slotId: string, game: GameTab): boolean {
+  const s = loadSave<SaveProbe>(saveKeyForSlot(slotId, game));
+  if (!s) return false;
+  if (game === 'contador') {
+    return s.startedAt !== undefined || (s.uptime ?? 0) > 0;
+  }
+  return s.started === true;
+}
 
 const VIDEO_TOGGLES: {
   key: Exclude<keyof VideoPrefs, 'theme'>;
@@ -252,7 +276,7 @@ export default function Settings({
                         </div>
                         {!active && (
                           <button
-                            className="btn-primary"
+                            className={`btn-primary ${styles.loadBtn}`}
                             onClick={() => {
                               onSwitchSlot(slot.id);
                               setExpandedSlotId(null);
@@ -261,15 +285,18 @@ export default function Settings({
                             {t('saves.load')}
                           </button>
                         )}
-                        {GAMES.map((game) => (
-                          <button
-                            key={game}
-                            className={styles.dangerBtn}
-                            onClick={() => onReset(slot.id, game)}
-                          >
-                            {t('saves.reset', { game: t(`nav.${game}`) })}
-                          </button>
-                        ))}
+                        <div className={styles.resetRow}>
+                          {GAMES.map((game) => (
+                            <button
+                              key={game}
+                              className={styles.dangerBtn}
+                              disabled={!hasProgress(slot.id, game)}
+                              onClick={() => onReset(slot.id, game)}
+                            >
+                              {t('saves.reset', { game: t(`nav.${game}`) })}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
