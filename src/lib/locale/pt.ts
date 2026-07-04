@@ -4,7 +4,6 @@
 
 export const pt = {
   // Navegação principal (rodapé) — também nomeia os modos pelo app todo
-  'nav.contador': 'Contador',
   'nav.geradores': 'Geradores',
   'nav.ciclos': 'Ciclos',
   'nav.reino': 'Reino',
@@ -20,10 +19,7 @@ export const pt = {
   'common.produced': 'produzido',
   'common.toStart': 'Ir para o começo',
   'common.toEnd': 'Ir para o fim',
-
-  // Contador
-  'counter.double': 'Dobrar produção',
-  'counter.pause': 'Pausar',
+  'common.close': 'Fechar',
 
   // Tela de escolha de modo (Geradores/Ciclos)
   'mode.title': 'Modo de jogo',

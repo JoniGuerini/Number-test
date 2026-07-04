@@ -1,38 +1,41 @@
-/* Container da aba Config: abas soltas acima + card do conteúdo (igual Atividade) */
+/* Conteúdo do modal de Config: abas no topo (dentro do card) + corpo rolável.
+   O card em si é o próprio modal (definido em App.module.css). */
 .panel {
   width: 100%;
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
-/* Abas de navegação: cards soltos por fora, acima do conteúdo */
+/* Abas de navegação, dentro do card: reservam espaço à direita para o X */
 .tabs {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0;
   width: 100%;
+  padding-right: 26px;
 }
 
 .tab {
   flex: 1;
+  min-width: 0;
   text-align: center;
-  background: var(--paper);
+  background: var(--surface);
   border: none;
   box-shadow: var(--card-edge);
   border-radius: 4px;
-  padding: 11px 26px;
-  font: 500 12px var(--mono);
+  padding: 10px 8px;
+  font: 500 12px/1.25 var(--mono);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   color: var(--ink-muted);
   cursor: pointer;
   transition: background 0.15s, color 0.15s, box-shadow 0.15s, transform 0.08s;
 }
 .tab:hover {
-  background: var(--surface);
+  background: var(--surface-hover);
   color: var(--ink);
 }
 .tab:active {
@@ -46,19 +49,16 @@
   color: var(--brass-deep);
 }
 
-/* Card do conteúdo da tab ativa, com rolagem própria */
+/* Corpo rolável do modal (sem card próprio: o modal já é o card) */
 .body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   scrollbar-width: none;
-  background: var(--paper);
-  border-radius: 4px;
-  box-shadow: var(--card-edge);
-  padding: 20px 24px;
+  padding-top: 4px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 22px;
 }
 .body::-webkit-scrollbar {
   display: none;
@@ -206,11 +206,13 @@
 
 .resetRow {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   width: 100%;
 }
 .resetRow .dangerBtn {
-  flex: 1;
+  flex: 1 1 45%;
+  min-width: 0;
 }
 
 /* Botão compacto de ação destrutiva (zerar um modo do save) */
@@ -303,10 +305,9 @@
   gap: 8px;
 }
 
-/* Largura fixa para todos os cards de tema (ativo incluso) */
+/* Cards de tema ocupam a largura do modal (ativo incluso) */
 .themeCard {
-  width: 300px;
-  align-self: flex-start;
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 18px;
@@ -511,18 +512,7 @@
 }
 
 @media (max-width: 640px) {
-  .panel {
-    padding: 14px 16px;
-  }
-  .tabs {
-    width: 100%;
-  }
   .tab {
-    flex: 1;
-    padding: 11px 8px;
-    text-align: center;
-  }
-  .themeCard {
-    width: 100%;
+    letter-spacing: 0.02em;
   }
 }

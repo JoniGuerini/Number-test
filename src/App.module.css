@@ -24,14 +24,6 @@
   }
 }
 
-/* Contador: centralizado na área restante */
-.contentCenter {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 /* Geradores: ocupa toda a largura do app; min-height 0 permite a lista
    interna rolar em vez de estourar a página */
 .contentFull {
@@ -91,6 +83,68 @@
 .active:hover {
   background: var(--surface-deep);
   color: var(--brass-deep);
+}
+
+/* ===== Modal de configurações ===== */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.55);
+  animation: modalFade 0.15s ease-out;
+}
+
+/* Quadrado (mesma altura e largura), grande o bastante para as abas caberem
+   com a fonte normal, limitado às bordas da tela */
+.modal {
+  position: relative;
+  width: min(94vmin, max(460px, 48vmin));
+  height: min(94vmin, max(460px, 48vmin));
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  border-radius: 6px;
+  box-shadow: var(--card-edge-lg);
+  padding: 18px;
+  animation: modalPop 0.16s ease-out;
+}
+
+.modalClose {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.modalClose:hover {
+  color: var(--ink);
+  background: var(--surface);
+}
+
+@keyframes modalFade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
 }
 
 @media (max-width: 640px) {

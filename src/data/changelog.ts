@@ -10,6 +10,15 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.20.0',
+    date: '04/07/2026',
+    title: 'Settings modal & Counter removal',
+    notes: [
+      'Settings now opens as a centered square modal over the interface instead of a full page — close it by clicking outside, the ✕, or pressing Esc. Its section tabs live back inside the card.',
+      'Removed the Counter mode entirely: it was only a sandbox for validating ideas and was never really a game. The app now focuses on Generators, Cycles and Kingdom.',
+    ],
+  },
+  {
     version: 'v0.19.0',
     date: '04/07/2026',
     title: 'Kingdom mode (medieval production lines)',

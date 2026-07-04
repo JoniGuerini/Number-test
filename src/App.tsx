@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import Counter from './components/Counter/Counter';
 import Generators from './components/Generators/Generators';
 import Cycles from './components/Cycles/Cycles';
 import Reino from './components/Reino/Reino';
@@ -23,20 +22,12 @@ import {
 } from './lib/storage';
 import styles from './App.module.css';
 
-export type GameTab = 'contador' | 'geradores' | 'ciclos' | 'reino';
-type Page = GameTab | 'atividade' | 'notas' | 'config';
+export type GameTab = 'geradores' | 'ciclos' | 'reino';
+type Page = GameTab | 'atividade' | 'notas';
 
 /* A última página visitada sobrevive ao refresh */
 const PAGE_KEY = 'number-test:page';
-const PAGES: Page[] = [
-  'contador',
-  'geradores',
-  'ciclos',
-  'reino',
-  'atividade',
-  'notas',
-  'config',
-];
+const PAGES: Page[] = ['geradores', 'ciclos', 'reino', 'atividade', 'notas'];
 
 function readStoredPage(): Page {
   try {
@@ -88,9 +79,19 @@ export default function App() {
       // Sem localStorage — vale só pra sessão
     }
   }, [page]);
+
+  // Config vive num modal sobre a interface (não é mais uma página exclusiva)
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  useEffect(() => {
+    if (!settingsOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSettingsOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [settingsOpen]);
   // Trocar a key remonta o componente da aba, zerando só aquele jogo.
   const [resetKeys, setResetKeys] = useState({
-    contador: 0,
     geradores: 0,
     ciclos: 0,
     reino: 0,
@@ -144,12 +145,7 @@ export default function App() {
       <FullscreenToggle />
       <FpsMeter />
 
-      {/* As duas telas ficam sempre montadas para o progresso não resetar ao trocar de aba. */}
-      <main
-        className={`${styles.contentCenter} ${page !== 'contador' ? styles.hidden : ''}`}
-      >
-        <Counter key={`${slotEpoch}:${resetKeys.contador}`} />
-      </main>
+      {/* As telas ficam sempre montadas para o progresso não resetar ao trocar de aba. */}
       <main
         className={`${styles.contentFull} ${page !== 'geradores' ? styles.hidden : ''}`}
       >
@@ -179,33 +175,67 @@ export default function App() {
       >
         <PatchNotes />
       </main>
-      <main
-        className={`${styles.contentFull} ${page !== 'config' ? styles.hidden : ''}`}
-      >
-        <Settings
-          onReset={resetGame}
-          slots={slots}
-          activeSlotId={activeSlotId}
-          onCreateSlot={handleCreateSlot}
-          onSwitchSlot={handleSwitchSlot}
-          onDeleteSlot={handleDeleteSlot}
-          onRenameSlot={handleRenameSlot}
-        />
-      </main>
 
       <footer className={styles.footer}>
         <nav className={styles.tabs}>
           {PAGES.map((p) => (
             <button
               key={p}
-              className={`${styles.tab} ${page === p ? styles.active : ''}`}
-              onClick={() => setPage(p)}
+              className={`${styles.tab} ${page === p && !settingsOpen ? styles.active : ''}`}
+              onClick={() => {
+                setSettingsOpen(false);
+                setPage(p);
+              }}
             >
               {t(`nav.${p}`)}
             </button>
           ))}
+          <button
+            className={`${styles.tab} ${settingsOpen ? styles.active : ''}`}
+            onClick={() => setSettingsOpen((o) => !o)}
+          >
+            {t('nav.config')}
+          </button>
         </nav>
       </footer>
+
+      {settingsOpen && (
+        <div
+          className={styles.modalBackdrop}
+          onClick={() => setSettingsOpen(false)}
+        >
+          <div
+            className={styles.modal}
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className={styles.modalClose}
+              onClick={() => setSettingsOpen(false)}
+              aria-label={t('common.close')}
+            >
+              <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+                <path
+                  d="M1 1 L9 9 M9 1 L1 9"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+            <Settings
+              onReset={resetGame}
+              slots={slots}
+              activeSlotId={activeSlotId}
+              onCreateSlot={handleCreateSlot}
+              onSwitchSlot={handleSwitchSlot}
+              onDeleteSlot={handleDeleteSlot}
+              onRenameSlot={handleRenameSlot}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

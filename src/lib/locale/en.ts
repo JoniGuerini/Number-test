@@ -3,7 +3,6 @@
 import type { Dict } from './pt';
 
 export const en: Dict = {
-  'nav.contador': 'Counter',
   'nav.geradores': 'Generators',
   'nav.ciclos': 'Cycles',
   'nav.reino': 'Kingdom',
@@ -18,9 +17,7 @@ export const en: Dict = {
   'common.produced': 'produced',
   'common.toStart': 'Go to the top',
   'common.toEnd': 'Go to the end',
-
-  'counter.double': 'Double production',
-  'counter.pause': 'Pause',
+  'common.close': 'Close',
 
   'mode.title': 'Game mode',
   'mode.manual': 'Manual',
