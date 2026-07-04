@@ -1,33 +1,74 @@
-/** Notas de patch exibidas na aba Notas — a história do laboratório. */
+/** Notas de patch exibidas na aba Notas — a história do laboratório.
+
+    Cada versão é organizada em um resumo (summary) + seções por categoria:
+    - major: grandes funcionalidades / mudanças de destaque
+    - minor: funcionalidades menores e mudanças notáveis
+    - qol:   qualidade de vida e polimento
+    - fixes: correções de bugs
+
+    Entradas até a v0.16.0 permanecem em português; a partir da v0.16.1 o
+    inglês é a língua canônica do projeto (as notas antigas ficam no idioma
+    original, como documentos históricos que são). */
 
 export interface PatchNote {
   version: string;
   date: string;
   title: string;
-  notes: string[];
+  /** Uma linha que resume o patch. */
+  summary: string;
+  /** Grandes funcionalidades / mudanças de destaque. */
+  major?: string[];
+  /** Funcionalidades menores e mudanças notáveis. */
+  minor?: string[];
+  /** Qualidade de vida e polimento. */
+  qol?: string[];
+  /** Correções de bugs. */
+  fixes?: string[];
 }
 
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.21.0',
+    date: '04/07/2026',
+    title: 'Patch notes revamp',
+    summary:
+      'The patch notes got a full revamp — every release is now organized into a summary plus color-coded sections.',
+    qol: [
+      'Each entry leads with a one-line summary, then groups its changes into labeled Major, Minor, Quality-of-life and Fixes sections so you can scan a release at a glance.',
+      'Cleaner card layout with color-coded section tags.',
+      'Applied retroactively across the entire history.',
+    ],
+  },
+  {
     version: 'v0.20.0',
     date: '04/07/2026',
     title: 'Settings modal & Counter removal',
-    notes: [
-      'Settings now opens as a centered square modal over the interface instead of a full page — close it by clicking outside, the ✕, or pressing Esc. Its section tabs live back inside the card.',
+    summary:
+      'Settings moved into a centered modal and the Counter mode was retired.',
+    minor: [
       'Removed the Counter mode entirely: it was only a sandbox for validating ideas and was never really a game. The app now focuses on Generators, Cycles and Kingdom.',
+    ],
+    qol: [
+      'Settings now opens as a centered square modal over the interface instead of a full page — close it by clicking outside, the ✕, or pressing Esc. Its section tabs live back inside the card.',
     ],
   },
   {
     version: 'v0.19.0',
     date: '04/07/2026',
     title: 'Kingdom mode (medieval production lines)',
-    notes: [
+    summary:
+      'A new medieval Kingdom mode arrives with a fully playable Food production line.',
+    major: [
       'New "Kingdom" mode: a medieval theme with several production lines you switch between via sub-tabs.',
       'The Food line is fully playable — harvest Wheat through a finite chain of 12 named generators (Reaper, Peasant, Farmer… up to Kingdom), each a deterministic cycle just like Cycles mode.',
+    ],
+    minor: [
       'Deliberately slow, medieval economy: cycles start at 2s and grow 3× per tier (minutes-long at the top), while per-cycle output is decoupled from cycle length (+0.1 per tier) — deeper tiers run long cycles for a modest yield, so their effective rate keeps dropping. The idea is to stack many copies of the same generator, so repeat purchases get gradually pricier.',
       'Every line runs its own independent, frame-rate-proof simulation anchored to wall-clock time, so progress stays perfectly reproducible.',
       'Mining, Medicine and Military lines are in as placeholders ("coming soon") for now.',
+    ],
+    qol: [
       'Auto mode no longer blocks manual purchases — it still auto-buys the next generator, but you can also buy on your own at any time.',
       'Locked generators now read as a progress bar (across Generators, Cycles and Kingdom): no card, just a filling bar toward the unlock cost, with the filled part in the same brass as the buy button. Costs show decimals so incremental price bumps are visible.',
     ],
@@ -36,7 +77,8 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.18.3',
     date: '04/07/2026',
     title: 'Consistent Settings labels',
-    notes: [
+    summary: 'Settings tab labels now match their section titles.',
+    fixes: [
       'Settings tab labels now match their section titles — the Saves tab reads "Jogos salvos" and the Video section is no longer titled "Telemetria".',
     ],
   },
@@ -44,7 +86,9 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.18.2',
     date: '04/07/2026',
     title: 'Fullscreen persistence & empty saves',
-    notes: [
+    summary:
+      'Fullscreen survives a refresh and empty saves stop showing a fake date.',
+    qol: [
       'Fullscreen now survives a refresh: the app re-enters fullscreen on your first click or keypress after reloading (browsers block auto-fullscreen without a gesture).',
       'Saves with no progress in any mode show "no data" instead of a meaningless date.',
     ],
@@ -53,7 +97,8 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.18.1',
     date: '04/07/2026',
     title: 'Save reset tweaks',
-    notes: [
+    summary: 'Reset buttons behave better inside the save panel.',
+    qol: [
       'Reset buttons are now disabled for modes with no progress yet — nothing to wipe, nothing to click.',
       'The three reset buttons (and the load button) now span the full width of the expanded save panel.',
     ],
@@ -62,8 +107,11 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.18.0',
     date: '04/07/2026',
     title: 'Fullscreen & tidier Settings',
-    notes: [
+    summary: 'A fullscreen toggle arrives and Settings gets tidier.',
+    minor: [
       'New fullscreen toggle at the top-left corner — enter or leave fullscreen with a single click (hidden where the browser has no Fullscreen API).',
+    ],
+    qol: [
       'Settings tabs now sit above the panel as standalone cards (like Activity), leaving the content card shorter and less boxed-in.',
     ],
   },
@@ -71,16 +119,20 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.17.1',
     date: '03/07/2026',
     title: 'Locale housekeeping',
-    notes: [
-      'Internal: translations refactored into one file per language (src/lib/locale/), ready for more languages after 1.0. Nothing changes in game.',
+    summary: 'Internal locale refactor — nothing changes in game.',
+    minor: [
+      'Internal: translations refactored into one file per language (src/lib/locale/), ready for more languages after 1.0.',
     ],
   },
   {
     version: 'v0.17.0',
     date: '03/07/2026',
     title: 'Ahora en español',
-    notes: [
+    summary: 'Español joins the UI, completing the 1.0 language trio.',
+    major: [
       'Third UI language: Español — full dictionary, auto-detection for Spanish systems, localized dates and default save names (Partida N).',
+    ],
+    minor: [
       'The 1.0 language trio is set: English, Português (Brasil) and Español.',
     ],
   },
@@ -88,7 +140,8 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.16.6',
     date: '03/07/2026',
     title: 'Jogos salvos',
-    notes: [
+    summary: 'The Portuguese UI drops the "saves" loanword for "jogos salvos".',
+    qol: [
       'The Portuguese UI now says "jogos salvos" instead of the English loanword "saves" — tab, titles, buttons and the default name of new saves (Jogo salvo N).',
     ],
   },
@@ -96,8 +149,11 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.16.5',
     date: '03/07/2026',
     title: 'Sound switch',
-    notes: [
+    summary: 'A sound on/off switch and simpler Video labels.',
+    minor: [
       'Sound tab gained an on/off switch alongside the volume slider — mute without losing your volume level.',
+    ],
+    qol: [
       'Simpler labels on the Video toggles (FPS, Frame time, Battery), grouped under an "individual cards" label.',
     ],
   },
@@ -105,7 +161,8 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.16.4',
     date: '03/07/2026',
     title: 'One switch to rule them all',
-    notes: [
+    summary: 'A master switch toggles every telemetry card at once.',
+    minor: [
       'Video tab gained an "All cards" master switch at the top: turns every telemetry card on or off at once.',
     ],
   },
@@ -113,7 +170,8 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.16.3',
     date: '03/07/2026',
     title: 'Less chatter in Settings',
-    notes: [
+    summary: 'Trimmed Settings copy and a cleaner active-save row.',
+    qol: [
       'Settings descriptions trimmed to the essentials — shorter hints for Saves, Themes, Sound, Video and Language.',
       'The active save no longer shows a delete button (it was disabled anyway) — its card now takes the full row.',
     ],
@@ -122,8 +180,11 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.16.2',
     date: '03/07/2026',
     title: 'The app speaks your language',
-    notes: [
+    summary: 'First-visit language now follows the OS/browser.',
+    minor: [
       'On first visit the UI language now follows the OS/browser language: Portuguese systems get pt-BR, everything else gets English.',
+    ],
+    qol: [
       'Picking a language in Settings still overrides the detection and is remembered on the device.',
     ],
   },
@@ -131,7 +192,8 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.16.1',
     date: '03/07/2026',
     title: 'English as the canonical language',
-    notes: [
+    summary: 'English becomes the project\u2019s canonical language.',
+    minor: [
       'English is now the project\u2019s canonical language: README, page metadata, docs and — starting with this entry — the patch notes are written in English.',
       'Portuguese (Brasil) remains fully available as a UI language for players; the app still opens in pt-BR by default.',
       'Older patch notes stay in Portuguese, as the historical documents they are.',
@@ -141,8 +203,11 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.16.0',
     date: '03/07/2026',
     title: 'O laboratório fala inglês',
-    notes: [
+    summary: 'i18n chega: toda a interface em Português e English.',
+    major: [
       'Suporte a idiomas (i18n): toda a interface agora existe em Português e English, com dicionários próprios e chaves tipadas.',
+    ],
+    minor: [
       'Nova aba Idioma na Config para trocar a língua — a escolha fica salva no dispositivo e vale para o app inteiro.',
       'Datas e horários acompanham o idioma (dd/mm vs. mm/dd).',
       'As notas de patch permanecem no idioma original, como documentos históricos que são.',
@@ -152,12 +217,17 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.15.0',
     date: '03/07/2026',
     title: 'Saves com nome próprio',
-    notes: [
+    summary: 'Saves agora podem ser batizados e renomeados.',
+    minor: [
       'Criar um save agora abre um campo de nome já preenchido com o genérico (Save N) — é só apagar e batizar como quiser antes de confirmar.',
       'Todo save pode ser renomeado: o campo fica no painel expandido, junto das outras opções.',
+    ],
+    qol: [
       'Enter confirma, Esc cancela a criação.',
-      'Refinos: o filete de foco do campo de nome não é mais cortado na esquerda, e o input de renomear ganhou um fundo mais claro dentro do painel escuro.',
+      'O input de renomear ganhou um fundo mais claro dentro do painel escuro.',
       'Botões pressionados agora afundam 1px fixo em vez de encolher em porcentagem — botões largos não recuam mais de forma exagerada.',
+    ],
+    fixes: [
       'O filete de foco do input agora é cor sólida de verdade: a sombra interna do baixo relevo escurecia o topo dele, dando impressão de gradiente.',
       'O ✕ de excluir e a setinha de expandir viraram ícones desenhados (SVG): como caracteres de texto, cada sistema usava uma fonte diferente e os tamanhos divergiam entre macOS e Windows.',
     ],
@@ -166,9 +236,12 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.14.0',
     date: '03/07/2026',
     title: 'Saves com calma',
-    notes: [
+    summary: 'O fluxo de saves ficou mais calmo, sem trocas acidentais.',
+    minor: [
       'Clicar num save não troca mais na hora: abre um painel abaixo dele com as opções de carregar e de zerar cada modo.',
       'Os botões de zerar progresso saíram da seção solta e agora vivem dentro do save escolhido, lado a lado — dá até para zerar um modo de um save inativo.',
+    ],
+    qol: [
       'Os botões de carregar e de criar save usam o mesmo estilo dos botões de compra dos Geradores, com texto centralizado.',
       'Criar um novo save também ficou mais calmo: ele entra na lista sem assumir o lugar do atual; carregue quando quiser.',
     ],
@@ -177,13 +250,20 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.13.x',
     date: '03/07/2026',
     title: 'Aba Temas e faixas exorcizadas',
-    notes: [
+    summary: 'Config ganha a aba Temas e o Chrome/macOS para de listrar o preto.',
+    major: [
       'Config ganhou a aba Temas: cada tema virou um card pintado com as próprias cores, com um mini-mockup de interface dentro.',
+    ],
+    minor: [
       'O tema ativo fica em destaque no topo; os disponíveis se organizam lado a lado, quebrando linha conforme a coleção cresce.',
       'Tabs da Config agora ocupam a largura toda, e o conteúdo das abas também — os cards de tema aproveitam o espaço no desktop.',
+    ],
+    qol: [
       'O tema ativo perdeu o anel de destaque: a posição no topo já conta a história.',
       'Cards de tema agora têm largura fixa — o ativo parou de esticar pela tela toda.',
       'O app lembra em qual página você estava: dar refresh não te devolve mais para os Ciclos.',
+    ],
+    fixes: [
       'Corrigidas as faixas de pretos diferentes no Chrome/macOS: um micro-ruído imperceptível no fundo força todos os blocos de pintura pelo mesmo caminho de rasterização.',
     ],
   },
@@ -191,18 +271,24 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.12.0',
     date: '03/07/2026',
     title: 'Atividade para os dois modos',
-    notes: [
+    summary: 'A Atividade passa a cobrir Ciclos e Geradores.',
+    minor: [
       'A Atividade ganhou abas Ciclos e Geradores — o log de desbloqueios agora cobre os dois modos.',
-      'O card do gerador nos Geradores perdeu a coluna de desbloqueio (a informação vive na Atividade) e o grid foi redistribuído.',
       'Modo sem desbloqueios mostra um convite com botão para começar a jogar dali mesmo.',
+    ],
+    qol: [
+      'O card do gerador nos Geradores perdeu a coluna de desbloqueio (a informação vive na Atividade) e o grid foi redistribuído.',
     ],
   },
   {
     version: 'v0.11.x',
     date: '03/07/2026',
     title: 'Verde musgo e amostras',
-    notes: [
+    summary: 'Quarto tema (verde-musgo) e amostras de cor no seletor.',
+    minor: [
       'Quarto tema: base verde-musgo escura com amarelo queimado (mostarda) nos acentos.',
+    ],
+    qol: [
       'O seletor de temas ganhou amostras de cores (fundo, card, acento, texto) ao lado de cada nome.',
     ],
   },
@@ -210,7 +296,8 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.10.0',
     date: '03/07/2026',
     title: 'Creme terracota',
-    notes: [
+    summary: 'Terceiro tema, agora claro: creme com terracota.',
+    minor: [
       'Terceiro tema, agora claro: fundos em areia/creme, tintas em marrons quentes, terracota queimada como acento e sombras recalibradas para superfície clara.',
     ],
   },
@@ -218,7 +305,8 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.9.0',
     date: '03/07/2026',
     title: 'Sistema de temas',
-    notes: [
+    summary: 'Nasce o sistema de temas escolhíveis.',
+    major: [
       'Paleta de cores escolhível na Config (aba Vídeo): Dark neutro ou Azul meia-noite, com aplicação instantânea e persistência no dispositivo.',
     ],
   },
@@ -226,7 +314,8 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.8.0',
     date: '03/07/2026',
     title: 'Dark neutro',
-    notes: [
+    summary: 'Dark mode de verdade: pretos e cinzas puros.',
+    minor: [
       'Teste de paleta: a base azulada deu lugar a pretos e cinzas puros — dark mode de verdade, mantendo a hierarquia de profundidade (fundo → cards → superfícies) e o latão como acento.',
     ],
   },
@@ -234,7 +323,8 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.7.2 – v0.7.3',
     date: '03/07/2026',
     title: 'Canaleta calibrada',
-    notes: [
+    summary: 'A canaleta da barra de ciclo foi calibrada.',
+    qol: [
       'A parte vazia da barra de ciclo foi calibrada num meio-termo: visível sem roubar atenção do preenchimento.',
     ],
   },
@@ -242,7 +332,8 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.7.1',
     date: '03/07/2026',
     title: 'Setinhas honestas',
-    notes: [
+    summary: 'Correção nas setinhas de navegação da lista.',
+    fixes: [
       'Corrige as setinhas de navegação que às vezes ficavam visíveis (e inertes) mesmo com a lista já no fim — o estado das bordas envelhecia quando a virtualização mudava a altura do conteúdo sem evento de scroll.',
     ],
   },
@@ -250,7 +341,8 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.7.0',
     date: '03/07/2026',
     title: 'Notas de patch',
-    notes: [
+    summary: 'Estreia a aba Notas — esta página.',
+    major: [
       'Nova aba Notas com o histórico de versões do laboratório — esta página.',
     ],
   },
@@ -258,8 +350,11 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.6.x',
     date: '03/07/2026',
     title: 'Barra de ciclo interna',
-    notes: [
+    summary: 'A fitinha de ciclo virou uma barra interna dedicada.',
+    minor: [
       'A fitinha de 3px na borda dos cards dos Ciclos virou uma barra interna dedicada, com canaleta em baixo relevo e preenchimento em alto relevo.',
+    ],
+    qol: [
       'Cantos achatados no padrão dos cards e espessura calibrada em audições sucessivas.',
     ],
   },
@@ -267,9 +362,14 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.5.x',
     date: '03/07/2026',
     title: 'Config de gente grande',
-    notes: [
+    summary: 'Config vira painel único com tabs internas.',
+    major: [
       'Config virou painel único com tabs internas: Saves, Som e Vídeo.',
+    ],
+    minor: [
       'Aba Vídeo estreia os toggles de telemetria: cards de FPS, frame time e bateria podem ser desligados.',
+    ],
+    qol: [
       'Switches deslizantes com relevo físico (canaleta afundada, bolinha flutuando).',
       'Slider de volume repaginado: pegador em pill, trilho em baixo relevo, preenchimento em alto relevo e halo no hover.',
     ],
@@ -278,18 +378,24 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.4.x',
     date: '03/07/2026',
     title: 'Saves múltiplos',
-    notes: [
+    summary: 'Sistema de slots de save com migração automática.',
+    major: [
       'Sistema de slots de save: crie, troque e exclua saves sem perder progresso — cada slot guarda os três modos.',
+    ],
+    minor: ['Zerar por modo passou a morar junto dos saves.'],
+    qol: [
       'Migração automática do save antigo para o "Save 1", com sincronia bit a bit preservada.',
-      'Zerar por modo passou a morar junto dos saves.',
     ],
   },
   {
     version: 'v0.3.0',
     date: '03/07/2026',
     title: 'Virtualização',
-    notes: [
+    summary: 'Virtualização da lista leva o frame rate ao teto do monitor.',
+    major: [
       'Cards fora da janela de scroll (e de abas ocultas) viram fantasmas de mesma altura: com 80+ geradores, o frame rate subiu de ~135fps para o teto do monitor (180fps).',
+    ],
+    minor: [
       'Simulação, sincronia e saves intocados — só a renderização emagreceu.',
     ],
   },
@@ -297,9 +403,12 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.2.x',
     date: '03/07/2026',
     title: 'Identidade de versão',
-    notes: [
+    summary: 'Pill de versão e detector de deploy pendente.',
+    minor: [
       'Pill de versão no hub, alimentada pelo carimbo do build.',
       'Detector de deploy pendente: a pill vira o botão "Nova versão pendente" quando o servidor tem build mais novo (version.json consultado a cada 60s, sem backend).',
+    ],
+    qol: [
       'Contador ganhou o hub completo: início do save, tempo e Exportar CSV.',
     ],
   },
@@ -307,14 +416,20 @@ export const CHANGELOG: PatchNote[] = [
     version: 'v0.1.0',
     date: '02/07/2026',
     title: 'A fundação',
-    notes: [
+    summary:
+      'A fundação do laboratório: contador, geradores, ciclos, atividade e a infra.',
+    major: [
       'Contador de formatação com break_eternity.js: sufixos K…No, letras infinitas (aa…zz, aaa…) e truncamento estilo odômetro.',
       'Geradores em cadeia contínua com desbloqueio progressivo, modo automático e curva de custos tunada por simulação.',
       'Ciclos: produção em rajadas com ciclos progressivos (5s × N) — e a descoberta de que rajadas nunca alcançam o contínuo.',
       'Atividade: log de desbloqueios com tempos explicados e ritmo colorido.',
+    ],
+    minor: [
       'Sincronia bit a bit entre máquinas: timestep fixo determinístico ancorado no relógio, com catch-up offline.',
       'Telemetria (FPS, frame time, bateria, ambiente), export CSV para balanceamento e wake lock.',
       'Som de clique sintetizado (o "Toc", garimpado de um bug alheio) com par pressionar/soltar e volume.',
+    ],
+    qol: [
       'Visual portado do design system do Coders, responsivo até no iPhone, com deploy contínuo na Vercel.',
     ],
   },
