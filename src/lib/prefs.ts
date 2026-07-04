@@ -55,11 +55,13 @@ export interface VideoPrefs {
 }
 
 const DEFAULTS: VideoPrefs = {
-  showFps: true,
-  showFrameTime: true,
-  showBattery: true,
-  showMemory: true,
-  showDomNodes: true,
+  // Telemetria off por padrão — o jogador liga o que quiser (e fica salvo).
+  showFps: false,
+  showFrameTime: false,
+  showBattery: false,
+  showMemory: false,
+  showDomNodes: false,
+  // Exceção: barras de progresso do ciclo vêm ligadas.
   showCycleBars: true,
   theme: 'neutro',
 };

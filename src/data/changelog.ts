@@ -32,6 +32,18 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.16.9',
+    date: '04/07/2026',
+    time: '19:52',
+    title: 'Telemetry off by default',
+    summary:
+      'Telemetry cards now start hidden, leaving a cleaner default top bar.',
+    qol: [
+      'All Video telemetry cards (FPS, frame time, battery, memory, DOM nodes) now start off by default — turn on only what you want; your choice stays saved per device.',
+      'The cycle progress bars remain on by default.',
+    ],
+  },
+  {
     version: 'v0.16.8',
     date: '04/07/2026',
     time: '19:49',
