@@ -10,6 +10,14 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.17.1',
+    date: '03/07/2026',
+    title: 'Locale housekeeping',
+    notes: [
+      'Internal: translations refactored into one file per language (src/lib/locale/), ready for more languages after 1.0. Nothing changes in game.',
+    ],
+  },
+  {
     version: 'v0.17.0',
     date: '03/07/2026',
     title: 'Ahora en español',

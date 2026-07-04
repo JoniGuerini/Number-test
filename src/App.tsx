@@ -7,7 +7,7 @@ import PatchNotes from './components/PatchNotes/PatchNotes';
 import Settings from './components/Settings/Settings';
 import FpsMeter from './components/FpsMeter/FpsMeter';
 import { useWakeLock } from './hooks/useWakeLock';
-import { useI18n } from './lib/i18n';
+import { useI18n } from './lib/locale';
 import { playPress, playRelease } from './lib/sound';
 import {
   clearSave,

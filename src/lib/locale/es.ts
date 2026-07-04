@@ -1,0 +1,102 @@
+/** Español. */
+
+import type { Dict } from './pt';
+
+export const es: Dict = {
+  'nav.contador': 'Contador',
+  'nav.geradores': 'Generadores',
+  'nav.ciclos': 'Ciclos',
+  'nav.atividade': 'Actividad',
+  'nav.notas': 'Notas',
+  'nav.config': 'Ajustes',
+
+  'common.exportCsv': 'Exportar CSV',
+  'common.start': 'Iniciar',
+  'common.startLabel': 'inicio',
+  'common.time': 'tiempo',
+  'common.produced': 'producido',
+  'common.toStart': 'Ir al comienzo',
+  'common.toEnd': 'Ir al final',
+
+  'counter.double': 'Duplicar producción',
+  'counter.pause': 'Pausar',
+
+  'mode.title': 'Modo de juego',
+  'mode.manual': 'Manual',
+  'mode.auto': 'Automático',
+  'mode.hintAuto':
+    'El juego compra solo 1 unidad de cada generador en cuanto alcanza el costo.',
+  'mode.hintManual': 'Tú haces todas las compras manualmente.',
+
+  'gen.autoToggle': 'Automático: {state}',
+  'gen.baseNumber': 'número base',
+  'gen.owns': 'posee',
+  'gen.produces': 'produce {target}',
+  'cyc.cycleEvery': 'ciclo {time}',
+  'cyc.perCycleSuffix': '/ ciclo',
+
+  'activity.empty': 'Ningún desbloqueo registrado en el modo {game} todavía.',
+  'activity.cta': 'Empezar a jugar {game}',
+  'activity.unlocked': 'generadores desbloqueados',
+  'activity.playTime': 'tiempo de juego',
+  'activity.avgInterval': 'promedio del “tiempo desde el anterior”',
+  'activity.sinceLast': 'desde el último',
+  'activity.generator': 'Generador {n}',
+  'activity.unlockedWith': 'desbloqueado con',
+  'activity.ofPlay': '{time} de juego',
+  'activity.sincePrev': 'tiempo desde el anterior',
+  'activity.gameStart': 'inicio del juego',
+  'activity.pace': 'ritmo vs. desbloqueo anterior',
+  'activity.samePace': 'mismo ritmo',
+  'activity.slower': 'más lento',
+  'activity.faster': 'más rápido',
+
+  'fps.production': 'producción',
+  'fps.max': 'máx',
+  'fps.newVersion': 'Nueva versión pendiente',
+
+  'tab.saves': 'Partidas',
+  'tab.temas': 'Temas',
+  'tab.som': 'Sonido',
+  'tab.video': 'Vídeo',
+  'tab.idioma': 'Idioma',
+
+  'saves.title': 'Partidas guardadas',
+  'saves.hint': 'Tus partidas guardadas.',
+  'saves.active': 'activa',
+  'saves.load': 'Cargar partida',
+  'saves.reset': 'Reiniciar {game}',
+  'saves.rename': 'Renombrar',
+  'saves.create': 'Crear nueva partida +',
+  'saves.confirmCreate': 'Crear',
+  'saves.cancel': 'Cancelar',
+  'saves.deleteAria': 'Eliminar {name}',
+  'saves.nameAria': 'Nombre de {name}',
+  'saves.newNameAria': 'Nombre de la nueva partida',
+  'saves.defaultName': 'Partida {n}',
+
+  'themes.title': 'Temas',
+  'themes.hint': 'Biblioteca de temas.',
+  'themes.active': 'tema activo',
+  'themes.available': 'disponibles',
+  'theme.neutro': 'Oscuro neutro',
+  'theme.midnight': 'Azul medianoche',
+  'theme.creme': 'Crema terracota',
+  'theme.verde': 'Verde musgo',
+
+  'sound.title': 'Sonido',
+  'sound.hint': 'Sonido del click de los botones.',
+  'sound.enabled': 'Sonido',
+  'sound.volumeAria': 'Volumen del sonido de los botones',
+
+  'video.title': 'Telemetría',
+  'video.hint': 'Opciones que aparecen en la parte superior de la pantalla.',
+  'video.all': 'Todas las tarjetas',
+  'video.individual': 'tarjetas individuales',
+  'video.fps': 'FPS',
+  'video.frameTime': 'Frame time',
+  'video.battery': 'Batería',
+
+  'lang.title': 'Idioma',
+  'lang.hint': 'Selecciona el idioma.',
+};

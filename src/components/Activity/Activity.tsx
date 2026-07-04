@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { fmtTime } from '../../lib/format';
-import { useI18n } from '../../lib/i18n';
+import { useI18n } from '../../lib/locale';
 import { loadSave, saveKeyFor } from '../../lib/storage';
 // Reusa o esqueleto visual das listas de geradores (scroll, fades)
 import gstyles from '../Generators/Generators.module.css';

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Decimal from 'break_eternity.js';
 import { fmt, fmtRate, fmtTime } from '../../lib/format';
-import { getDateLocale, useI18n } from '../../lib/i18n';
+import { getDateLocale, useI18n } from '../../lib/locale';
 import { loadSave, saveKeyFor, writeSave } from '../../lib/storage';
 import styles from './Counter.module.css';
 // Reusa o visual dos cardzinhos do topo (padrão das abas Geradores/Ciclos)

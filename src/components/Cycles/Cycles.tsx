@@ -2,7 +2,7 @@ import { useEffect, useReducer, useRef, useState } from 'react';
 import Decimal from 'break_eternity.js';
 import { useVirtualRows } from '../../hooks/useVirtualRows';
 import { fmt, fmtRate, fmtTime } from '../../lib/format';
-import { getDateLocale, useI18n } from '../../lib/i18n';
+import { getDateLocale, useI18n } from '../../lib/locale';
 import { loadSave, saveKeyFor, writeSave } from '../../lib/storage';
 import styles from '../Generators/Generators.module.css';
 import cyc from './Cycles.module.css';

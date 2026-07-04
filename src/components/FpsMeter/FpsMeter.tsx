@@ -1,5 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import { useI18n } from '../../lib/i18n';
+import { useI18n } from '../../lib/locale';
 import { getVideoPrefs, subscribeVideoPrefs } from '../../lib/prefs';
 import styles from './FpsMeter.module.css';
 

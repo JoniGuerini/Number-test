@@ -6,7 +6,7 @@ import {
   setLocale,
   useI18n,
   type TKey,
-} from '../../lib/i18n';
+} from '../../lib/locale';
 import {
   getVideoPrefs,
   setVideoPref,

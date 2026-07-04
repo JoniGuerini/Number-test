@@ -4,7 +4,7 @@
     consome não mudam — os slots só resolvem QUAL chave é lida/gravada, então
     a sincronia determinística e o catch-up ficam intactos. */
 
-import { translate } from './i18n';
+import { translate } from './locale';
 
 export type SaveGame = 'contador' | 'geradores' | 'ciclos';
 
