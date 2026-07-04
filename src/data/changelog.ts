@@ -32,7 +32,7 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
-    version: 'v0.17.1',
+    version: 'v0.16.5',
     date: '04/07/2026',
     time: '19:05',
     title: 'Patch notes, laid out',
@@ -45,7 +45,7 @@ export const CHANGELOG: PatchNote[] = [
     ],
   },
   {
-    version: 'v0.17.0',
+    version: 'v0.16.4',
     date: '04/07/2026',
     title: 'Kingdom in Activity',
     summary: 'The Activity tab now tracks Kingdom unlocks too.',
