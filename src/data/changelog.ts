@@ -32,6 +32,22 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.17.0',
+    date: '04/07/2026',
+    time: '19:28',
+    title: 'Kingdom up front & new telemetry',
+    summary:
+      'Kingdom takes the lead across the app, and telemetry gains memory and DOM-node readouts.',
+    minor: [
+      'Two new telemetry cards next to FPS and frame time: JS heap memory (MB, Chromium only) and a live DOM-node count — toggle them in Settings → Video, on by default. Handy for gauging how much features like hidden cycle bars actually save.',
+      'Kingdom is now the first mode in the navigation and the default landing screen for first-time players.',
+    ],
+    qol: [
+      'The Activity tabs now also lead with Kingdom, matching the nav order (Kingdom, Generators, Cycles).',
+      'The "Notes" menu is now labelled "Patch notes".',
+    ],
+  },
+  {
     version: 'v0.16.5',
     date: '04/07/2026',
     time: '19:05',

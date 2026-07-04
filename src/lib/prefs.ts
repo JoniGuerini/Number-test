@@ -44,6 +44,10 @@ export interface VideoPrefs {
   showFps: boolean;
   showFrameTime: boolean;
   showBattery: boolean;
+  /** Heap JS usado (só Chromium expõe performance.memory). */
+  showMemory: boolean;
+  /** Total de nós de DOM na página — proxy do peso da árvore renderizada. */
+  showDomNodes: boolean;
   /** Barras de progresso do ciclo (Ciclos e Reino). Coluna de tempo já mostra
       o restante, então o jogador pode ocultá-las por gosto. */
   showCycleBars: boolean;
@@ -54,6 +58,8 @@ const DEFAULTS: VideoPrefs = {
   showFps: true,
   showFrameTime: true,
   showBattery: true,
+  showMemory: true,
+  showDomNodes: true,
   showCycleBars: true,
   theme: 'neutro',
 };

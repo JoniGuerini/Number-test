@@ -9,6 +9,15 @@ interface FrameStats {
   fps: number;
   avgMs: number;
   maxMs: number;
+  /** Heap JS usado em MB — null onde performance.memory não existe. */
+  heapMb: number | null;
+  /** Total de elementos no documento. */
+  domNodes: number;
+}
+
+/** performance.memory é não-padrão (só Chromium). */
+interface PerformanceMemory {
+  usedJSHeapSize: number;
 }
 
 /** Battery Status API (Chrome/Edge; Safari e Firefox não expõem). */
@@ -108,7 +117,13 @@ function useUpdateAvailable() {
 
 export default function FpsMeter() {
   const { t } = useI18n();
-  const [stats, setStats] = useState<FrameStats>({ fps: 0, avgMs: 0, maxMs: 0 });
+  const [stats, setStats] = useState<FrameStats>({
+    fps: 0,
+    avgMs: 0,
+    maxMs: 0,
+    heapMb: null,
+    domNodes: 0,
+  });
   const battery = useBattery();
   const updateAvailable = useUpdateAvailable();
   const prefs = useSyncExternalStore(subscribeVideoPrefs, getVideoPrefs);
@@ -119,6 +134,7 @@ export default function FpsMeter() {
     let maxDelta = 0;
     let windowStart = performance.now();
     let lastFrame = windowStart;
+    const perf = performance as Performance & { memory?: PerformanceMemory };
 
     const tick = (now: number) => {
       frames++;
@@ -131,6 +147,8 @@ export default function FpsMeter() {
           fps: Math.round((frames * 1000) / elapsed),
           avgMs: elapsed / frames,
           maxMs: maxDelta,
+          heapMb: perf.memory ? perf.memory.usedJSHeapSize / 1048576 : null,
+          domNodes: document.getElementsByTagName('*').length,
         });
         frames = 0;
         maxDelta = 0;
@@ -176,6 +194,18 @@ export default function FpsMeter() {
             {Math.round(battery.level * 100)}%
           </span>
           <span className={styles.label}>bat</span>
+        </div>
+      )}
+      {prefs.showMemory && stats.heapMb !== null && (
+        <div className={styles.pill}>
+          <span className={styles.value}>{stats.heapMb.toFixed(0)}</span>
+          <span className={styles.label}>MB</span>
+        </div>
+      )}
+      {prefs.showDomNodes && (
+        <div className={styles.pill}>
+          <span className={styles.value}>{stats.domNodes}</span>
+          <span className={styles.label}>dom</span>
         </div>
       )}
       {updateAvailable ? (

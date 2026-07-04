@@ -57,6 +57,8 @@ const VIDEO_TOGGLES: {
   { key: 'showFps', label: 'video.fps' },
   { key: 'showFrameTime', label: 'video.frameTime' },
   { key: 'showBattery', label: 'video.battery' },
+  { key: 'showMemory', label: 'video.memory' },
+  { key: 'showDomNodes', label: 'video.domNodes' },
 ];
 
 type ConfigTab = 'saves' | 'temas' | 'som' | 'video' | 'idioma';

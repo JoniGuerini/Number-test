@@ -27,7 +27,7 @@ type Page = GameTab | 'atividade' | 'notas';
 
 /* A última página visitada sobrevive ao refresh */
 const PAGE_KEY = 'number-test:page';
-const PAGES: Page[] = ['geradores', 'ciclos', 'reino', 'atividade', 'notas'];
+const PAGES: Page[] = ['reino', 'geradores', 'ciclos', 'atividade', 'notas'];
 
 function readStoredPage(): Page {
   try {
@@ -36,7 +36,7 @@ function readStoredPage(): Page {
   } catch {
     // Sem localStorage — cai no padrão
   }
-  return 'ciclos';
+  return 'reino';
 }
 
 export default function App() {

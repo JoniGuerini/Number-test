@@ -8,7 +8,7 @@ export const pt = {
   'nav.ciclos': 'Ciclos',
   'nav.reino': 'Reino',
   'nav.atividade': 'Atividade',
-  'nav.notas': 'Notas',
+  'nav.notas': 'Notas de atualização',
   'nav.config': 'Config',
 
   // Compartilhado entre os modos de jogo
@@ -106,6 +106,8 @@ export const pt = {
   'video.fps': 'FPS',
   'video.frameTime': 'Frame time',
   'video.battery': 'Bateria',
+  'video.memory': 'Memória',
+  'video.domNodes': 'Nós de DOM',
   'video.gameplay': 'no jogo',
   'video.cycleBars': 'Barras de progresso dos ciclos',
 

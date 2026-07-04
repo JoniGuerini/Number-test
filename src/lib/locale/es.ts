@@ -7,7 +7,7 @@ export const es: Dict = {
   'nav.ciclos': 'Ciclos',
   'nav.reino': 'Reino',
   'nav.atividade': 'Actividad',
-  'nav.notas': 'Notas',
+  'nav.notas': 'Notas de actualización',
   'nav.config': 'Ajustes',
 
   'common.exportCsv': 'Exportar CSV',
@@ -95,6 +95,8 @@ export const es: Dict = {
   'video.fps': 'FPS',
   'video.frameTime': 'Frame time',
   'video.battery': 'Batería',
+  'video.memory': 'Memoria',
+  'video.domNodes': 'Nodos DOM',
   'video.gameplay': 'en el juego',
   'video.cycleBars': 'Barras de progreso de ciclos',
 

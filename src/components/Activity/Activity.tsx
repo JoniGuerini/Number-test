@@ -9,7 +9,7 @@ import styles from './Activity.module.css';
 
 type LogGame = 'ciclos' | 'geradores' | 'reino';
 
-const GAMES: LogGame[] = ['ciclos', 'geradores', 'reino'];
+const GAMES: LogGame[] = ['reino', 'geradores', 'ciclos'];
 
 /** Linha do Reino exibida na Atividade. Só a Comida está jogável por ora;
     quando houver mais linhas ativas, dá para virar sub-abas aqui. */
@@ -89,8 +89,8 @@ export default function Activity({ onNavigate }: ActivityProps) {
     geradores: saveKeyFor('geradores'),
     reino: saveKeyFor('reino'),
   }));
-  const [game, setGame] = useState<LogGame>('ciclos');
-  const [log, setLog] = useState(() => readLog('ciclos', keys));
+  const [game, setGame] = useState<LogGame>('reino');
+  const [log, setLog] = useState(() => readLog('reino', keys));
   const { entries, uptime } = log;
   const listRef = useRef<HTMLDivElement>(null);
 
