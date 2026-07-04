@@ -32,6 +32,19 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.16.8',
+    date: '04/07/2026',
+    time: '19:49',
+    title: 'Patch notes, browsable',
+    summary:
+      'The patch notes get Steam-style feature banners, collapsible patches and jump-to-edge controls.',
+    qol: [
+      'Feature releases (x.y.0) now wear a Steam-style blue treatment: a header banner ("Feature release" for a MINOR, "Major update" for a MAJOR), a blue border and a subtle blue tint — the milestones stand out at a glance.',
+      'Small patches now start collapsed, showing just version, title and date/time; click the row (or press Enter) to expand the details.',
+      'Fade controls at the top and bottom of the list jump you to the start or the end, matching the Generators and Cycles lists.',
+    ],
+  },
+  {
     version: 'v0.16.7',
     date: '04/07/2026',
     time: '19:31',

@@ -1,20 +1,59 @@
 .wrap {
+  position: relative;
   width: 100%;
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
-  scrollbar-width: none;
-}
-.wrap::-webkit-scrollbar {
-  display: none;
+  display: flex;
+  flex-direction: column;
 }
 
 .list {
   width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+.list::-webkit-scrollbar {
+  display: none;
+}
+
+.inner {
   display: flex;
   flex-direction: column;
   gap: 12px;
   padding-bottom: 24px;
+}
+
+/* Áreas esmaecidas nas bordas: indicam mais conteúdo e levam ao topo/fim
+   (mesmo padrão das listas de Geradores/Ciclos). */
+.fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 56px;
+  z-index: 2;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 500 18px var(--mono);
+  color: var(--ink-muted);
+  transition: color 0.15s;
+}
+.fade:hover {
+  color: var(--brass-deep);
+}
+.fadeTop {
+  top: 0;
+  background: linear-gradient(to bottom, var(--bg) 25%, var(--bg-fade));
+}
+.fadeBottom {
+  bottom: 0;
+  background: linear-gradient(to top, var(--bg) 25%, var(--bg-fade));
 }
 
 .entry {
@@ -28,15 +67,32 @@
   gap: 16px;
 }
 
-/* Release de destaque (x.y.0): fundo levemente alatoado + barra de acento à
-   esquerda, para saltar aos olhos no meio dos patches — como as grandes
-   atualizações da Steam. */
+/* Release de destaque (x.y.0): faixa azul no topo, borda azul e fundo com um
+   leve tom azulado — inspiração direta nas grandes atualizações da Steam. */
 .entryFeature {
-  background: color-mix(in srgb, var(--brass-deep) 9%, var(--paper));
-  box-shadow: var(--card-edge), inset 3px 0 0 0 var(--brass-bright);
+  --feat: #2a86cc;
+  --feat-deep: #1f6fb2;
+  background: color-mix(in srgb, var(--feat) 12%, var(--paper));
+  box-shadow: var(--card-edge),
+    inset 0 0 0 1px color-mix(in srgb, var(--feat) 60%, transparent);
+  overflow: hidden;
 }
 .entryFeature .version {
-  color: var(--brass-bright);
+  color: var(--feat);
+}
+.entryFeature .summary {
+  border-left-color: var(--feat);
+}
+
+/* Faixa full-bleed no topo do card (cancela o padding com margem negativa). */
+.featureBanner {
+  margin: -22px -26px 0;
+  padding: 7px 26px;
+  background: linear-gradient(180deg, var(--feat) 0%, var(--feat-deep) 100%);
+  color: #fff;
+  font: 600 10.5px var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 /* ===== Cabeçalho da versão ===== */
@@ -44,6 +100,20 @@
   display: flex;
   align-items: baseline;
   gap: 12px;
+}
+
+/* Cards colapsáveis (patches pequenos): header clicável + chevron */
+.collapsible .header {
+  cursor: pointer;
+}
+.chevron {
+  align-self: center;
+  color: var(--ink-faint);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+.chevronOpen {
+  transform: rotate(90deg);
 }
 
 .version {
@@ -155,6 +225,10 @@
 @media (max-width: 640px) {
   .entry {
     padding: 18px 18px;
+  }
+  .featureBanner {
+    margin: -18px -18px 0;
+    padding: 6px 18px;
   }
   .header {
     flex-wrap: wrap;
