@@ -96,6 +96,19 @@ export function subscribeLocale(fn: () => void): () => void {
   return () => listeners.delete(fn);
 }
 
+/** Restaura o idioma ao padrão: esquece a escolha salva e volta a seguir o
+    idioma do sistema/navegador. */
+export function resetLocale(): void {
+  try {
+    localStorage.removeItem(LOCALE_KEY);
+  } catch {
+    // Sem localStorage — nada a limpar
+  }
+  locale = detectLocale();
+  applyLocale(locale);
+  listeners.forEach((fn) => fn());
+}
+
 /** Date locale (toLocaleString) matching the UI language. */
 export function getDateLocale(): string {
   return DATE_LOCALE[locale];

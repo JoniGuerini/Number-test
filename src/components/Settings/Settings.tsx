@@ -3,12 +3,14 @@ import type { GameTab } from '../../App';
 import {
   getDateLocale,
   LOCALES,
+  resetLocale,
   setLocale,
   useI18n,
   type TKey,
 } from '../../lib/locale';
 import {
   getVideoPrefs,
+  resetVideoPrefs,
   setVideoPref,
   subscribeVideoPrefs,
   THEMES,
@@ -18,6 +20,7 @@ import {
   getSoundVolume,
   isSoundOn,
   playPress,
+  resetSound,
   setSoundOn,
   setSoundVolume,
 } from '../../lib/sound';
@@ -143,10 +146,22 @@ export default function Settings({
   const [createName, setCreateName] = useState('');
   const [volume, setVolume] = useState(getSoundVolume());
   const [soundOn, setSoundOnState] = useState(isSoundOn());
+  // Confirmação em duas etapas do botão de restaurar configs
+  const [confirmReset, setConfirmReset] = useState(false);
 
   const toggleSound = () => {
     setSoundOn(!soundOn);
     setSoundOnState(!soundOn);
+  };
+
+  // Restaura temas, som, vídeo e idioma ao padrão (não toca nos jogos salvos).
+  const resetAllConfig = () => {
+    resetVideoPrefs();
+    resetSound();
+    setVolume(getSoundVolume());
+    setSoundOnState(isSoundOn());
+    resetLocale();
+    setConfirmReset(false);
   };
 
   const confirmCreate = () => {
@@ -513,6 +528,32 @@ export default function Settings({
               })}
             </div>
           </section>
+        )}
+      </div>
+
+      <div className={styles.footer}>
+        {confirmReset ? (
+          <div className={styles.resetConfirm}>
+            <span className={styles.resetWarn}>{t('config.resetWarn')}</span>
+            <div className={styles.resetActions}>
+              <button className="btn-primary" onClick={resetAllConfig}>
+                {t('config.resetConfirm')}
+              </button>
+              <button
+                className="btn-secondary"
+                onClick={() => setConfirmReset(false)}
+              >
+                {t('saves.cancel')}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            className="btn-secondary"
+            onClick={() => setConfirmReset(true)}
+          >
+            {t('config.reset')}
+          </button>
         )}
       </div>
     </div>

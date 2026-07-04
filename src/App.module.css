@@ -113,28 +113,6 @@
   animation: modalPop 0.16s ease-out;
 }
 
-.modalClose {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 1;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  border-radius: 4px;
-  background: transparent;
-  color: var(--ink-muted);
-  cursor: pointer;
-  transition: color 0.15s, background 0.15s;
-}
-.modalClose:hover {
-  color: var(--ink);
-  background: var(--surface);
-}
-
 @keyframes modalFade {
   from {
     opacity: 0;

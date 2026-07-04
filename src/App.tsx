@@ -210,20 +210,6 @@ export default function App() {
             aria-modal="true"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              className={styles.modalClose}
-              onClick={() => setSettingsOpen(false)}
-              aria-label={t('common.close')}
-            >
-              <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
-                <path
-                  d="M1 1 L9 9 M9 1 L1 9"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </button>
             <Settings
               onReset={resetGame}
               slots={slots}

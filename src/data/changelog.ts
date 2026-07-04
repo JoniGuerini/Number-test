@@ -32,6 +32,18 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.16.10',
+    date: '04/07/2026',
+    time: '20:01',
+    title: 'Restore settings & tidier modal',
+    summary:
+      'A button to restore default settings, and a cleaner Settings modal.',
+    qol: [
+      'New "Restore defaults" button in the Settings footer: resets Themes, Sound, Video and Language to their defaults (with a confirmation step). Saved games are never touched.',
+      'Removed the redundant ✕ on the Settings modal — click outside or press Esc to close — so the navigation tabs now use the full width.',
+    ],
+  },
+  {
     version: 'v0.16.9',
     date: '04/07/2026',
     time: '19:52',

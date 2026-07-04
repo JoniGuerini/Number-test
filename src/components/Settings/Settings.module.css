@@ -9,13 +9,12 @@
   gap: 12px;
 }
 
-/* Abas de navegação, dentro do card: reservam espaço à direita para o X */
+/* Abas de navegação, dentro do card */
 .tabs {
   display: flex;
   gap: 6px;
   flex-shrink: 0;
   width: 100%;
-  padding-right: 26px;
 }
 
 .tab {
@@ -62,6 +61,28 @@
 }
 .body::-webkit-scrollbar {
   display: none;
+}
+
+/* Rodapé fixo do modal: restaurar configs ao padrão */
+.footer {
+  flex-shrink: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--surface-deep);
+  display: flex;
+  flex-direction: column;
+}
+.resetConfirm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.resetWarn {
+  font: 400 12px/1.5 var(--mono);
+  color: var(--ink-muted);
+}
+.resetActions {
+  display: flex;
+  gap: 8px;
 }
 
 .section {

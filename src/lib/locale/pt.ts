@@ -115,6 +115,12 @@ export const pt = {
   'lang.title': 'Idioma',
   'lang.hint': 'Selecione o idioma.',
 
+  // Config: restaurar padrões
+  'config.reset': 'Restaurar padrões',
+  'config.resetWarn':
+    'Restaurar temas, som, vídeo e idioma para o padrão? Os jogos salvos não são afetados.',
+  'config.resetConfirm': 'Restaurar',
+
   // Botão de tela cheia (topo)
   'fullscreen.enter': 'Tela cheia',
   'fullscreen.exit': 'Sair da tela cheia',

@@ -103,6 +103,11 @@ export const en: Dict = {
   'lang.title': 'Language',
   'lang.hint': 'Select the language.',
 
+  'config.reset': 'Restore defaults',
+  'config.resetWarn':
+    'Restore themes, sound, video and language to their defaults? Your saved games are not affected.',
+  'config.resetConfirm': 'Restore',
+
   'fullscreen.enter': 'Fullscreen',
   'fullscreen.exit': 'Exit fullscreen',
 

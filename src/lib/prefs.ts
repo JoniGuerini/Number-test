@@ -101,6 +101,21 @@ export function setVideoPref<K extends keyof VideoPrefs>(
   listeners.forEach((fn) => fn());
 }
 
+/** Restaura as preferências de vídeo (tema + telemetria + barras) ao padrão.
+    Preserva as chaves de som que dividem a mesma entrada de config. */
+export function resetVideoPrefs(): void {
+  prefs = { ...DEFAULTS };
+  try {
+    const raw = localStorage.getItem(CONFIG_KEY);
+    const stored = raw ? JSON.parse(raw) : {};
+    localStorage.setItem(CONFIG_KEY, JSON.stringify({ ...stored, ...DEFAULTS }));
+  } catch {
+    // Sem localStorage — vale só pra sessão
+  }
+  applyTheme(prefs.theme);
+  listeners.forEach((fn) => fn());
+}
+
 /** Para useSyncExternalStore: componentes reagem na hora aos toggles. */
 export function subscribeVideoPrefs(fn: () => void): () => void {
   listeners.add(fn);

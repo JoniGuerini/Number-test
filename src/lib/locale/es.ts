@@ -103,6 +103,11 @@ export const es: Dict = {
   'lang.title': 'Idioma',
   'lang.hint': 'Selecciona el idioma.',
 
+  'config.reset': 'Restaurar valores',
+  'config.resetWarn':
+    '¿Restaurar temas, sonido, vídeo e idioma a sus valores por defecto? Tus partidas guardadas no se ven afectadas.',
+  'config.resetConfirm': 'Restaurar',
+
   'fullscreen.enter': 'Pantalla completa',
   'fullscreen.exit': 'Salir de pantalla completa',
 

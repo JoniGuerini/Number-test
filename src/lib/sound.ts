@@ -26,10 +26,13 @@ function readConfig(): SoundConfig {
   }
 }
 
+const DEFAULT_VOLUME = 1;
+const DEFAULT_SOUND_ON = true;
+
 /** Volume mestre dos sons de botão (0..1). */
-let currentVolume: number = readConfig().volume ?? 1;
+let currentVolume: number = readConfig().volume ?? DEFAULT_VOLUME;
 /** Master on/off switch, independent of the volume level. */
-let soundOn: boolean = readConfig().soundOn ?? true;
+let soundOn: boolean = readConfig().soundOn ?? DEFAULT_SOUND_ON;
 
 export function getSoundVolume(): number {
   return currentVolume;
@@ -57,6 +60,21 @@ export function setSoundOn(on: boolean): void {
     localStorage.setItem(
       CONFIG_KEY,
       JSON.stringify({ ...readConfig(), soundOn: on })
+    );
+  } catch {
+    // Sem localStorage — a escolha vale só pra sessão
+  }
+}
+
+/** Restaura som (volume e liga/desliga) ao padrão. Os módulos que exibem o
+    estado (ex.: Config) devem reler getSoundVolume()/isSoundOn() depois. */
+export function resetSound(): void {
+  currentVolume = DEFAULT_VOLUME;
+  soundOn = DEFAULT_SOUND_ON;
+  try {
+    localStorage.setItem(
+      CONFIG_KEY,
+      JSON.stringify({ ...readConfig(), volume: currentVolume, soundOn })
     );
   } catch {
     // Sem localStorage — a escolha vale só pra sessão
