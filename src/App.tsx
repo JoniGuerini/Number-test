@@ -166,7 +166,7 @@ export default function App() {
       >
         {/* Remonta ao zerar um dos modos (ou trocar de slot) para o log acompanhar */}
         <Activity
-          key={`${slotEpoch}:${resetKeys.ciclos}:${resetKeys.geradores}`}
+          key={`${slotEpoch}:${resetKeys.ciclos}:${resetKeys.geradores}:${resetKeys.reino}`}
           onNavigate={setPage}
         />
       </main>

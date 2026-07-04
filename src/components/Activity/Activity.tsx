@@ -1,19 +1,30 @@
 import { useEffect, useRef, useState } from 'react';
 import { fmtTime } from '../../lib/format';
-import { useI18n } from '../../lib/locale';
+import { useI18n, type TKey } from '../../lib/locale';
 import { loadSave, saveKeyFor } from '../../lib/storage';
+import { ENABLED_LINES } from '../Reino/lines';
 // Reusa o esqueleto visual das listas de geradores (scroll, fades)
 import gstyles from '../Generators/Generators.module.css';
 import styles from './Activity.module.css';
 
-type LogGame = 'ciclos' | 'geradores';
+type LogGame = 'ciclos' | 'geradores' | 'reino';
 
-const GAMES: LogGame[] = ['ciclos', 'geradores'];
+const GAMES: LogGame[] = ['ciclos', 'geradores', 'reino'];
 
-/** Campos comuns aos saves dos dois modos que interessam ao log. */
+/** Linha do Reino exibida na Atividade. Só a Comida está jogável por ora;
+    quando houver mais linhas ativas, dá para virar sub-abas aqui. */
+const REINO_LINE = ENABLED_LINES[0]?.id;
+
+/** Campos comuns aos saves que interessam ao log (Ciclos/Geradores e cada
+    linha do Reino compartilham essa forma). */
 interface GameSaveLite {
   gens: { bought: number; unlockedAt?: number }[];
   uptime: number;
+}
+
+/** Save do Reino: uma linha por chave. */
+interface ReinoSaveLite {
+  lines?: Partial<Record<string, GameSaveLite>>;
 }
 
 interface Entry {
@@ -25,8 +36,11 @@ interface Entry {
   accel?: number;
 }
 
-function readLog(saveKey: string): { entries: Entry[]; uptime: number } {
-  const save = loadSave<GameSaveLite>(saveKey);
+/** Constrói as entradas do log a partir de um save (gens + uptime). */
+function buildEntries(save: GameSaveLite | null | undefined): {
+  entries: Entry[];
+  uptime: number;
+} {
   if (!save) return { entries: [], uptime: 0 };
 
   const unlocked = save.gens
@@ -48,6 +62,19 @@ function readLog(saveKey: string): { entries: Entry[]; uptime: number } {
   return { entries, uptime: save.uptime };
 }
 
+type Keys = Record<LogGame, string>;
+
+/** Lê o log do modo. O Reino mora numa chave só (uma linha por sub-chave),
+    então extraímos a linha habilitada. */
+function readLog(game: LogGame, keys: Keys): { entries: Entry[]; uptime: number } {
+  if (game === 'reino') {
+    if (!REINO_LINE) return { entries: [], uptime: 0 };
+    const save = loadSave<ReinoSaveLite>(keys.reino);
+    return buildEntries(save?.lines?.[REINO_LINE]);
+  }
+  return buildEntries(loadSave<GameSaveLite>(keys[game]));
+}
+
 interface ActivityProps {
   /** Leva o jogador para a aba do modo (CTA do estado vazio). */
   onNavigate: (game: LogGame) => void;
@@ -57,19 +84,20 @@ interface ActivityProps {
 export default function Activity({ onNavigate }: ActivityProps) {
   const { t } = useI18n();
   // Chaves dos saves do slot ativo (trocar de slot remonta o componente)
-  const [keys] = useState(() => ({
+  const [keys] = useState<Keys>(() => ({
     ciclos: saveKeyFor('ciclos'),
     geradores: saveKeyFor('geradores'),
+    reino: saveKeyFor('reino'),
   }));
   const [game, setGame] = useState<LogGame>('ciclos');
-  const [log, setLog] = useState(() => readLog(keys.ciclos));
+  const [log, setLog] = useState(() => readLog('ciclos', keys));
   const { entries, uptime } = log;
   const listRef = useRef<HTMLDivElement>(null);
 
   // O save é gravado 1x/s; reler no mesmo ritmo mantém o log vivo.
   useEffect(() => {
-    setLog(readLog(keys[game]));
-    const id = setInterval(() => setLog(readLog(keys[game])), 1000);
+    setLog(readLog(game, keys));
+    const id = setInterval(() => setLog(readLog(game, keys)), 1000);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game]);
@@ -219,7 +247,9 @@ export default function Activity({ onNavigate }: ActivityProps) {
               {entries.map((entry) => (
                 <div key={entry.gen} className={styles.entry}>
                   <span className={styles.entryTitle}>
-                    {t('activity.generator', { n: entry.gen })}
+                    {game === 'reino' && REINO_LINE
+                      ? t(`reino.gen.${REINO_LINE}.${entry.gen}` as TKey)
+                      : t('activity.generator', { n: entry.gen })}
                   </span>
 
                   <div className={styles.fields}>

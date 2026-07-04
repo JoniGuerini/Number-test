@@ -29,6 +29,15 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.23.0',
+    date: '04/07/2026',
+    title: 'Kingdom in Activity',
+    summary: 'The Activity tab now tracks Kingdom unlocks too.',
+    minor: [
+      'New "Kingdom" tab in Activity: the unlock log now covers Kingdom alongside Cycles and Generators, listing each generator by its name (Reaper, Peasant, Farmer…) with the same times, intervals and pace breakdown.',
+    ],
+  },
+  {
     version: 'v0.22.0',
     date: '04/07/2026',
     title: 'Toggleable cycle bars',
