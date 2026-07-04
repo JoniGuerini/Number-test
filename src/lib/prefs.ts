@@ -44,6 +44,9 @@ export interface VideoPrefs {
   showFps: boolean;
   showFrameTime: boolean;
   showBattery: boolean;
+  /** Barras de progresso do ciclo (Ciclos e Reino). Coluna de tempo já mostra
+      o restante, então o jogador pode ocultá-las por gosto. */
+  showCycleBars: boolean;
   theme: ThemeId;
 }
 
@@ -51,6 +54,7 @@ const DEFAULTS: VideoPrefs = {
   showFps: true,
   showFrameTime: true,
   showBattery: true,
+  showCycleBars: true,
   theme: 'neutro',
 };
 

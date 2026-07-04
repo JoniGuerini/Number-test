@@ -1,8 +1,9 @@
-import { useEffect, useReducer, useRef, useState } from 'react';
+import { useEffect, useReducer, useRef, useState, useSyncExternalStore } from 'react';
 import Decimal from 'break_eternity.js';
 import { useVirtualRows } from '../../hooks/useVirtualRows';
 import { fmt, fmtRate, fmtTime } from '../../lib/format';
 import { getDateLocale, useI18n } from '../../lib/locale';
+import { getVideoPrefs, subscribeVideoPrefs } from '../../lib/prefs';
 import { loadSave, saveKeyFor, writeSave } from '../../lib/storage';
 import styles from '../Generators/Generators.module.css';
 import cyc from './Cycles.module.css';
@@ -278,6 +279,10 @@ export default function Cycles() {
   };
 
   const isAuto = game.mode === 'auto';
+  const showCycleBars = useSyncExternalStore(
+    subscribeVideoPrefs,
+    () => getVideoPrefs().showCycleBars
+  );
 
   // Fração de segundo desde o último passo — anima as barras entre passos.
   const partial =
@@ -539,14 +544,17 @@ export default function Cycles() {
                 </button>
 
                 {/* Barra do ciclo: canaleta em baixo relevo + preenchimento
-                    em alto relevo (mesma linguagem do slider da Config) */}
-                <div className={cyc.cycleTrack} aria-hidden="true">
-                  <div className={cyc.cycleGroove} />
-                  <div
-                    className={cyc.cycleFill}
-                    style={{ width: `${cycleProgress(gen, i) * 100}%` }}
-                  />
-                </div>
+                    em alto relevo (mesma linguagem do slider da Config).
+                    Ocultável na Config — a coluna de tempo já mostra o ciclo. */}
+                {showCycleBars && (
+                  <div className={cyc.cycleTrack} aria-hidden="true">
+                    <div className={cyc.cycleGroove} />
+                    <div
+                      className={cyc.cycleFill}
+                      style={{ width: `${cycleProgress(gen, i) * 100}%` }}
+                    />
+                  </div>
+                )}
               </div>
             );
           })}

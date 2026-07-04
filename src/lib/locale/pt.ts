@@ -100,12 +100,14 @@ export const pt = {
 
   // Config: Vídeo
   'video.title': 'Vídeo',
-  'video.hint': 'Opções que aparecem no topo da tela.',
+  'video.hint': 'Opções de exibição.',
   'video.all': 'Todos os cards',
   'video.individual': 'cards individuais',
   'video.fps': 'FPS',
   'video.frameTime': 'Frame time',
   'video.battery': 'Bateria',
+  'video.gameplay': 'no jogo',
+  'video.cycleBars': 'Barras de progresso dos ciclos',
 
   // Config: Idioma
   'lang.title': 'Idioma',

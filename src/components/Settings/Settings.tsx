@@ -467,6 +467,24 @@ export default function Settings({
                   </button>
                 );
               })}
+
+              <span className={styles.subLabel}>{t('video.gameplay')}</span>
+              <button
+                className={styles.option}
+                role="switch"
+                aria-checked={videoPrefs.showCycleBars}
+                onClick={() =>
+                  setVideoPref('showCycleBars', !videoPrefs.showCycleBars)
+                }
+              >
+                <span>{t('video.cycleBars')}</span>
+                <span
+                  className={`${styles.switch} ${videoPrefs.showCycleBars ? styles.switchOn : ''}`}
+                  aria-hidden="true"
+                >
+                  <span className={styles.switchThumb} />
+                </span>
+              </button>
             </div>
           </section>
         )}

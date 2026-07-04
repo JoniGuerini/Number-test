@@ -89,12 +89,14 @@ export const es: Dict = {
   'sound.volumeAria': 'Volumen del sonido de los botones',
 
   'video.title': 'Vídeo',
-  'video.hint': 'Opciones que aparecen en la parte superior de la pantalla.',
+  'video.hint': 'Opciones de visualización.',
   'video.all': 'Todas las tarjetas',
   'video.individual': 'tarjetas individuales',
   'video.fps': 'FPS',
   'video.frameTime': 'Frame time',
   'video.battery': 'Batería',
+  'video.gameplay': 'en el juego',
+  'video.cycleBars': 'Barras de progreso de ciclos',
 
   'lang.title': 'Idioma',
   'lang.hint': 'Selecciona el idioma.',

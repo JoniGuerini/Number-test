@@ -29,6 +29,17 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.22.0',
+    date: '04/07/2026',
+    title: 'Toggleable cycle bars',
+    summary:
+      'A Video setting to hide the cycle progress bars, on by default.',
+    qol: [
+      'New "Cycle progress bars" switch in Settings → Video (on by default): hide the in-card cycle bars in Cycles and Kingdom if you prefer — the remaining-time column already shows the cycle.',
+      'Purely visual: the setting is a per-device preference and never touches saves or the deterministic, bit-for-bit simulation.',
+    ],
+  },
+  {
     version: 'v0.21.0',
     date: '04/07/2026',
     title: 'Patch notes revamp',

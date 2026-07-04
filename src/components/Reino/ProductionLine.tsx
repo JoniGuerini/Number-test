@@ -3,9 +3,10 @@
     linguagem visual reaproveita os estilos de Geradores/Ciclos — o que muda é
     a coluna de nomes (geradores nomeados) e o recurso base. */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
 import { fmt, fmtCost, fmtRate, fmtTime } from '../../lib/format';
 import { getDateLocale, useI18n, type TKey } from '../../lib/locale';
+import { getVideoPrefs, subscribeVideoPrefs } from '../../lib/prefs';
 import styles from '../Generators/Generators.module.css';
 import cyc from '../Cycles/Cycles.module.css';
 import rn from './Reino.module.css';
@@ -47,6 +48,10 @@ export default function ProductionLine({
 }: ProductionLineProps) {
   const { t } = useI18n();
   const listRef = useRef<HTMLDivElement>(null);
+  const showCycleBars = useSyncExternalStore(
+    subscribeVideoPrefs,
+    () => getVideoPrefs().showCycleBars
+  );
 
   const genName = (i: number): string => t(`reino.gen.${lineId}.${i + 1}` as TKey);
   const baseName = t(`reino.base.${lineId}` as TKey);
@@ -313,13 +318,15 @@ export default function ProductionLine({
                   {fmtCost(cost)}
                 </button>
 
-                <div className={cyc.cycleTrack} aria-hidden="true">
-                  <div className={cyc.cycleGroove} />
-                  <div
-                    className={cyc.cycleFill}
-                    style={{ width: `${cycleProgress(gen, i) * 100}%` }}
-                  />
-                </div>
+                {showCycleBars && (
+                  <div className={cyc.cycleTrack} aria-hidden="true">
+                    <div className={cyc.cycleGroove} />
+                    <div
+                      className={cyc.cycleFill}
+                      style={{ width: `${cycleProgress(gen, i) * 100}%` }}
+                    />
+                  </div>
+                )}
               </div>
             );
           })}
