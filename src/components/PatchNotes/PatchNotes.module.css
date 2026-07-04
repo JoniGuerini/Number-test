@@ -28,6 +28,17 @@
   gap: 16px;
 }
 
+/* Release de destaque (x.y.0): fundo levemente alatoado + barra de acento à
+   esquerda, para saltar aos olhos no meio dos patches — como as grandes
+   atualizações da Steam. */
+.entryFeature {
+  background: color-mix(in srgb, var(--brass-deep) 9%, var(--paper));
+  box-shadow: var(--card-edge), inset 3px 0 0 0 var(--brass-bright);
+}
+.entryFeature .version {
+  color: var(--brass-bright);
+}
+
 /* ===== Cabeçalho da versão ===== */
 .header {
   display: flex;

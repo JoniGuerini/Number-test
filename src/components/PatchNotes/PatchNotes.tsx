@@ -10,13 +10,25 @@ const SECTIONS: { key: keyof PatchNote; label: string }[] = [
   { key: 'fixes', label: 'Fixes' },
 ];
 
+/** Release de destaque (feature/expansão): último número da versão é 0, ou
+    seja MINOR (0.x.0) ou MAJOR (x.0.0). Ganha cor própria, estilo Steam. */
+function isFeatureRelease(version: string): boolean {
+  const parts = version.replace(/^v/, '').split('.');
+  return parts.length === 3 && parts[2] === '0';
+}
+
 /** Aba Notas: o histórico de versões do laboratório. */
 export default function PatchNotes() {
   return (
     <div className={styles.wrap}>
       <div className={styles.list}>
         {CHANGELOG.map((patch) => (
-          <article key={patch.version} className={styles.entry}>
+          <article
+            key={patch.version}
+            className={`${styles.entry} ${
+              isFeatureRelease(patch.version) ? styles.entryFeature : ''
+            }`}
+          >
             <header className={styles.header}>
               <h2 className={styles.version}>{patch.version}</h2>
               <span className={styles.title}>{patch.title}</span>

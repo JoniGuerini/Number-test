@@ -32,18 +32,27 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
-    version: 'v0.17.0',
+    version: 'v0.16.7',
+    date: '04/07/2026',
+    time: '19:31',
+    title: 'Highlighted feature releases',
+    summary:
+      'Feature releases now stand out in the patch notes, Steam-style.',
+    qol: [
+      'Feature releases (x.y.0 — a MINOR or MAJOR) now get their own accent in the patch notes: a brass left bar, a warm background tint and a brighter version number, so the big milestones pop out from the small patches.',
+      'Housekeeping: the previous release was reclassified as a PATCH (v0.17.0 → v0.16.6) — new telemetry cards and reordering aren\u2019t new game content, so they don\u2019t warrant a MINOR.',
+    ],
+  },
+  {
+    version: 'v0.16.6',
     date: '04/07/2026',
     time: '19:28',
     title: 'Kingdom up front & new telemetry',
     summary:
       'Kingdom takes the lead across the app, and telemetry gains memory and DOM-node readouts.',
-    minor: [
-      'Two new telemetry cards next to FPS and frame time: JS heap memory (MB, Chromium only) and a live DOM-node count — toggle them in Settings → Video, on by default. Handy for gauging how much features like hidden cycle bars actually save.',
-      'Kingdom is now the first mode in the navigation and the default landing screen for first-time players.',
-    ],
     qol: [
-      'The Activity tabs now also lead with Kingdom, matching the nav order (Kingdom, Generators, Cycles).',
+      'Two new telemetry cards next to FPS and frame time: JS heap memory (MB, Chromium only) and a live DOM-node count — toggle them in Settings → Video, on by default. Handy for gauging how much features like hidden cycle bars actually save.',
+      'Kingdom is now the first mode in the navigation and the default landing screen for first-time players; the Activity tabs lead with Kingdom too (Kingdom, Generators, Cycles).',
       'The "Notes" menu is now labelled "Patch notes".',
     ],
   },
