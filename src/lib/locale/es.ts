@@ -3,8 +3,6 @@
 import type { Dict } from './pt';
 
 export const es: Dict = {
-  'nav.geradores': 'Generadores',
-  'nav.ciclos': 'Ciclos',
   'nav.reino': 'Reino',
   'nav.atividade': 'Actividad',
   'nav.chat': 'Social',

@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react';
-import Generators from './components/Generators/Generators';
-import Cycles from './components/Cycles/Cycles';
 import Reino from './components/Reino/Reino';
 import Activity from './components/Activity/Activity';
 import Chat from './components/Chat/Chat';
@@ -23,12 +21,12 @@ import {
 } from './lib/storage';
 import styles from './App.module.css';
 
-export type GameTab = 'geradores' | 'ciclos' | 'reino';
+export type GameTab = 'reino';
 type Page = GameTab | 'atividade' | 'chat' | 'notas';
 
 /* A última página visitada sobrevive ao refresh */
 const PAGE_KEY = 'number-test:page';
-const PAGES: Page[] = ['reino', 'geradores', 'ciclos', 'atividade', 'chat', 'notas'];
+const PAGES: Page[] = ['reino', 'atividade', 'chat', 'notas'];
 
 function readStoredPage(): Page {
   try {
@@ -93,8 +91,6 @@ export default function App() {
   }, [settingsOpen]);
   // Trocar a key remonta o componente da aba, zerando só aquele jogo.
   const [resetKeys, setResetKeys] = useState({
-    geradores: 0,
-    ciclos: 0,
     reino: 0,
   });
 
@@ -148,16 +144,6 @@ export default function App() {
 
       {/* As telas ficam sempre montadas para o progresso não resetar ao trocar de aba. */}
       <main
-        className={`${styles.contentFull} ${page !== 'geradores' ? styles.hidden : ''}`}
-      >
-        <Generators key={`${slotEpoch}:${resetKeys.geradores}`} />
-      </main>
-      <main
-        className={`${styles.contentFull} ${page !== 'ciclos' ? styles.hidden : ''}`}
-      >
-        <Cycles key={`${slotEpoch}:${resetKeys.ciclos}`} />
-      </main>
-      <main
         className={`${styles.contentFull} ${page !== 'reino' ? styles.hidden : ''}`}
       >
         <Reino key={`${slotEpoch}:${resetKeys.reino}`} />
@@ -165,9 +151,9 @@ export default function App() {
       <main
         className={`${styles.contentFull} ${page !== 'atividade' ? styles.hidden : ''}`}
       >
-        {/* Remonta ao zerar um dos modos (ou trocar de slot) para o log acompanhar */}
+        {/* Remonta ao zerar o Reino (ou trocar de slot) para o log acompanhar */}
         <Activity
-          key={`${slotEpoch}:${resetKeys.ciclos}:${resetKeys.geradores}:${resetKeys.reino}`}
+          key={`${slotEpoch}:${resetKeys.reino}`}
           onNavigate={setPage}
         />
       </main>

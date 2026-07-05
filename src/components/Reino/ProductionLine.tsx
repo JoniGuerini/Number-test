@@ -7,8 +7,8 @@ import { useEffect, useRef, useSyncExternalStore } from 'react';
 import { fmt, fmtCost, fmtRate, fmtTime } from '../../lib/format';
 import { getDateLocale, useI18n, type TKey } from '../../lib/locale';
 import { getVideoPrefs, subscribeVideoPrefs } from '../../lib/prefs';
-import styles from '../Generators/Generators.module.css';
-import cyc from '../Cycles/Cycles.module.css';
+import styles from '../../styles/productionList.module.css';
+import cyc from '../../styles/cycleBars.module.css';
 import rn from './Reino.module.css';
 import {
   CYCLE_BASE_S,

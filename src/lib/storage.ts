@@ -6,19 +6,17 @@
 
 import { translate } from './locale';
 
-export type SaveGame = 'geradores' | 'ciclos' | 'reino';
+export type SaveGame = 'reino';
 
 /** Chaves antigas (pré-slots), migradas para o primeiro slot. O Reino nasceu
     já no sistema de slots, então nunca teve chave legada (o valor abaixo não
     existe no storage e a migração simplesmente o ignora). */
 const LEGACY_KEYS: Record<SaveGame, string> = {
-  geradores: 'number-test:geradores',
-  ciclos: 'number-test:ciclos',
   reino: 'number-test:reino',
 };
 
 const SLOTS_META_KEY = 'number-test:slots';
-const GAMES: SaveGame[] = ['geradores', 'ciclos', 'reino'];
+const GAMES: SaveGame[] = ['reino'];
 
 export interface SlotMeta {
   id: string;

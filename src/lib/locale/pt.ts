@@ -4,8 +4,6 @@
 
 export const pt = {
   // Navegação principal (rodapé) — também nomeia os modos pelo app todo
-  'nav.geradores': 'Geradores',
-  'nav.ciclos': 'Ciclos',
   'nav.reino': 'Reino',
   'nav.atividade': 'Atividade',
   'nav.chat': 'Social',

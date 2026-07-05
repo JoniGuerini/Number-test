@@ -32,25 +32,20 @@ import {
 } from '../../lib/storage';
 import styles from './Settings.module.css';
 
-const GAMES: GameTab[] = ['geradores', 'ciclos', 'reino'];
+const GAMES: GameTab[] = ['reino'];
 
-/** Campos que sinalizam progresso iniciado em cada tipo de save. */
+/** Campos que sinalizam progresso iniciado no save. */
 interface SaveProbe {
-  started?: boolean;
   /** Reino: uma linha por chave; conta se qualquer linha foi iniciada. */
   lines?: Record<string, { started?: boolean } | undefined>;
 }
 
-/** Há progresso para zerar naquele modo? (jogo de fato iniciado, não só o
-    save gravado automaticamente). Geradores/Ciclos contam pela saída da tela
-    de escolha de modo; Reino, por qualquer linha iniciada. */
+/** Há progresso para zerar? (jogo de fato iniciado, não só o save gravado
+    automaticamente). No Reino, conta por qualquer linha iniciada. */
 function hasProgress(slotId: string, game: GameTab): boolean {
   const s = loadSave<SaveProbe>(saveKeyForSlot(slotId, game));
   if (!s) return false;
-  if (game === 'reino') {
-    return Object.values(s.lines ?? {}).some((l) => l?.started === true);
-  }
-  return s.started === true;
+  return Object.values(s.lines ?? {}).some((l) => l?.started === true);
 }
 
 const VIDEO_TOGGLES: {

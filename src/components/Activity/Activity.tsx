@@ -3,13 +3,13 @@ import { fmtTime } from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
 import { loadSave, saveKeyFor } from '../../lib/storage';
 import { ENABLED_LINES } from '../Reino/lines';
-// Reusa o esqueleto visual das listas de geradores (scroll, fades)
-import gstyles from '../Generators/Generators.module.css';
+// Reusa o esqueleto visual das listas de produção (scroll, fades)
+import gstyles from '../../styles/productionList.module.css';
 import styles from './Activity.module.css';
 
-type LogGame = 'ciclos' | 'geradores' | 'reino';
+type LogGame = 'reino';
 
-const GAMES: LogGame[] = ['reino', 'geradores', 'ciclos'];
+const GAMES: LogGame[] = ['reino'];
 
 /** Linha do Reino exibida na Atividade. Só a Comida está jogável por ora;
     quando houver mais linhas ativas, dá para virar sub-abas aqui. */
@@ -64,15 +64,12 @@ function buildEntries(save: GameSaveLite | null | undefined): {
 
 type Keys = Record<LogGame, string>;
 
-/** Lê o log do modo. O Reino mora numa chave só (uma linha por sub-chave),
-    então extraímos a linha habilitada. */
-function readLog(game: LogGame, keys: Keys): { entries: Entry[]; uptime: number } {
-  if (game === 'reino') {
-    if (!REINO_LINE) return { entries: [], uptime: 0 };
-    const save = loadSave<ReinoSaveLite>(keys.reino);
-    return buildEntries(save?.lines?.[REINO_LINE]);
-  }
-  return buildEntries(loadSave<GameSaveLite>(keys[game]));
+/** Lê o log do Reino: mora numa chave só (uma linha por sub-chave), então
+    extraímos a linha habilitada. */
+function readLog(keys: Keys): { entries: Entry[]; uptime: number } {
+  if (!REINO_LINE) return { entries: [], uptime: 0 };
+  const save = loadSave<ReinoSaveLite>(keys.reino);
+  return buildEntries(save?.lines?.[REINO_LINE]);
 }
 
 interface ActivityProps {
@@ -84,20 +81,16 @@ interface ActivityProps {
 export default function Activity({ onNavigate }: ActivityProps) {
   const { t } = useI18n();
   // Chaves dos saves do slot ativo (trocar de slot remonta o componente)
-  const [keys] = useState<Keys>(() => ({
-    ciclos: saveKeyFor('ciclos'),
-    geradores: saveKeyFor('geradores'),
-    reino: saveKeyFor('reino'),
-  }));
+  const [keys] = useState<Keys>(() => ({ reino: saveKeyFor('reino') }));
   const [game, setGame] = useState<LogGame>('reino');
-  const [log, setLog] = useState(() => readLog('reino', keys));
+  const [log, setLog] = useState(() => readLog(keys));
   const { entries, uptime } = log;
   const listRef = useRef<HTMLDivElement>(null);
 
   // O save é gravado 1x/s; reler no mesmo ritmo mantém o log vivo.
   useEffect(() => {
-    setLog(readLog(game, keys));
-    const id = setInterval(() => setLog(readLog(game, keys)), 1000);
+    setLog(readLog(keys));
+    const id = setInterval(() => setLog(readLog(keys)), 1000);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game]);

@@ -32,6 +32,22 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.18.0',
+    date: '05/07/2026',
+    time: '00:55',
+    title: 'Focus on Kingdom',
+    summary:
+      'Cycles and Generators retire so the app can center entirely on Kingdom.',
+    major: [
+      'The Generators and Cycles modes have been retired to focus development on Kingdom. Nothing is lost: their code lives on in the project history (tagged snapshot) and can be brought back at any time.',
+      'The footer navigation is leaner now — Kingdom, Activity, Social and Patch notes — leaving room for what comes next.',
+    ],
+    qol: [
+      'Activity now tracks Kingdom only; the shared list styling was kept intact.',
+      'Existing Generators/Cycles saves are left untouched in storage — just no longer shown.',
+    ],
+  },
+  {
     version: 'v0.17.0',
     date: '05/07/2026',
     time: '00:40',
