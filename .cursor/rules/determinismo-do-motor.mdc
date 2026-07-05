@@ -10,35 +10,29 @@ passos fixos**, ancorado no `startedAt` da linha. Duas máquinas com o mesmo
 save produzem a MESMA sequência de contas, bit a bit. É isso que sustenta o
 catch-up offline e o futuro ranking multiplayer justo. Nunca quebre isso.
 
-## Proibido (quebra saves existentes)
+## O que nunca pode (quebra o determinismo em si)
 
-Em `src/components/Reino/engine.ts`, nunca altere o resultado numérico de
-saves já existentes:
+- Relógio de parede influenciando o resultado além da CONTAGEM de passos
+  derivada de `startedAt` (nada de `Date.now()` dentro da conta).
+- `Math.random()` em lógica de jogo; se precisar de aleatoriedade, use RNG
+  com semente derivada do save (e documente).
+- Resultado dependente de FPS, timezone, locale ou máquina.
+- UI escrevendo estado fora das ações do jogador (compras) e do avanço por
+  passos; ordem das operações dentro do passo deve ser fixa.
 
-- Constantes: `SIM_STEP_S`, `CYCLE_BASE_S`, `CYCLE_GROWTH`, `PROD_BASE`,
-  `PROD_STEP` e a curva de custos (`COST_SLOPE`, `COST_CURVE`).
-- Ordem das operações dentro do passo, arredondamentos, ou troca/upgrade do
-  `break_eternity.js` que mude resultados.
-- Qualquer influência do relógio de parede no resultado além da CONTAGEM de
-  passos derivada de `startedAt` (nada de `Date.now()` dentro da conta).
+## O que pode (fase de desenvolvimento, pré-1.0)
 
-## Regras para novas mecânicas
+Estamos em desenvolvimento ativo: saves são resetados o tempo todo e NÃO há
+compromisso de compatibilidade com saves antigos por enquanto. Rebalancear a
+economia (`SIM_STEP_S`, `CYCLE_BASE_S`, `CYCLE_GROWTH`, `PROD_BASE`,
+`PROD_STEP`, curva de custos) é permitido e esperado — desde que o resultado
+continue determinístico. Não crie migrações/versionamento de save ainda.
 
-- Toda mecânica que afeta a economia deve ser determinística: mesma entrada
-  (save) → mesma saída, independente de FPS, timezone ou máquina.
-- Nada de `Math.random()` em lógica de jogo; se precisar de aleatoriedade,
-  use RNG com semente derivada do save (e documente).
-- UI pode ler o estado à vontade; só não pode escrever fora das ações do
-  jogador (compras) e do avanço por passos.
-
-## Caminho certo para evoluir a economia
-
-Nunca altere a matemática existente silenciosamente. Se a economia precisar
-mudar: versione (campo de versão no save / nova temporada), mantenha o
-caminho antigo para saves antigos ou migre explicitamente num corte claro.
+A partir da 1.0 (jogadores reais / ranking ativo), muda o regime: economia
+existente só evolui com corte explícito (versão de save / temporada).
 
 ## Verificação
 
 `scripts/simulate-reino.mjs` espelha o motor. Ao mexer no engine, atualize o
-script junto e compare a linha do tempo de desbloqueios antes/depois — ela
-deve ser idêntica para a mesma configuração.
+script junto — ele é a prova de que a simulação continua reproduzível e a
+ferramenta para tunar a economia antes de commitar.
