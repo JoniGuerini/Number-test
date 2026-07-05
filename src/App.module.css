@@ -24,8 +24,8 @@
   }
 }
 
-/* Geradores: ocupa toda a largura do app; min-height 0 permite a lista
-   interna rolar em vez de estourar a página */
+/* Página de conteúdo: ocupa toda a largura do app; min-height 0 permite a
+   lista interna rolar em vez de estourar a página */
 .contentFull {
   flex: 1;
   min-height: 0;

@@ -48,8 +48,8 @@ export interface VideoPrefs {
   showMemory: boolean;
   /** Total de nós de DOM na página — proxy do peso da árvore renderizada. */
   showDomNodes: boolean;
-  /** Barras de progresso do ciclo (Ciclos e Reino). Coluna de tempo já mostra
-      o restante, então o jogador pode ocultá-las por gosto. */
+  /** Barras de progresso do ciclo no Reino. Coluna de tempo já mostra o
+      restante, então o jogador pode ocultá-las por gosto. */
   showCycleBars: boolean;
   theme: ThemeId;
 }

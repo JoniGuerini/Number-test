@@ -1,17 +1,17 @@
 /** Motor determinístico de uma linha de produção do Reino.
 
-    É uma cópia do motor cíclico de Ciclos (batelada por ciclo), com um TETO
-    finito de geradores. Cada linha é uma cadeia independente: estado = função
-    pura do nº de passos fixos, ancorado no próprio startedAt da linha, então
-    duas máquinas com o mesmo save produzem a MESMA sequência de contas —
+    Motor cíclico (produção em batelada por ciclo) com um TETO finito de
+    geradores. Cada linha é uma cadeia independente: estado = função pura do
+    nº de passos fixos, ancorado no próprio startedAt da linha, então duas
+    máquinas com o mesmo save produzem a MESMA sequência de contas —
     requisito para ranking justo bit a bit. */
 
 import Decimal from 'break_eternity.js';
 
-/** Timestep fixo (mesma arquitetura determinística dos outros modos). */
+/** Timestep fixo da simulação determinística. */
 export const SIM_STEP_S = 0.25;
-/** Ciclo do Gerador 1, em segundos. O Reino tem uma economia propositalmente
-    mais lenta que Ciclos: começa em 2s e triplica a cada nível. */
+/** Ciclo do Gerador 1, em segundos. Economia propositalmente lenta:
+    começa em 2s e triplica a cada nível. */
 export const CYCLE_BASE_S = 2;
 /** Fator de crescimento do ciclo entre um gerador e o seguinte (geométrico):
     ciclo do gerador N = 2s × 3^(N-1) → 2s, 6s, 18s, 54s… */

@@ -26,7 +26,6 @@ export const es: Dict = {
   'mode.hintManual': 'Tú haces todas las compras manualmente.',
 
   'gen.autoToggle': 'Automático: {state}',
-  'gen.baseNumber': 'número base',
   'gen.owns': 'posee',
   'gen.produces': 'produce {target}',
   'cyc.cycleEvery': 'ciclo {time}',
@@ -38,7 +37,6 @@ export const es: Dict = {
   'activity.playTime': 'tiempo de juego',
   'activity.avgInterval': 'promedio del “tiempo desde el anterior”',
   'activity.sinceLast': 'desde el último',
-  'activity.generator': 'Generador {n}',
   'activity.unlockedWith': 'desbloqueado con',
   'activity.ofPlay': '{time} de juego',
   'activity.sincePrev': 'tiempo desde el anterior',

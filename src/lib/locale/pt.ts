@@ -10,7 +10,7 @@ export const pt = {
   'nav.notas': 'Notas de atualização',
   'nav.config': 'Config',
 
-  // Compartilhado entre os modos de jogo
+  // Compartilhado pelo app todo
   'common.exportCsv': 'Exportar CSV',
   'common.start': 'Iniciar',
   'common.startLabel': 'início',
@@ -20,7 +20,7 @@ export const pt = {
   'common.toEnd': 'Ir para o fim',
   'common.close': 'Fechar',
 
-  // Tela de escolha de modo (Geradores/Ciclos)
+  // Tela de escolha de modo (linhas do Reino)
   'mode.title': 'Modo de jogo',
   'mode.manual': 'Manual',
   'mode.auto': 'Automático',
@@ -28,9 +28,8 @@ export const pt = {
     'O jogo compra sozinho o gerador de maior nível que couber no saldo: desbloqueia o próximo ou empilha o mais alto já desbloqueado.',
   'mode.hintManual': 'Você faz todas as compras manualmente.',
 
-  // Geradores / Ciclos
+  // Linha de produção (geradores e ciclos do Reino)
   'gen.autoToggle': 'Automático: {state}',
-  'gen.baseNumber': 'número base',
   'gen.owns': 'possui',
   'gen.produces': 'produz {target}',
   'cyc.cycleEvery': 'ciclo {time}',
@@ -43,7 +42,6 @@ export const pt = {
   'activity.playTime': 'tempo de jogo',
   'activity.avgInterval': 'média do “tempo desde o anterior”',
   'activity.sinceLast': 'desde o último',
-  'activity.generator': 'Gerador {n}',
   'activity.unlockedWith': 'desbloqueado com',
   'activity.ofPlay': '{time} de jogo',
   'activity.sincePrev': 'tempo desde o anterior',

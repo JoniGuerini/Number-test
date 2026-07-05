@@ -1,7 +1,8 @@
 /** UI de UMA linha de produção do Reino. Componente controlado: recebe o
     estado da linha e callbacks do Reino (que é dono do loop e do save). A
-    linguagem visual reaproveita os estilos de Geradores/Ciclos — o que muda é
-    a coluna de nomes (geradores nomeados) e o recurso base. */
+    linguagem visual vem dos esqueletos compartilhados em src/styles
+    (productionList/cycleBars) — o que muda é a coluna de nomes (geradores
+    nomeados) e o recurso base. */
 
 import { useEffect, useRef, useSyncExternalStore } from 'react';
 import { fmt, fmtCost, fmtRate, fmtTime } from '../../lib/format';

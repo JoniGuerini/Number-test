@@ -1,9 +1,3 @@
-/* Grid dos Ciclos: nome, possui, produz, ciclo e botão (o log de
-   desbloqueios vive na aba Atividade). Só vale no desktop. */
-.rowWide {
-  grid-template-columns: 60px 150px 160px 160px 120px;
-}
-
 /* ===== Barra de progresso do ciclo (interna ao card) =====
    Canaleta em baixo relevo com o preenchimento em alto relevo por cima,
    mesma linguagem do slider da Config. Ocupa a largura útil do card:

@@ -27,7 +27,7 @@
 }
 
 /* Áreas esmaecidas nas bordas: indicam mais conteúdo e levam ao topo/fim
-   (mesmo padrão das listas de Geradores/Ciclos). */
+   (mesmo padrão da lista de produção do Reino). */
 .fade {
   position: absolute;
   left: 0;

@@ -1,6 +1,6 @@
 /** Persistência em localStorage com sistema de slots de save.
 
-    Cada slot agrupa os três jogos; o conteúdo dos saves e o motor que os
+    Cada slot guarda o save do Reino; o conteúdo dos saves e o motor que os
     consome não mudam — os slots só resolvem QUAL chave é lida/gravada, então
     a sincronia determinística e o catch-up ficam intactos. */
 

@@ -32,6 +32,20 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.18.1',
+    date: '05/07/2026',
+    time: '01:10',
+    title: 'Cleanup after the retirement',
+    summary:
+      'Sweeps away every leftover from the retired modes — smaller, tidier codebase.',
+    qol: [
+      'Activity lost its single-tab header: with Kingdom as the only mode, the log now opens straight into the summary and entries.',
+    ],
+    fixes: [
+      'Removed orphaned translation strings, styles and tuning scripts that only served Generators and Cycles, plus stale comments that still referred to them.',
+    ],
+  },
+  {
     version: 'v0.18.0',
     date: '05/07/2026',
     time: '00:55',
