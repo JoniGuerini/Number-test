@@ -32,6 +32,16 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.19.1',
+    date: '05/07/2026',
+    time: '02:05',
+    title: 'Leaderboard column balance',
+    summary: 'The ranking table distributes its columns evenly on wide screens.',
+    qol: [
+      'Player, clan and generator columns now share the extra width proportionally — no more giant gap after the player name — and the position column sits closer to the card edge.',
+    ],
+  },
+  {
     version: 'v0.19.0',
     date: '05/07/2026',
     time: '01:40',
