@@ -1,0 +1,44 @@
+---
+description: Pilar do jogo — simulação determinística bit a bit do Reino (engine.ts e novas mecânicas)
+alwaysApply: true
+---
+
+# Determinismo do motor (pilar inegociável)
+
+O Reino é uma simulação determinística: **estado = função pura do número de
+passos fixos**, ancorado no `startedAt` da linha. Duas máquinas com o mesmo
+save produzem a MESMA sequência de contas, bit a bit. É isso que sustenta o
+catch-up offline e o futuro ranking multiplayer justo. Nunca quebre isso.
+
+## Proibido (quebra saves existentes)
+
+Em `src/components/Reino/engine.ts`, nunca altere o resultado numérico de
+saves já existentes:
+
+- Constantes: `SIM_STEP_S`, `CYCLE_BASE_S`, `CYCLE_GROWTH`, `PROD_BASE`,
+  `PROD_STEP` e a curva de custos (`COST_SLOPE`, `COST_CURVE`).
+- Ordem das operações dentro do passo, arredondamentos, ou troca/upgrade do
+  `break_eternity.js` que mude resultados.
+- Qualquer influência do relógio de parede no resultado além da CONTAGEM de
+  passos derivada de `startedAt` (nada de `Date.now()` dentro da conta).
+
+## Regras para novas mecânicas
+
+- Toda mecânica que afeta a economia deve ser determinística: mesma entrada
+  (save) → mesma saída, independente de FPS, timezone ou máquina.
+- Nada de `Math.random()` em lógica de jogo; se precisar de aleatoriedade,
+  use RNG com semente derivada do save (e documente).
+- UI pode ler o estado à vontade; só não pode escrever fora das ações do
+  jogador (compras) e do avanço por passos.
+
+## Caminho certo para evoluir a economia
+
+Nunca altere a matemática existente silenciosamente. Se a economia precisar
+mudar: versione (campo de versão no save / nova temporada), mantenha o
+caminho antigo para saves antigos ou migre explicitamente num corte claro.
+
+## Verificação
+
+`scripts/simulate-reino.mjs` espelha o motor. Ao mexer no engine, atualize o
+script junto e compare a linha do tempo de desbloqueios antes/depois — ela
+deve ser idêntica para a mesma configuração.
