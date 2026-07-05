@@ -98,18 +98,18 @@
   animation: modalFade 0.15s ease-out;
 }
 
-/* Quadrado (mesma altura e largura), grande o bastante para as abas caberem
-   com a fonte normal, limitado às bordas da tela */
+/* Painel amplo (mais largo que alto), grande o bastante para as abas e o
+   conteúdo respirarem, limitado às bordas da tela */
 .modal {
   position: relative;
-  width: min(94vmin, max(460px, 48vmin));
-  height: min(94vmin, max(460px, 48vmin));
+  width: min(94vw, 760px);
+  height: min(90vh, 660px);
   display: flex;
   flex-direction: column;
   background: var(--paper);
   border-radius: 6px;
   box-shadow: var(--card-edge-lg);
-  padding: 18px;
+  padding: 22px;
   animation: modalPop 0.16s ease-out;
 }
 

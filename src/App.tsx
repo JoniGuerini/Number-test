@@ -3,10 +3,12 @@ import Reino from './components/Reino/Reino';
 import Activity from './components/Activity/Activity';
 import Chat from './components/Chat/Chat';
 import Leaderboard from './components/Leaderboard/Leaderboard';
+import Login from './components/Login/Login';
 import PatchNotes from './components/PatchNotes/PatchNotes';
 import Settings from './components/Settings/Settings';
 import FpsMeter from './components/FpsMeter/FpsMeter';
 import FullscreenToggle from './components/FullscreenToggle/FullscreenToggle';
+import { useAuth } from './lib/auth';
 import { useWakeLock } from './hooks/useWakeLock';
 import { useI18n } from './lib/locale';
 import { playPress, playRelease } from './lib/sound';
@@ -42,6 +44,8 @@ function readStoredPage(): Page {
 export default function App() {
   useWakeLock();
   const { t } = useI18n();
+  // Gate de autenticação (mock): sem usuário, mostra o login antes do jogo.
+  const user = useAuth();
 
   // Feedback sonoro global: um som ao pressionar qualquer botão habilitado e
   // outro (variação mais leve) ao soltar — sensação de tecla física.
@@ -82,6 +86,15 @@ export default function App() {
 
   // Config vive num modal sobre a interface (não é mais uma página exclusiva)
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // Ao deslogar (inclusive pelo "Sair da conta" dentro do Config): fecha o
+  // modal e volta a página para o Reino, para que o próximo login caia direto
+  // na tela do Reino em vez de restaurar a última aba visitada.
+  useEffect(() => {
+    if (!user) {
+      setSettingsOpen(false);
+      setPage('reino');
+    }
+  }, [user]);
   useEffect(() => {
     if (!settingsOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -137,6 +150,10 @@ export default function App() {
     deleteSlot(id);
     refreshSlots();
   };
+
+  // Sem usuário autenticado, o app é substituído pela tela de login (mock).
+  // Fica após todos os hooks para não quebrar a ordem de hooks do React.
+  if (!user) return <Login />;
 
   return (
     <div className={styles.frame}>

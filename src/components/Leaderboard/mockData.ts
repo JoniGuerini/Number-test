@@ -28,6 +28,8 @@ export const TOTAL_PLAYERS = 8_432;
 
 export const YOU_POS = 121;
 export const YOUR_CLAN = 'Vale Dourado';
+/** Temporada em que "você" começou a jogar (mock — perfil). */
+export const YOU_SEASON_JOINED = 3;
 
 export interface LbEntry {
   pos: number;

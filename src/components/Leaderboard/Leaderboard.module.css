@@ -65,15 +65,17 @@
   padding: 6px 8px;
 }
 
-/* Grid compartilhado por cabeçalho e linhas. As colunas de texto (jogador,
-   clã, gerador) são todas flexíveis: o espaço extra se distribui entre elas
-   em vez de virar um vão entre Jogador e Clã. */
+/* Grid compartilhado por cabeçalho e linhas. Só as duas primeiras colunas
+   (posição e variação) têm largura fixa; todas as demais — inclusive as
+   numéricas (trigo e prosperidade) — são frações, de modo que o espaço se
+   distribui de forma uniforme por toda a largura em vez de acumular vãos à
+   esquerda e espremer os números à direita. */
 .headRow,
 .row {
   display: grid;
   grid-template-columns:
-    30px 36px minmax(170px, 1.3fr) minmax(130px, 1fr) minmax(130px, 1fr)
-    90px 120px;
+    40px 44px minmax(0, 1.6fr) minmax(0, 1.2fr) minmax(0, 1.2fr)
+    minmax(0, 0.9fr) minmax(0, 1fr);
   align-items: center;
   gap: 10px;
   padding: 9px 10px;

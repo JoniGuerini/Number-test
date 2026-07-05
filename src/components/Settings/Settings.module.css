@@ -110,6 +110,78 @@
   margin-top: 4px;
 }
 
+/* ===== Perfil (dados do usuário logado — mock) ===== */
+.profileHead {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+  padding: 14px;
+  background: var(--surface);
+  border-radius: 6px;
+  box-shadow: var(--card-edge);
+}
+.profileId {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.profileName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 600 16px var(--mono);
+  color: var(--rank, var(--ink));
+}
+.profileRank {
+  font: 600 9.5px var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--rank, var(--ink-muted));
+}
+.profileVia {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 400 11px var(--mono);
+  color: var(--ink-muted);
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.statCard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border-radius: 4px;
+  box-shadow: var(--card-edge);
+}
+.statCardLabel {
+  font: 600 9px var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.statCardValue {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 500 13.5px var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.signoutBtn {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
 /* ===== Opções (linhas clicáveis) ===== */
 .option {
   display: flex;

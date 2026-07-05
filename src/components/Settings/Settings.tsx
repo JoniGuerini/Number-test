@@ -1,5 +1,6 @@
 import { useState, useSyncExternalStore } from 'react';
 import type { GameTab } from '../../App';
+import { signOut, useAuth } from '../../lib/auth';
 import {
   getDateLocale,
   LOCALES,
@@ -30,6 +31,12 @@ import {
   saveKeyForSlot,
   type SlotMeta,
 } from '../../lib/storage';
+import {
+  LB_GEN_CAP,
+  LB_LINE,
+  YOU_ENTRY,
+  YOU_SEASON_JOINED,
+} from '../Leaderboard/mockData';
 import styles from './Settings.module.css';
 
 const GAMES: GameTab[] = ['reino'];
@@ -59,9 +66,9 @@ const VIDEO_TOGGLES: {
   { key: 'showDomNodes', label: 'video.domNodes' },
 ];
 
-type ConfigTab = 'saves' | 'temas' | 'som' | 'video' | 'idioma';
+type ConfigTab = 'perfil' | 'saves' | 'temas' | 'som' | 'video' | 'idioma';
 
-const TABS: ConfigTab[] = ['saves', 'temas', 'som', 'video', 'idioma'];
+const TABS: ConfigTab[] = ['perfil', 'saves', 'temas', 'som', 'video', 'idioma'];
 
 /** Card de tema pintado com as cores dele mesmo, com mini-mockup dentro. */
 function ThemeCard({
@@ -131,7 +138,8 @@ export default function Settings({
   onRenameSlot,
 }: SettingsProps) {
   const { t, locale } = useI18n();
-  const [tab, setTab] = useState<ConfigTab>('saves');
+  const authUser = useAuth();
+  const [tab, setTab] = useState<ConfigTab>('perfil');
   // Slot com as opções (carregar / renomear / zerar) abertas abaixo dele
   const [expandedSlotId, setExpandedSlotId] = useState<string | null>(null);
   // Rascunho do nome no painel expandido (renomear)
@@ -185,6 +193,52 @@ export default function Settings({
       </nav>
 
       <div className={styles.body}>
+        {tab === 'perfil' && authUser && (
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>{t('tab.perfil')}</h2>
+            <p className={styles.sectionHint}>{t('profile.hint')}</p>
+
+            <div className={styles.profileHead}>
+              <div className={styles.profileId}>
+                <span className={styles.profileName} data-rank={YOU_ENTRY.rank}>
+                  {authUser.name}
+                </span>
+                <span className={styles.profileRank}>
+                  {t(`rank.${YOU_ENTRY.rank}` as TKey)}
+                </span>
+                <span className={styles.profileVia}>{authUser.email}</span>
+              </div>
+            </div>
+
+            <span className={styles.subLabel}>{t('profile.kingdom')}</span>
+            <div className={styles.statGrid}>
+              {(
+                [
+                  [t('chat.profile.ranking'), `#${YOU_ENTRY.pos.toLocaleString(getDateLocale())}`],
+                  [t('chat.profile.prosperity'), YOU_ENTRY.prosperity.toLocaleString(getDateLocale())],
+                  [t('chat.profile.wheat'), YOU_ENTRY.wheat],
+                  [t('chat.profile.topGen'), t(`reino.gen.${LB_LINE}.${YOU_ENTRY.gens}` as TKey)],
+                  [t('chat.profile.generators'), `${YOU_ENTRY.gens}/${LB_GEN_CAP}`],
+                  [t('chat.profile.clan'), YOU_ENTRY.clan ?? t('chat.profile.noClan')],
+                  [t('chat.profile.since'), t('chat.profile.season', { n: YOU_SEASON_JOINED })],
+                ] as [string, string][]
+              ).map(([label, value]) => (
+                <div className={styles.statCard} key={label}>
+                  <span className={styles.statCardLabel}>{label}</span>
+                  <span className={styles.statCardValue}>{value}</span>
+                </div>
+              ))}
+            </div>
+
+            <button
+              className={`btn-secondary ${styles.signoutBtn}`}
+              onClick={signOut}
+            >
+              {t('auth.signout')}
+            </button>
+          </section>
+        )}
+
         {tab === 'saves' && (
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>{t('saves.title')}</h2>

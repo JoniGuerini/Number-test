@@ -51,11 +51,15 @@ export const en: Dict = {
   'fps.max': 'max',
   'fps.newVersion': 'New version pending',
 
+  'tab.perfil': 'Profile',
   'tab.saves': 'Saves',
   'tab.temas': 'Themes',
   'tab.som': 'Sound',
   'tab.video': 'Video',
   'tab.idioma': 'Language',
+
+  'profile.hint': 'Your account and your kingdom’s progress.',
+  'profile.kingdom': 'Kingdom',
 
   'saves.title': 'Saves',
   'saves.hint': 'Your saved games.',
@@ -189,4 +193,26 @@ export const en: Dict = {
   'lb.col.prosperity': 'Prosperity',
   'lb.you': 'You',
   'lb.yourPosition': 'Your position',
+
+  // Authentication (login — prototype/mock)
+  'auth.mockNote': 'Prototype',
+  'auth.title': 'Number Test',
+  'auth.tagline': 'Sign in to link your kingdom to your account.',
+  'auth.tab.signin': 'Sign in',
+  'auth.tab.signup': 'Sign up',
+  'auth.name': 'Name',
+  'auth.namePlaceholder': 'What should we call you',
+  'auth.email': 'Email',
+  'auth.emailPlaceholder': 'you@example.com',
+  'auth.password': 'Password',
+  'auth.passwordPlaceholder': '••••••••',
+  'auth.forgot': 'Forgot?',
+  'auth.signin': 'Sign in',
+  'auth.signup': 'Create account',
+  'auth.or': 'or',
+  'auth.google': 'Google',
+  'auth.apple': 'Apple',
+  'auth.legal': 'By continuing, you agree to the Terms and Privacy Policy.',
+  'auth.signedInAs': 'Signed in as',
+  'auth.signout': 'Sign out',
 };

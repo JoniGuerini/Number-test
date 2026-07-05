@@ -1,0 +1,235 @@
+/* Tela de login (mock). Card único centralizado sobre o fundo do app, no mesmo
+   espírito do card de "Modo de jogo": paper + card-edge-lg, título serif em
+   latão, tipografia mono nos controles. */
+
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg);
+  overflow-y: auto;
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  background: var(--paper);
+  border-radius: 6px;
+  box-shadow: var(--card-edge-lg);
+  padding: 30px 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Selo "protótipo" no canto, mesmo tom do aviso do chat mock */
+.mockNote {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font: 600 8.5px var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  margin-top: 4px;
+}
+.title {
+  font: 500 26px/1.1 var(--serif);
+  font-variation-settings: 'opsz' 40;
+  letter-spacing: -0.01em;
+  color: var(--brass-deep);
+}
+.tagline {
+  font: 400 12px/1.5 var(--mono);
+  color: var(--ink-muted);
+  max-width: 26ch;
+}
+
+/* Abas Entrar / Criar conta — mesmo padrão das abas de escopo do ranking */
+.tabs {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+.tab {
+  flex: 1;
+  background: var(--surface);
+  border: none;
+  box-shadow: var(--card-edge);
+  border-radius: 4px;
+  padding: 10px 0;
+  font: 500 12px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+.tab:hover {
+  background: var(--surface-hover);
+  color: var(--ink);
+}
+.tabActive,
+.tabActive:hover {
+  background: var(--surface-deep);
+  color: var(--brass-deep);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.labelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.label {
+  font: 600 9.5px var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.forgot {
+  background: none;
+  border: none;
+  padding: 0;
+  font: 500 10px var(--mono);
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.forgot:hover {
+  color: var(--brass-deep);
+}
+
+.input {
+  width: 100%;
+  background: var(--surface);
+  border: none;
+  box-shadow: var(--card-edge);
+  border-radius: 4px;
+  padding: 11px 12px;
+  font: 400 13px var(--mono);
+  color: var(--ink);
+  transition: box-shadow 0.15s;
+}
+.input::placeholder {
+  color: var(--ink-faint);
+}
+.input:focus {
+  outline: none;
+  box-shadow: var(--card-edge), 0 0 0 1.5px var(--brass);
+}
+
+/* Autofill do Chrome/WebKit: o fundo azul-claro dele é imune a `background` —
+   pinta-se por cima com um box-shadow interno enorme na cor da superfície e
+   troca-se a cor do texto por `-webkit-text-fill-color`. A transition longa
+   evita o flash azul no instante do preenchimento. */
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--ink);
+  caret-color: var(--ink);
+  box-shadow: var(--card-edge), inset 0 0 0 1000px var(--surface);
+  transition: box-shadow 0.15s, background-color 6000s;
+}
+.input:-webkit-autofill:focus {
+  box-shadow: var(--card-edge), 0 0 0 1.5px var(--brass),
+    inset 0 0 0 1000px var(--surface);
+}
+
+.submit {
+  width: 100%;
+  margin-top: 2px;
+}
+
+/* Divisor "ou" com filetes dos dois lados */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink-faint);
+  font: 500 9.5px var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-soft);
+}
+
+.providers {
+  display: flex;
+  gap: 8px;
+}
+.provider {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--surface);
+  border: none;
+  box-shadow: var(--card-edge);
+  border-radius: 4px;
+  padding: 10px 0;
+  font: 500 12px var(--mono);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s, transform 0.08s;
+}
+.provider:hover {
+  background: var(--surface-hover);
+  color: var(--ink);
+}
+.provider:active {
+  box-shadow: var(--card-edge-press);
+  transform: translateY(1px);
+}
+.providerIcon {
+  flex-shrink: 0;
+}
+
+.legal {
+  text-align: center;
+  font: 400 10px/1.5 var(--mono);
+  color: var(--ink-faint);
+  max-width: 30ch;
+  margin: 0 auto;
+}
+
+@media (max-width: 440px) {
+  .card {
+    padding: 26px 20px 20px;
+  }
+  .providers {
+    flex-direction: column;
+  }
+}

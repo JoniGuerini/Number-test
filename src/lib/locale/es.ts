@@ -51,11 +51,15 @@ export const es: Dict = {
   'fps.max': 'máx',
   'fps.newVersion': 'Nueva versión pendiente',
 
+  'tab.perfil': 'Perfil',
   'tab.saves': 'Partidas guardadas',
   'tab.temas': 'Temas',
   'tab.som': 'Sonido',
   'tab.video': 'Vídeo',
   'tab.idioma': 'Idioma',
+
+  'profile.hint': 'Tus datos y el progreso de tu reino.',
+  'profile.kingdom': 'Reino',
 
   'saves.title': 'Partidas guardadas',
   'saves.hint': 'Tus partidas guardadas.',
@@ -189,4 +193,26 @@ export const es: Dict = {
   'lb.col.prosperity': 'Prosperidad',
   'lb.you': 'Tú',
   'lb.yourPosition': 'Tu posición',
+
+  // Autenticación (login — prototipo/mock)
+  'auth.mockNote': 'Prototipo',
+  'auth.title': 'Number Test',
+  'auth.tagline': 'Inicia sesión para vincular tu reino a tu cuenta.',
+  'auth.tab.signin': 'Entrar',
+  'auth.tab.signup': 'Crear cuenta',
+  'auth.name': 'Nombre',
+  'auth.namePlaceholder': 'Cómo quieres que te llamemos',
+  'auth.email': 'Correo',
+  'auth.emailPlaceholder': 'tu@ejemplo.com',
+  'auth.password': 'Contraseña',
+  'auth.passwordPlaceholder': '••••••••',
+  'auth.forgot': '¿Olvidaste?',
+  'auth.signin': 'Entrar',
+  'auth.signup': 'Crear cuenta',
+  'auth.or': 'o',
+  'auth.google': 'Google',
+  'auth.apple': 'Apple',
+  'auth.legal': 'Al continuar, aceptas los Términos y la Política de Privacidad.',
+  'auth.signedInAs': 'Conectado como',
+  'auth.signout': 'Cerrar sesión',
 };

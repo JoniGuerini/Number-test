@@ -9,7 +9,7 @@ export const pt = {
   'nav.chat': 'Social',
   'nav.classificacao': 'Classificação',
   'nav.notas': 'Notas de atualização',
-  'nav.config': 'Config',
+  'nav.config': 'Configurações',
 
   // Compartilhado pelo app todo
   'common.exportCsv': 'Exportar CSV',
@@ -58,11 +58,16 @@ export const pt = {
   'fps.newVersion': 'Nova versão pendente',
 
   // Config: tabs
+  'tab.perfil': 'Perfil',
   'tab.saves': 'Jogos salvos',
   'tab.temas': 'Temas',
   'tab.som': 'Som',
   'tab.video': 'Vídeo',
   'tab.idioma': 'Idioma',
+
+  // Config: Perfil (dados do usuário logado — mock)
+  'profile.hint': 'Seus dados e o progresso do seu reino.',
+  'profile.kingdom': 'Reino',
 
   // Config: Saves
   'saves.title': 'Jogos salvos',
@@ -207,6 +212,28 @@ export const pt = {
   'lb.col.prosperity': 'Prosperidade',
   'lb.you': 'Você',
   'lb.yourPosition': 'Sua posição',
+
+  // Autenticação (login — protótipo/mock)
+  'auth.mockNote': 'Protótipo',
+  'auth.title': 'Number Test',
+  'auth.tagline': 'Entre para vincular seu reino à sua conta.',
+  'auth.tab.signin': 'Entrar',
+  'auth.tab.signup': 'Criar conta',
+  'auth.name': 'Nome',
+  'auth.namePlaceholder': 'Como quer ser chamado',
+  'auth.email': 'E-mail',
+  'auth.emailPlaceholder': 'voce@exemplo.com',
+  'auth.password': 'Senha',
+  'auth.passwordPlaceholder': '••••••••',
+  'auth.forgot': 'Esqueceu?',
+  'auth.signin': 'Entrar',
+  'auth.signup': 'Criar conta',
+  'auth.or': 'ou',
+  'auth.google': 'Google',
+  'auth.apple': 'Apple',
+  'auth.legal': 'Ao continuar, você concorda com os Termos e a Política de Privacidade.',
+  'auth.signedInAs': 'Conectado como',
+  'auth.signout': 'Sair da conta',
 };
 
 export type TKey = keyof typeof pt;

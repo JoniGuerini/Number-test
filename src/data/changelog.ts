@@ -32,6 +32,29 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.20.0',
+    date: '05/07/2026',
+    time: '03:17',
+    title: 'Login & profile preview',
+    summary:
+      'A mock sign-in gate and a profile tab, groundwork for binding saves to an account.',
+    major: [
+      'New login screen (100% mock): the app now opens on a sign-in gate — Sign in / Create account tabs with email and password, plus Google and Apple providers. Any submit "authenticates" and enters the game, and the choice is remembered so you land straight in your Kingdom next time. First step toward tying saves to a user account.',
+    ],
+    minor: [
+      'New Profile tab in Settings (now the default tab): shows the signed-in user — name, rank and email — plus your Kingdom stats (ranking, prosperity, wheat/s, top generator, generators, clan and the season you started playing). "Sign out" lives here.',
+    ],
+    qol: [
+      'The Settings modal is now a wider, taller panel instead of a square, giving the tabs and content more room to breathe.',
+      'Leaderboard columns now spread evenly across the full width — the numeric columns (wheat, prosperity) flex too, instead of being clamped to the right edge.',
+      'Portuguese footer: "Config" is now spelled out as "Configurações", matching the other unabbreviated tabs.',
+    ],
+    fixes: [
+      'Signing out from within Settings no longer leaves the Config modal open on the next login — you now enter straight into the Kingdom screen.',
+      'Login inputs keep the dark theme when the browser autofills a saved suggestion, instead of flashing the default blue background.',
+    ],
+  },
+  {
     version: 'v0.19.1',
     date: '05/07/2026',
     time: '02:05',
