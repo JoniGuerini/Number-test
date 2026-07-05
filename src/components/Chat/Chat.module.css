@@ -30,25 +30,7 @@
   grid-area: members;
 }
 
-/* ===== Cores de rank (independentes do tema — são "insígnias" do jogo) ===== */
-.chat [data-rank='bronze'] {
-  --rank: #c08457;
-}
-.chat [data-rank='prata'] {
-  --rank: #b9c2cc;
-}
-.chat [data-rank='ouro'] {
-  --rank: #e2b23c;
-}
-.chat [data-rank='platina'] {
-  --rank: #57c9b8;
-}
-.chat [data-rank='diamante'] {
-  --rank: #6cb6ff;
-}
-.chat [data-rank='mestre'] {
-  --rank: #e0669a;
-}
+/* Cores de rank: vêm do global src/styles/ranks.css via data-rank. */
 
 /* ===== Sidebar de conversas ===== */
 .sidebar {

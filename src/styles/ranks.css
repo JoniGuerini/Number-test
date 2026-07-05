@@ -1,0 +1,21 @@
+/* Cores das insígnias de rank do multiplayer (independentes do tema — são
+   identidade do jogo). Qualquer elemento com data-rank ganha a var --rank;
+   usada pelo Social (chat) e pela Classificação. */
+[data-rank='bronze'] {
+  --rank: #c08457;
+}
+[data-rank='prata'] {
+  --rank: #b9c2cc;
+}
+[data-rank='ouro'] {
+  --rank: #e2b23c;
+}
+[data-rank='platina'] {
+  --rank: #57c9b8;
+}
+[data-rank='diamante'] {
+  --rank: #6cb6ff;
+}
+[data-rank='mestre'] {
+  --rank: #e0669a;
+}

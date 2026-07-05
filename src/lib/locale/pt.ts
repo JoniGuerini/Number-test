@@ -7,6 +7,7 @@ export const pt = {
   'nav.reino': 'Reino',
   'nav.atividade': 'Atividade',
   'nav.chat': 'Social',
+  'nav.classificacao': 'Classificação',
   'nav.notas': 'Notas de atualização',
   'nav.config': 'Config',
 
@@ -183,12 +184,29 @@ export const pt = {
   'chat.you': 'Você',
   'chat.sys.joined': '{name} entrou no canal',
   'chat.sys.rankup': '{name} subiu para {rank}',
-  'chat.rank.bronze': 'Bronze',
-  'chat.rank.prata': 'Prata',
-  'chat.rank.ouro': 'Ouro',
-  'chat.rank.platina': 'Platina',
-  'chat.rank.diamante': 'Diamante',
-  'chat.rank.mestre': 'Mestre',
+
+  // Insígnias de rank do multiplayer (Social + Classificação)
+  'rank.bronze': 'Bronze',
+  'rank.prata': 'Prata',
+  'rank.ouro': 'Ouro',
+  'rank.platina': 'Platina',
+  'rank.diamante': 'Diamante',
+  'rank.mestre': 'Mestre',
+
+  // Classificação (ranking — protótipo/mock)
+  'lb.scope.global': 'Global',
+  'lb.scope.amigos': 'Amigos',
+  'lb.scope.cla': 'Clã',
+  'lb.season': 'Temporada {n}',
+  'lb.endsIn': 'termina em {time}',
+  'lb.players': '{n} jogadores',
+  'lb.col.player': 'Jogador',
+  'lb.col.clan': 'Clã',
+  'lb.col.topGen': 'Gerador',
+  'lb.col.wheat': 'Trigo/s',
+  'lb.col.prosperity': 'Prosperidade',
+  'lb.you': 'Você',
+  'lb.yourPosition': 'Sua posição',
 };
 
 export type TKey = keyof typeof pt;

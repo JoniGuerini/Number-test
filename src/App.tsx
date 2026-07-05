@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Reino from './components/Reino/Reino';
 import Activity from './components/Activity/Activity';
 import Chat from './components/Chat/Chat';
+import Leaderboard from './components/Leaderboard/Leaderboard';
 import PatchNotes from './components/PatchNotes/PatchNotes';
 import Settings from './components/Settings/Settings';
 import FpsMeter from './components/FpsMeter/FpsMeter';
@@ -22,11 +23,11 @@ import {
 import styles from './App.module.css';
 
 export type GameTab = 'reino';
-type Page = GameTab | 'atividade' | 'chat' | 'notas';
+type Page = GameTab | 'atividade' | 'chat' | 'classificacao' | 'notas';
 
 /* A última página visitada sobrevive ao refresh */
 const PAGE_KEY = 'number-test:page';
-const PAGES: Page[] = ['reino', 'atividade', 'chat', 'notas'];
+const PAGES: Page[] = ['reino', 'atividade', 'chat', 'classificacao', 'notas'];
 
 function readStoredPage(): Page {
   try {
@@ -161,6 +162,11 @@ export default function App() {
         className={`${styles.contentFull} ${page !== 'chat' ? styles.hidden : ''}`}
       >
         <Chat />
+      </main>
+      <main
+        className={`${styles.contentFull} ${page !== 'classificacao' ? styles.hidden : ''}`}
+      >
+        <Leaderboard />
       </main>
       <main
         className={`${styles.contentFull} ${page !== 'notas' ? styles.hidden : ''}`}

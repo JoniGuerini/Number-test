@@ -1,0 +1,292 @@
+.wrap {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ===== Barra superior: abas de escopo + info da temporada ===== */
+.topBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.tab {
+  background: var(--paper);
+  border: none;
+  box-shadow: var(--card-edge);
+  border-radius: 4px;
+  padding: 9px 18px;
+  font: 500 12px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s, transform 0.08s;
+}
+.tab:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+.tab:active {
+  box-shadow: var(--card-edge-press);
+  transform: translateY(1px);
+}
+.tabActive,
+.tabActive:hover {
+  background: var(--surface-deep);
+  color: var(--brass-deep);
+}
+
+.seasonInfo {
+  margin-left: auto;
+  font: 400 12px var(--mono);
+  color: var(--ink-muted);
+}
+
+/* ===== Card da tabela ===== */
+.card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  border-radius: 6px;
+  box-shadow: var(--card-edge);
+  padding: 6px 8px;
+}
+
+/* Grid compartilhado por cabeçalho e linhas */
+.headRow,
+.row {
+  display: grid;
+  grid-template-columns: 44px 44px minmax(0, 1fr) 150px 150px 90px 120px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+}
+
+.headRow {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border-soft);
+  font: 600 10px var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+/* Cabeçalhos numéricos alinham com os valores */
+.headRow .wheat,
+.headRow .score {
+  color: var(--ink-faint);
+}
+
+.listWrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-deep) transparent;
+}
+.scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll::-webkit-scrollbar-thumb {
+  background: var(--surface-deep);
+  border-radius: 999px;
+}
+.scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--brass);
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  padding: 2px 0 6px;
+}
+
+.row {
+  border-radius: 4px;
+  transition: background 0.12s;
+}
+.row:hover {
+  background: var(--surface);
+}
+
+/* Sua linha: destaque em latão, também na fixada do rodapé */
+.rowYou,
+.rowYou:hover {
+  background: color-mix(in srgb, var(--brass-deep) 12%, transparent);
+}
+
+/* ===== Colunas ===== */
+.pos {
+  font: 600 13px var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--rank, var(--ink-muted));
+  text-align: right;
+}
+
+.delta {
+  font: 500 10.5px var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-faint);
+  text-align: center;
+}
+.up {
+  color: var(--tier-startup);
+}
+.down {
+  color: var(--accent);
+}
+
+.player {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 600 13.5px var(--mono);
+  color: var(--rank, var(--ink));
+}
+.rankLabel {
+  flex-shrink: 0;
+  font: 500 9.5px var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.clan {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 400 12.5px var(--mono);
+  color: var(--ink-muted);
+}
+
+.gen {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  overflow: hidden;
+  white-space: nowrap;
+  font: 400 12.5px var(--mono);
+  color: var(--ink-soft);
+}
+.genCount {
+  font: 400 10.5px var(--mono);
+  font-style: normal;
+  color: var(--ink-faint);
+}
+
+.wheat {
+  font: 400 12.5px var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+  text-align: right;
+}
+
+.score {
+  font: 600 13px var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--brass-deep);
+  text-align: right;
+}
+
+/* ===== Fades de rolagem (mesmo padrão das outras listas) ===== */
+.fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 52px;
+  z-index: 2;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 500 18px var(--mono);
+  color: var(--ink-muted);
+  transition: color 0.15s;
+}
+.fade:hover {
+  color: var(--brass-deep);
+}
+.fadeTop {
+  top: 0;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(to bottom, var(--paper) 35%, transparent);
+}
+.fadeBottom {
+  bottom: 0;
+  border-radius: 0 0 6px 6px;
+  background: linear-gradient(to top, var(--paper) 35%, transparent);
+}
+
+/* ===== Sua posição (fixada no rodapé do card, fora da rolagem) ===== */
+.youBar {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border-soft);
+  padding-top: 6px;
+}
+.youLabel {
+  display: block;
+  padding: 2px 12px 4px;
+  font: 600 9.5px var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* ===== Responsivo ===== */
+@media (max-width: 860px) {
+  .headRow,
+  .row {
+    grid-template-columns: 40px 40px minmax(0, 1fr) 120px 110px;
+  }
+  .clan,
+  .wheat {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .headRow,
+  .row {
+    grid-template-columns: 34px 34px minmax(0, 1fr) 96px;
+    gap: 8px;
+    padding: 8px 8px;
+  }
+  .gen {
+    display: none;
+  }
+  .seasonInfo {
+    margin-left: 0;
+  }
+}

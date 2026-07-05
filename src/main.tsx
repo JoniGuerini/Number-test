@@ -7,6 +7,7 @@ import '@fontsource-variable/jetbrains-mono';
 import './styles/tokens.css';
 import './styles/global.css';
 import './styles/buttons.css';
+import './styles/ranks.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

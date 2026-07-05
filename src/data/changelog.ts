@@ -32,6 +32,21 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.19.0',
+    date: '05/07/2026',
+    time: '01:40',
+    title: 'Leaderboard preview',
+    summary:
+      'A mock leaderboard joins the nav: season top 100 by prosperity, with friends and clan views.',
+    major: [
+      'New Leaderboard page (100% mock): the season ranking by prosperity. Top 100 with podium medals, daily position change (▲/▼), each player\'s rank, clan, highest generator and wheat/s — same cast as the Social preview.',
+      'Global, Friends and Clan tabs; outside the top 100 your own row stays pinned at the bottom of the card so you always see where you stand.',
+    ],
+    qol: [
+      'Rank badge colors moved to a shared stylesheet used by both Social and the Leaderboard (single source of truth).',
+    ],
+  },
+  {
     version: 'v0.18.1',
     date: '05/07/2026',
     time: '01:10',

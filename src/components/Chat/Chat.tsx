@@ -446,7 +446,7 @@ export default function Chat() {
                 {active.user}
               </span>
               <span className={styles.headerRank}>
-                {activeRank && t(`chat.rank.${activeRank}` as TKey)}
+                {activeRank && t(`rank.${activeRank}` as TKey)}
               </span>
               <span className={styles.online}>
                 {dmOnline ? (
@@ -491,7 +491,7 @@ export default function Chat() {
                                   Object.entries(msg.sysParams).map(([k, v]) => [
                                     k,
                                     typeof v === 'string' &&
-                                    v.startsWith('chat.rank.')
+                                    v.startsWith('rank.')
                                       ? t(v as TKey)
                                       : v,
                                   ])
@@ -516,7 +516,7 @@ export default function Chat() {
                         </span>
                         {msg.rank && (
                           <span className={styles.badge}>
-                            {t(`chat.rank.${msg.rank}` as TKey)}
+                            {t(`rank.${msg.rank}` as TKey)}
                           </span>
                         )}
                         <span className={styles.time}>{msg.time}</span>
@@ -580,7 +580,7 @@ export default function Chat() {
                     {p.name}
                   </span>
                   <span className={styles.mentionRank}>
-                    {t(`chat.rank.${p.rank}` as TKey)}
+                    {t(`rank.${p.rank}` as TKey)}
                   </span>
                 </button>
               ))}
@@ -641,7 +641,7 @@ export default function Chat() {
                     </span>
                   </button>
                   <span className={styles.memberRank}>
-                    {t(`chat.rank.${p.rank}` as TKey)}
+                    {t(`rank.${p.rank}` as TKey)}
                   </span>
                 </div>
               ))}
@@ -685,7 +685,7 @@ export default function Chat() {
                       </span>
                     </button>
                     <span className={styles.memberRank}>
-                      {t(`chat.rank.${p.rank}` as TKey)}
+                      {t(`rank.${p.rank}` as TKey)}
                     </span>
                   </div>
                 ))}
@@ -804,7 +804,7 @@ export default function Chat() {
                       {p.name}
                     </span>
                     <span className={styles.profileRank}>
-                      {t(`chat.rank.${p.rank}` as TKey)}
+                      {t(`rank.${p.rank}` as TKey)}
                     </span>
                     <span className={styles.profileStatus}>
                       <i
