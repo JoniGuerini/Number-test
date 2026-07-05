@@ -99,20 +99,25 @@ export default function Reino() {
 
   const def = lineDefOf(activeLine);
   const line = lines[activeLine];
+  // Na tela de escolha de modo (linha ativa ainda não iniciada) não faz sentido
+  // mostrar as tabs de linhas — nada foi criado ainda.
+  const onModeSelect = def.enabled && !!line && !line.started;
 
   return (
     <div className={styles.reino}>
-      <nav className={styles.lineTabs}>
-        {LINES.map((l) => (
-          <button
-            key={l.id}
-            className={`${styles.lineTab} ${activeLine === l.id ? styles.lineTabActive : ''}`}
-            onClick={() => setActiveLine(l.id)}
-          >
-            {t(`reino.line.${l.id}` as TKey)}
-          </button>
-        ))}
-      </nav>
+      {!onModeSelect && (
+        <nav className={styles.lineTabs}>
+          {LINES.map((l) => (
+            <button
+              key={l.id}
+              className={`${styles.lineTab} ${activeLine === l.id ? styles.lineTabActive : ''}`}
+              onClick={() => setActiveLine(l.id)}
+            >
+              {t(`reino.line.${l.id}` as TKey)}
+            </button>
+          ))}
+        </nav>
+      )}
 
       {def.enabled && line ? (
         <ProductionLine

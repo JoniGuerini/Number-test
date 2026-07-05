@@ -3,6 +3,7 @@ import Generators from './components/Generators/Generators';
 import Cycles from './components/Cycles/Cycles';
 import Reino from './components/Reino/Reino';
 import Activity from './components/Activity/Activity';
+import Chat from './components/Chat/Chat';
 import PatchNotes from './components/PatchNotes/PatchNotes';
 import Settings from './components/Settings/Settings';
 import FpsMeter from './components/FpsMeter/FpsMeter';
@@ -23,11 +24,11 @@ import {
 import styles from './App.module.css';
 
 export type GameTab = 'geradores' | 'ciclos' | 'reino';
-type Page = GameTab | 'atividade' | 'notas';
+type Page = GameTab | 'atividade' | 'chat' | 'notas';
 
 /* A última página visitada sobrevive ao refresh */
 const PAGE_KEY = 'number-test:page';
-const PAGES: Page[] = ['reino', 'geradores', 'ciclos', 'atividade', 'notas'];
+const PAGES: Page[] = ['reino', 'geradores', 'ciclos', 'atividade', 'chat', 'notas'];
 
 function readStoredPage(): Page {
   try {
@@ -169,6 +170,11 @@ export default function App() {
           key={`${slotEpoch}:${resetKeys.ciclos}:${resetKeys.geradores}:${resetKeys.reino}`}
           onNavigate={setPage}
         />
+      </main>
+      <main
+        className={`${styles.contentFull} ${page !== 'chat' ? styles.hidden : ''}`}
+      >
+        <Chat />
       </main>
       <main
         className={`${styles.contentFull} ${page !== 'notas' ? styles.hidden : ''}`}

@@ -32,6 +32,26 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.17.0',
+    date: '05/07/2026',
+    time: '00:40',
+    title: 'Social — chat preview',
+    summary:
+      'A rich preview of the upcoming multiplayer chat, with friends, ranking and profiles.',
+    major: [
+      'New Social page (100% mock, for now): a preview of the future multiplayer chat. Public channels (Global, Ranked, Clan) and 1:1 direct messages, with rank-colored names and system events like rank-ups.',
+      'Friends: a friends list sits next to the online players, each with an online/offline status. Right-click any player — in Online, Friends or the DM list — for options: view profile, open chat, add/remove friend and delete conversation.',
+      'Player profile modal: ranking position, prosperity, wheat/s, top generator, generators unlocked, clan and the season they started playing.',
+    ],
+    minor: [
+      'Mentions: @-autocomplete while you type, highlighted mentions inside messages, and a persistent "jump to mention" card that jumps to the first message that mentioned you — shown only while that message is off-screen.',
+      'Unread counters for DMs and per-channel mention counts; your own messages align to the right, chat-app style.',
+    ],
+    qol: [
+      'Kingdom: the production-line tabs are now hidden on the mode-select screen, where there is nothing to switch between yet.',
+    ],
+  },
+  {
     version: 'v0.16.11',
     date: '04/07/2026',
     time: '20:19',
