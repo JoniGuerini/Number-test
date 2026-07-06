@@ -12,13 +12,16 @@
 //     em 72h — nada de extrapolação) e regeneração de
 //     src/data/simulatedUnlocks.ts (aba Simulada da Atividade).
 //
-// O modo deep roda as 5 linhas EM PARALELO (worker threads, uma por núcleo):
-// o tempo total é o da linha mais lenta (~4–5s de execução por linha-ano),
-// não a soma. Cada linha é checkpointada em scripts/.sim-checkpoint.json ao
-// terminar — rodadas interrompidas retomam de onde pararam (linhas completas
-// ou do mesmo horizonte são reaproveitadas; mudou o balanceamento, o
-// checkpoint é invalidado sozinho via fingerprint). SIM_OUT=<path> desvia a
-// emissão do .ts (útil para testes).
+// O modo deep é incremental e roda as 5 linhas EM PARALELO (worker threads):
+//   - linha completa (20/20) no checkpoint  → reaproveitada em qualquer
+//     horizonte, nunca re-simula;
+//   - horizonte pedido ≤ já simulado        → recorte instantâneo;
+//   - horizonte pedido > já simulado        → RETOMA do estado salvo e paga
+//     só o trecho novo (determinístico: idêntico a simular do zero);
+//   - durante a rodada, cada linha salva um snapshot do estado a cada ~60s
+//     em scripts/.sim-checkpoint.json — interrupção perde no máximo isso.
+// Mudou o balanceamento? O fingerprint invalida o checkpoint sozinho.
+// SIM_OUT=<path> desvia a emissão do .ts (útil para testes).
 import Decimal from 'break_eternity.js';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -31,6 +34,8 @@ const FAST_HORIZON_S = 72 * 3600;
 const YEAR_S = 365 * 86400;
 /** Horizonte da simulação profunda, em anos (arg opcional do modo deep). */
 const DEEP_YEARS = Math.max(1, Number(process.argv[3]) || 15);
+/** Custo aproximado de execução por linha-ano simulada (para estimativas). */
+const WALL_S_PER_LINE_YEAR = 4.5;
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CHECKPOINT_PATH = join(HERE, '.sim-checkpoint.json');
@@ -111,9 +116,13 @@ function simulateDec(eco, horizonS) {
 // ===== Simulação rápida (floats nativos) — para horizontes profundos =====
 // Mesma lógica passo a passo; troca break_eternity por double (os valores do
 // jogo cabem folgados em 1.8e308). Paridade contra o Decimal é verificada em
-// 72h antes de confiar no resultado profundo. `onEvent` emite desbloqueios e
-// um heartbeat periódico (para acompanhar rodadas de horas).
-function simulateFast(eco, horizonS, onEvent) {
+// 72h antes de confiar no resultado profundo.
+//
+// `resume` (opcional) continua uma simulação anterior a partir do estado
+// salvo — como a continuação é função pura do estado, o resultado é idêntico
+// ao de simular tudo do zero. `onEvent` emite desbloqueios e um heartbeat
+// periódico com snapshot do estado (para checkpoint em rodadas longas).
+function simulateFast(eco, horizonS, onEvent, resume) {
   const baseCost = [];
   const cycleSteps = [];
   const prodPer = [];
@@ -123,21 +132,42 @@ function simulateFast(eco, horizonS, onEvent) {
     prodPer.push(eco.prodBase + eco.prodStep * i);
   }
 
-  let base = 1;
-  const amount = [0];
-  const bought = [0];
-  const cycleStep = [0];
-  const nextCost = [baseCost[0]];
-  const unlocks = [];
-  let uptime = 0;
-  const steps = Math.floor(horizonS / SIM_STEP_S);
+  let base, uptime, amount, bought, cycleStep, unlocks, startStep;
+  if (resume) {
+    ({ base, uptime } = resume.state);
+    amount = [...resume.state.amount];
+    bought = [...resume.state.bought];
+    cycleStep = [...resume.state.cycleStep];
+    unlocks = [...resume.unlocks];
+    startStep = Math.round(resume.simulatedS / SIM_STEP_S);
+  } else {
+    base = 1;
+    uptime = 0;
+    amount = [0];
+    bought = [0];
+    cycleStep = [0];
+    unlocks = [];
+    startStep = 0;
+  }
+  // Derivado de `bought` com a MESMA expressão da compra — determinístico.
+  const nextCost = bought.map((b, i) => baseCost[i] * Math.pow(BUY_GROWTH, b));
+
+  const totalSteps = Math.floor(horizonS / SIM_STEP_S);
+  const snapshot = () => ({
+    base,
+    uptime,
+    amount: [...amount],
+    bought: [...bought],
+    cycleStep: [...cycleStep],
+  });
 
   // Heartbeat: checa o relógio 1x por dia simulado, emite a cada >=60s reais.
   const BEAT_CHECK_STEPS = 86400 / SIM_STEP_S;
   let beatCountdown = BEAT_CHECK_STEPS;
   let lastBeat = Date.now();
 
-  for (let s = 0; s < steps && unlocks.length < CAP; s++) {
+  let s = startStep;
+  for (; s < totalSteps && unlocks.length < CAP; s++) {
     if (bought[0] > 0) uptime += SIM_STEP_S;
 
     if (onEvent && --beatCountdown === 0) {
@@ -145,7 +175,13 @@ function simulateFast(eco, horizonS, onEvent) {
       const now = Date.now();
       if (now - lastBeat >= 60_000) {
         lastBeat = now;
-        onEvent({ type: 'beat', doneS: s * SIM_STEP_S, horizonS });
+        onEvent({
+          type: 'beat',
+          simulatedS: s * SIM_STEP_S,
+          horizonS,
+          unlocks: [...unlocks],
+          state: snapshot(),
+        });
       }
     }
 
@@ -185,14 +221,21 @@ function simulateFast(eco, horizonS, onEvent) {
       break;
     }
   }
-  return unlocks;
+
+  const complete = unlocks.length >= CAP;
+  return {
+    unlocks,
+    simulatedS: s * SIM_STEP_S,
+    // Linha completa dispensa estado (nunca mais precisa continuar).
+    state: complete ? null : snapshot(),
+  };
 }
 
-// ===== Worker: simula UMA linha e devolve os desbloqueios =====
+// ===== Worker: simula UMA linha (do zero ou retomando) =====
 if (!isMainThread) {
-  const { eco, horizonS } = workerData;
-  const unlocks = simulateFast(eco, horizonS, (ev) => parentPort.postMessage(ev));
-  parentPort.postMessage({ type: 'done', unlocks });
+  const { eco, horizonS, resume } = workerData;
+  const result = simulateFast(eco, horizonS, (ev) => parentPort.postMessage(ev), resume);
+  parentPort.postMessage({ type: 'done', ...result });
 }
 
 // ===== Formatadores =====
@@ -219,21 +262,30 @@ function n(dec) {
   return (scaled < 100 ? scaled.toFixed(1) : Math.floor(scaled)) + (SUF[tier] ?? 'e' + tier * 3);
 }
 
-// ===== Checkpoint (retomada de rodadas longas) =====
-// Invalida sozinho quando o balanceamento muda: o fingerprint cobre tudo que
-// afeta o resultado da simulação.
+// ===== Checkpoint (retomada incremental de rodadas) =====
+// Formato por linha: { unlocks, simulatedS, state|null }. Invalida sozinho
+// quando o balanceamento muda (fingerprint cobre tudo que afeta a conta).
 const FINGERPRINT = JSON.stringify({ SIM_STEP_S, CAP, BUY_GROWTH, LINES });
 
 function loadCheckpoint() {
   if (!existsSync(CHECKPOINT_PATH)) return { fingerprint: FINGERPRINT, lines: {} };
   try {
     const raw = JSON.parse(readFileSync(CHECKPOINT_PATH, 'utf8'));
-    if (raw.fingerprint === FINGERPRINT) return raw;
-    console.log('  (checkpoint descartado: o balanceamento mudou desde a última rodada)');
+    if (raw.fingerprint !== FINGERPRINT) {
+      console.log('  (checkpoint descartado: o balanceamento mudou desde a última rodada)');
+      return { fingerprint: FINGERPRINT, lines: {} };
+    }
+    // Migração do formato antigo ({years, unlocks} — sem estado): mantém o
+    // resultado para reuso/recorte; sem estado, extensão recomeça do zero.
+    for (const [id, e] of Object.entries(raw.lines)) {
+      if (e.years !== undefined && e.simulatedS === undefined) {
+        raw.lines[id] = { unlocks: e.unlocks, simulatedS: e.years * YEAR_S, state: null };
+      }
+    }
+    return raw;
   } catch {
-    // corrompido — começa do zero
+    return { fingerprint: FINGERPRINT, lines: {} };
   }
-  return { fingerprint: FINGERPRINT, lines: {} };
 }
 
 // ===== Emissão dos dados da aba Simulada =====
@@ -261,13 +313,13 @@ function emit(resultByLine, years) {
   writeFileSync(OUT_PATH, out.join('\n'));
 }
 
-// ===== Modo deep: paridade → workers em paralelo → checkpoint → emissão =====
+// ===== Modo deep: paridade → reuso/retomada → workers → emissão =====
 async function deep() {
   console.log('\n=== Paridade float × Decimal (72h, desbloqueios) ===');
   let allOk = true;
   for (const eco of LINES) {
     const dec = simulateDec(eco, FAST_HORIZON_S);
-    const fast = simulateFast(eco, FAST_HORIZON_S);
+    const fast = simulateFast(eco, FAST_HORIZON_S).unlocks;
     const sameLen = dec.length === fast.length;
     let maxDiff = 0;
     if (sameLen)
@@ -285,39 +337,66 @@ async function deep() {
   }
 
   const checkpoint = loadCheckpoint();
+  const persist = () => writeFileSync(CHECKPOINT_PATH, JSON.stringify(checkpoint));
+  const horizonS = DEEP_YEARS * YEAR_S;
   const results = {};
   const pending = [];
+
   console.log(`\n=== Simulação profunda (${DEEP_YEARS} anos, automático estrito, linhas em paralelo) ===`);
   for (const eco of LINES) {
     const saved = checkpoint.lines[eco.id];
-    if (saved && (saved.unlocks.length === CAP || saved.years === DEEP_YEARS)) {
+    if (saved && saved.unlocks.length === CAP) {
       results[eco.id] = saved.unlocks;
-      const why = saved.unlocks.length === CAP ? 'linha completa' : `mesmo horizonte (${saved.years} anos)`;
-      console.log(`  ${eco.id}: reaproveitado do checkpoint — ${why}`);
+      console.log(`  ${eco.id}: reaproveitado do checkpoint — linha completa (20/20)`);
+    } else if (saved && saved.simulatedS >= horizonS) {
+      // Já simulamos além do pedido: recorte instantâneo dos desbloqueios.
+      results[eco.id] = saved.unlocks.filter((t) => t < horizonS);
+      console.log(
+        `  ${eco.id}: reaproveitado do checkpoint — já simulado até ${fmt(saved.simulatedS)} (recorte para ${DEEP_YEARS} anos)`
+      );
+    } else if (saved && saved.state) {
+      const yearsToDo = (horizonS - saved.simulatedS) / YEAR_S;
+      const estMin = (yearsToDo * WALL_S_PER_LINE_YEAR) / 60;
+      console.log(
+        `  ${eco.id}: retomando de ${fmt(saved.simulatedS)} → ${DEEP_YEARS} anos (falta ${fmt(horizonS - saved.simulatedS)}, ~${estMin.toFixed(0)} min)`
+      );
+      pending.push({ eco, resume: { state: saved.state, unlocks: saved.unlocks, simulatedS: saved.simulatedS } });
     } else {
-      pending.push(eco);
+      const estMin = (DEEP_YEARS * WALL_S_PER_LINE_YEAR) / 60;
+      console.log(`  ${eco.id}: simulando do zero (~${estMin.toFixed(0)} min)`);
+      pending.push({ eco, resume: null });
     }
   }
 
   const t0 = Date.now();
   await Promise.all(
     pending.map(
-      (eco) =>
+      ({ eco, resume }) =>
         new Promise((resolve, reject) => {
           const worker = new Worker(fileURLToPath(import.meta.url), {
-            workerData: { eco, horizonS: DEEP_YEARS * YEAR_S },
+            workerData: { eco, horizonS, resume },
           });
           worker.on('message', (ev) => {
             if (ev.type === 'unlock') {
               console.log(`  ${eco.id}: g${ev.gen} em ${fmt(ev.uptime)}`);
             } else if (ev.type === 'beat') {
-              const pct = ((100 * ev.doneS) / ev.horizonS).toFixed(0);
-              console.log(`  ${eco.id}: … ${pct}% do horizonte simulado (${fmt(ev.doneS)})`);
+              // Snapshot periódico: uma interrupção perde no máximo ~60s.
+              checkpoint.lines[eco.id] = {
+                unlocks: ev.unlocks,
+                simulatedS: ev.simulatedS,
+                state: ev.state,
+              };
+              persist();
+              const pct = ((100 * ev.simulatedS) / ev.horizonS).toFixed(0);
+              console.log(`  ${eco.id}: … ${pct}% do horizonte simulado (${fmt(ev.simulatedS)})`);
             } else if (ev.type === 'done') {
               results[eco.id] = ev.unlocks;
-              // Checkpoint por linha: uma interrupção não perde o que já saiu.
-              checkpoint.lines[eco.id] = { years: DEEP_YEARS, unlocks: ev.unlocks };
-              writeFileSync(CHECKPOINT_PATH, JSON.stringify(checkpoint));
+              checkpoint.lines[eco.id] = {
+                unlocks: ev.unlocks,
+                simulatedS: ev.simulatedS,
+                state: ev.state,
+              };
+              persist();
               console.log(`  ${eco.id}: pronto — g${ev.unlocks.length} em ${fmt(ev.unlocks[ev.unlocks.length - 1])}`);
               resolve();
             }
