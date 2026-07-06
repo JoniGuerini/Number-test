@@ -32,6 +32,16 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.22.5',
+    date: '06/07/2026',
+    time: '09:34',
+    title: 'Faster still',
+    summary: 'The speed dial gains a 1000× step.',
+    qol: [
+      'The dev speed card now cycles through 1×, 10×, 100× and 1000×. At full tilt a game day passes in ~86 real seconds — best enjoyed with automatic mode on.',
+    ],
+  },
+  {
     version: 'v0.22.4',
     date: '06/07/2026',
     time: '09:30',
