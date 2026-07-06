@@ -9,25 +9,23 @@ const SIM_STEP_S = 0.25;
 const CAP = 20;
 const MAX_TIME = 72 * 3600; // 72h de jogo simulado (headroom p/ curvas duras)
 
-// Economia por linha (ciclo/produção). Custo é compartilhado (curva da Comida).
+// Economia por linha (ciclo, produção e curva de preços-base). Filosofia:
+// ciclo-base e custo de entrada dobram por linha; crescimento do ciclo +1;
+// produção-base +0.1; escada de preços mais íngreme quanto mais funda.
 const LINES = [
-  { id: 'comida', cycleBaseS: 2, cycleGrowth: 3, prodBase: 0.3, prodStep: 0.1 },
-  { id: 'mineracao', cycleBaseS: 4, cycleGrowth: 4, prodBase: 0.4, prodStep: 0.1 },
-  { id: 'exploracao', cycleBaseS: 8, cycleGrowth: 5, prodBase: 0.5, prodStep: 0.1 },
-  { id: 'militar', cycleBaseS: 16, cycleGrowth: 6, prodBase: 0.6, prodStep: 0.1 },
-  { id: 'remedios', cycleBaseS: 32, cycleGrowth: 7, prodBase: 0.7, prodStep: 0.1 },
+  { id: 'comida', cycleBaseS: 2, cycleGrowth: 3, prodBase: 0.3, prodStep: 0.1, costSlope: 1.36, costCurve: 0.04 },
+  { id: 'mineracao', cycleBaseS: 4, cycleGrowth: 4, prodBase: 0.4, prodStep: 0.1, costSlope: 1.66, costCurve: 0.045 },
+  { id: 'exploracao', cycleBaseS: 8, cycleGrowth: 5, prodBase: 0.5, prodStep: 0.1, costSlope: 1.95, costCurve: 0.05 },
+  { id: 'militar', cycleBaseS: 16, cycleGrowth: 6, prodBase: 0.6, prodStep: 0.1, costSlope: 2.25, costCurve: 0.055 },
+  { id: 'remedios', cycleBaseS: 32, cycleGrowth: 7, prodBase: 0.7, prodStep: 0.1, costSlope: 2.54, costCurve: 0.06 },
 ];
 
-// Curva de custo compartilhada. Expoente = SLOPE*i + CURVE*i^2. Em i=0 dá
-// 10^0 = 1, então o 1º gerador é sempre comprável e o jogo arranca; o
-// encarecimento se concentra nos geradores seguintes.
-const SLOPE = 1.36;
-const CURVE = 0.04;
-const buyGrowthOf = (i) => 1 + 0.1 + 0.02 * i; // 1.10, 1.12, 1.14…
-function costOf(i, bought) {
-  return Decimal.pow(10, SLOPE * i + CURVE * i * i)
+// Encarecimento por compra repetida: +10% fixo e universal (BUY_GROWTH).
+const BUY_GROWTH = 1.1;
+function costOf(i, bought, eco) {
+  return Decimal.pow(10, eco.costSlope * i + eco.costCurve * i * i)
     .round()
-    .mul(Decimal.pow(buyGrowthOf(i), bought));
+    .mul(Decimal.pow(BUY_GROWTH, bought));
 }
 
 const cycleSecondsOf = (i, eco) => eco.cycleBaseS * Math.pow(eco.cycleGrowth, i);
@@ -59,7 +57,7 @@ function simulate(eco) {
     }
 
     const last = gens.length - 1;
-    const cost = costOf(last, 0);
+    const cost = costOf(last, 0, eco);
     if (gens[last].bought === 0 && base.gte(cost)) {
       base = base.sub(cost);
       gens[last].bought = 1;
@@ -92,20 +90,18 @@ function n(dec) {
   return (scaled < 100 ? scaled.toFixed(1) : Math.floor(scaled)) + (SUF[tier] ?? 'e' + tier * 3);
 }
 
-// Custo da 1ª compra por gerador (compartilhado por todas as linhas).
-console.log('\n=== Custo da 1ª compra por gerador (curva compartilhada) ===');
-for (let i = 0; i < CAP; i++) {
-  console.log(`  g${String(i + 1).padStart(2)} ${n(costOf(i, 0))}`);
-}
+// Encarecimento por compra: igual em tudo, mostrado uma vez.
+const rep = (k) => Decimal.pow(BUY_GROWTH, k - 1).toNumber().toFixed(1);
+console.log('\n=== Compra repetida (+10% fixo, todas as linhas) ===');
+console.log(`  10ª unidade = ×${rep(10)} do custo-base  ·  25ª = ×${rep(25)}  ·  50ª = ×${rep(50)}`);
 
 for (const eco of LINES) {
-  console.log(`\n### Linha: ${eco.id}  (ciclo ${eco.cycleBaseS}s ×${eco.cycleGrowth}, prod ${eco.prodBase} +${eco.prodStep})`);
-  console.log('  Ciclo e taxa por gerador:');
-  for (let i = 0; i < CAP; i++) {
-    const sec = cycleSecondsOf(i, eco);
-    const prod = eco.prodBase + eco.prodStep * i;
-    console.log(`    g${String(i + 1).padStart(2)}: ciclo ${fmt(sec).padStart(7)} (${sec}s), entrega ${prod.toFixed(1)}/ciclo → ${(prod / sec).toExponential(2)}/s`);
-  }
+  console.log(
+    `\n### Linha: ${eco.id}  (ciclo ${eco.cycleBaseS}s ×${eco.cycleGrowth}, prod ${eco.prodBase} +${eco.prodStep}, custo ${eco.costSlope}/${eco.costCurve})`
+  );
+  const costs = [];
+  for (let i = 0; i < CAP; i++) costs.push(`g${i + 1}=${n(costOf(i, 0, eco))}`);
+  console.log(`  Custo da 1ª compra: ${costs.join('  ')}`);
 
   const u = simulate(eco);
   console.log(`  Ritmo no automático (compra 1 de cada): chegou a g${u.length} em ${fmt(u[u.length - 1])}`);

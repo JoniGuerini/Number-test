@@ -217,7 +217,7 @@ export default function ProductionLine({
 
         <div className={styles.list} ref={listRef}>
           {line.gens.map((gen, i) => {
-            const cost = costOf(i, gen.bought);
+            const cost = costOf(i, gen.bought, eco);
             const target = i === 0 ? baseName : genName(i - 1);
 
             if (gen.bought === 0) {

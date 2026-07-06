@@ -32,6 +32,18 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.22.1',
+    date: '06/07/2026',
+    time: '03:09',
+    title: 'Each front pays its own price',
+    summary:
+      'Every production line now has its own price ladder, and repeat purchases cost a flat +10% everywhere.',
+    minor: [
+      'Prices now follow the same philosophy as the cycles — the deeper the front, the heavier the costs. The entry price of the second generator doubles per line (25 wheat, ~51 ore, 100 maps, ~202 troops, ~398 herbs) and the ladder steepens faster in deeper lines. The first generator of every front still costs 1, so all five start right away.',
+      'Repeat purchases were simplified to a flat +10%: every extra unit of the same generator costs 10% more than the previous one, in every line and every tier. (It used to grow per tier in Food — deep generators are now cheaper to stack than before.)',
+    ],
+  },
+  {
     version: 'v0.22.0',
     date: '06/07/2026',
     time: '02:32',

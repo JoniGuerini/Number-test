@@ -181,7 +181,7 @@ export default function Reino() {
           line={line}
           lineId={def.id}
           eco={def.eco}
-          onBuy={(i) => setLine(def.id, (g) => buyGen(g, i, def.genCount))}
+          onBuy={(i) => setLine(def.id, (g) => buyGen(g, i, def.genCount, def.eco))}
           onToggleAuto={() =>
             setAllLines((g) => ({
               ...g,

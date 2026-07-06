@@ -11,8 +11,9 @@ import Decimal from 'break_eternity.js';
 /** Timestep fixo da simulação determinística. */
 export const SIM_STEP_S = 0.25;
 
-/** Parâmetros econômicos de UMA cadeia. Cada linha de produção tem os seus
-    (ritmo de ciclo e entrega); só a curva de CUSTO é compartilhada entre todas.
+/** Parâmetros econômicos de UMA cadeia. Cada linha de produção tem os seus:
+    ritmo de ciclo, entrega E curva de preços-base — só o encarecimento por
+    compra repetida (BUY_GROWTH) é compartilhado por todas.
     A produção é DESACOPLADA do tempo e cresce de forma ARITMÉTICA (+prodStep
     por nível); o ciclo cresce de forma GEOMÉTRICA (×cycleGrowth por nível), então
     a taxa por segundo despenca nos geradores mais fundos (ciclos longos, entrega
@@ -26,21 +27,21 @@ export interface LineEconomy {
   prodBase: number;
   /** Incremento aritmético de entrega a cada gerador. */
   prodStep: number;
+  /** Inclinação do expoente da curva de custo: 10^(slope·i + curve·i²).
+      Em i=0 dá 10^0 = 1, então o 1º gerador de TODA linha custa 1 e a cadeia
+      sempre arranca com a base inicial. */
+  costSlope: number;
+  /** Termo quadrático do expoente — o quão mais íngreme a escada fica no fundo. */
+  costCurve: number;
 }
 
 /** Teto de passos por frame no catch-up. */
 export const MAX_STEPS_PER_FRAME = 2_000;
-/** Curva de custos do Reino. O expoente é `SLOPE·i + CURVE·i²`: em i=0 dá
-    10^0 = 1 (o 1º gerador, o Camponês, é sempre comprável e o jogo arranca).
-    Calibrada para o 2º gerador (Moinho) custar ~25 e escalar dali (Celeiro
-    ~759, etc.) até o 20º. */
-const COST_SLOPE = 1.36;
-const COST_CURVE = 0.04;
-/** Encarecimento por unidade repetida do MESMO gerador, em porcentagem (não
-    dobra): o gerador i sobe (10 + 2·i)% a cada compra — g1 +10%, g2 +12%,
-    g3 +14%… Assim compensa empilhar dezenas/centenas do mesmo gerador. */
-const BUY_GROWTH_BASE = 0.1;
-const BUY_GROWTH_STEP = 0.02;
+/** Encarecimento por unidade repetida do MESMO gerador: +10% por compra,
+    fixo e universal (todas as linhas, todos os geradores). Empilhar continua
+    viável em qualquer profundidade; o peso das linhas fundas está nos
+    preços-base (costSlope/costCurve de cada linha). */
+export const BUY_GROWTH = 1.1;
 const START_BASE = new Decimal(1);
 
 export type Mode = 'manual' | 'auto';
@@ -99,19 +100,15 @@ export const prodPerCycleOf = (i: number, eco: LineEconomy): Decimal =>
 export const ratePerSecOf = (i: number, eco: LineEconomy): Decimal =>
   prodPerCycleOf(i, eco).div(cycleSecondsOf(i, eco));
 
-/** Fator de encarecimento por compra do gerador i (ex.: 1.10, 1.12, 1.14…). */
-export const buyGrowthOf = (i: number): number =>
-  1 + BUY_GROWTH_BASE + BUY_GROWTH_STEP * i;
-
-/** Custo do gerador N (índice i) na próxima compra: custo-base × (fator%)^comprados.
-    O round() arredonda só o CUSTO-BASE (deixa 1, 25, 759… limpos e corrige o
-    pow do break_eternity); o fator em % é aplicado por cima SEM arredondar,
-    então as repetições ficam fracionárias (ex.: 1.10, 1.21) e o aumento por
-    compra aparece de verdade, inclusive nas casas decimais. */
-export const costOf = (i: number, bought: number): Decimal =>
-  Decimal.pow(10, COST_SLOPE * i + COST_CURVE * i * i)
+/** Custo do gerador N (índice i) na próxima compra: custo-base da linha ×
+    1.10^comprados. O round() arredonda só o CUSTO-BASE (deixa 1, 25, 759…
+    limpos e corrige o pow do break_eternity); o +10% é aplicado por cima SEM
+    arredondar, então as repetições ficam fracionárias (ex.: 1.10, 1.21) e o
+    aumento por compra aparece de verdade, inclusive nas casas decimais. */
+export const costOf = (i: number, bought: number, eco: LineEconomy): Decimal =>
+  Decimal.pow(10, eco.costSlope * i + eco.costCurve * i * i)
     .round()
-    .mul(Decimal.pow(buyGrowthOf(i), bought));
+    .mul(Decimal.pow(BUY_GROWTH, bought));
 
 export const newGen = (): Gen => ({ amount: new Decimal(0), bought: 0, cycleStep: 0 });
 
@@ -202,7 +199,7 @@ export function advanceLine(line: Line, nSteps: number, genCap: number, eco: Lin
       const candidates = lastLocked ? [last, last - 1] : [last];
       for (const i of candidates) {
         if (i < 0) continue;
-        const cost = costOf(i, gens[i].bought);
+        const cost = costOf(i, gens[i].bought, eco);
         if (base.lt(cost)) continue;
         const wasLocked = gens[i].bought === 0;
         base = base.sub(cost);
@@ -221,8 +218,8 @@ export function advanceLine(line: Line, nSteps: number, genCap: number, eco: Lin
 }
 
 /** Compra manual de 1 unidade do gerador i (respeitando o teto). Pura. */
-export function buyGen(line: Line, i: number, genCap: number): Line {
-  const cost = costOf(i, line.gens[i].bought);
+export function buyGen(line: Line, i: number, genCap: number, eco: LineEconomy): Line {
+  const cost = costOf(i, line.gens[i].bought, eco);
   if (line.base.lt(cost)) return line;
 
   const gens = line.gens.map((x) => ({ ...x }));
