@@ -210,7 +210,7 @@ export default function FpsMeter() {
           <span className={styles.label}>dom</span>
         </div>
       )}
-      {/* Acelerador de dev: 1× → 10× → 100× → 1000× no relógio do jogo (não encurta ciclos) */}
+      {/* Acelerador de dev: 1× → 10× → … → 5000× no relógio do jogo (não encurta ciclos) */}
       <button
         className={`${styles.pill} ${styles.speedPill} ${speed !== 1 ? styles.speedOn : ''}`}
         onClick={toggleGameSpeed}

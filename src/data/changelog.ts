@@ -32,6 +32,16 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.22.6',
+    date: '06/07/2026',
+    time: '09:43',
+    title: 'Pedal to the floor',
+    summary: 'The speed dial tops out at 5000× — the most the clock can actually deliver.',
+    qol: [
+      'A 5000× step joins the speed dial (1× → 10× → 100× → 1000× → 5000×): one game day every ~17 real seconds. It\u2019s deliberately the ceiling — beyond that the catch-up loop can\u2019t keep pace and the save would only pile up simulation debt.',
+    ],
+  },
+  {
     version: 'v0.22.5',
     date: '06/07/2026',
     time: '09:34',
