@@ -75,14 +75,20 @@ export function fmtRate(n: Decimal | number): string {
   return fmt(d);
 }
 
-/** Tempo decorrido em segundos → "2m 05s" / "45s" / "1h 12m".
-    Arredonda pra BAIXO (semântica de cronômetro): "5s" só aparece quando
-    5s reais já passaram. (O ceil original do Coders era pra tempo restante.) */
+/** Tempo decorrido em segundos → "45s" / "2m 05s" / "1h 12m" / "3d 07h" /
+    "2y 41d" (e "1.0My" para durações absurdas, caso das estimativas fundas
+    da simulação). Arredonda pra BAIXO (semântica de cronômetro): "5s" só
+    aparece quando 5s reais já passaram. */
 export function fmtTime(seconds: number): string {
   const s = Math.max(0, Math.floor(seconds));
   if (s < 60) return `${s}s`;
   const m = Math.floor(s / 60);
   if (m < 60) return `${m}m ${(s % 60).toString().padStart(2, '0')}s`;
   const h = Math.floor(m / 60);
-  return `${h}h ${(m % 60).toString().padStart(2, '0')}m`;
+  if (h < 24) return `${h}h ${(m % 60).toString().padStart(2, '0')}m`;
+  const d = Math.floor(h / 24);
+  if (d < 365) return `${d}d ${(h % 24).toString().padStart(2, '0')}h`;
+  const y = Math.floor(d / 365);
+  if (y >= 1000) return `${fmt(y)}y`;
+  return `${y}y ${d % 365}d`;
 }

@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { SIMULATED_UNLOCKS } from '../../data/simulatedUnlocks';
 import { fmtTime } from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
 import { loadSave, saveKeyFor } from '../../lib/storage';
@@ -6,6 +7,10 @@ import { ENABLED_LINES, type LineId } from '../Reino/lines';
 // Reusa o esqueleto visual das listas de produção (scroll, fades)
 import gstyles from '../../styles/productionList.module.css';
 import styles from './Activity.module.css';
+
+/** Real = desbloqueios do seu save; Simulada = previsão determinística do
+    modo automático (pré-computada por scripts/simulate-reino.mjs deep). */
+type ActivityView = 'real' | 'sim';
 
 /** Campos de uma linha do Reino que interessam ao log. */
 interface LineSaveLite {
@@ -27,30 +32,34 @@ interface Entry {
   accel?: number;
 }
 
+/** Converte a sequência de tempos de desbloqueio (g1, g2, …) em entradas do
+    log com intervalo e ritmo. Serve tanto pro save real quanto pra simulação
+    (os desbloqueios são sempre sequenciais). */
+function entriesFromTimes(times: number[]): Entry[] {
+  return times.map((unlockedAt, idx) => {
+    const prev = idx === 0 ? 0 : times[idx - 1];
+    const prevPrev = idx <= 1 ? 0 : times[idx - 2];
+    const delta = unlockedAt - prev;
+    const prevDelta = idx === 0 ? undefined : prev - prevPrev;
+    return {
+      gen: idx + 1,
+      unlockedAt,
+      delta,
+      accel: prevDelta !== undefined ? delta - prevDelta : undefined,
+    };
+  });
+}
+
 /** Constrói as entradas do log a partir de um save (gens + uptime). */
 function buildEntries(save: LineSaveLite | null | undefined): {
   entries: Entry[];
   uptime: number;
 } {
   if (!save) return { entries: [], uptime: 0 };
-
-  const unlocked = save.gens
-    .map((g, i) => ({ gen: i + 1, unlockedAt: g.unlockedAt }))
-    .filter((e): e is { gen: number; unlockedAt: number } => e.unlockedAt !== undefined);
-
-  const entries = unlocked.map((e, idx) => {
-    const prev = idx === 0 ? 0 : unlocked[idx - 1].unlockedAt;
-    const prevPrev = idx <= 1 ? 0 : unlocked[idx - 2].unlockedAt;
-    const delta = e.unlockedAt - prev;
-    const prevDelta = idx === 0 ? undefined : prev - prevPrev;
-    return {
-      ...e,
-      delta,
-      accel: prevDelta !== undefined ? delta - prevDelta : undefined,
-    };
-  });
-
-  return { entries, uptime: save.uptime };
+  const times = save.gens
+    .map((g) => g.unlockedAt)
+    .filter((u): u is number => u !== undefined);
+  return { entries: entriesFromTimes(times), uptime: save.uptime };
 }
 
 /** Lê o log de UMA linha do Reino (o save tem uma sub-chave por linha). */
@@ -64,24 +73,32 @@ interface ActivityProps {
   onNavigate: (page: 'reino') => void;
 }
 
-/** Log de desbloqueios do Reino, uma sub-aba por linha de produção, com
-    cada tempo explicado. */
+/** Log de desbloqueios do Reino: abas Real (seu save) / Simulada (previsão
+    do automático), uma sub-aba por linha de produção, cada tempo explicado. */
 export default function Activity({ onNavigate }: ActivityProps) {
   const { t } = useI18n();
   // Chave do save do slot ativo (trocar de slot remonta o componente)
   const [key] = useState(() => saveKeyFor('reino'));
+  const [view, setView] = useState<ActivityView>('real');
   const [line, setLine] = useState<LineId>(ENABLED_LINES[0]?.id ?? 'comida');
   const [log, setLog] = useState(() => readLog(key, line));
-  const { entries, uptime } = log;
   const listRef = useRef<HTMLDivElement>(null);
 
   // O save é gravado 1x/s; reler no mesmo ritmo mantém o log vivo. Trocar de
   // aba relê na hora (o efeito re-executa com a nova linha).
   useEffect(() => {
+    if (view !== 'real') return;
     setLog(readLog(key, line));
     const id = setInterval(() => setLog(readLog(key, line)), 1000);
     return () => clearInterval(id);
-  }, [key, line]);
+  }, [key, line, view]);
+
+  const simEntries = useMemo(
+    () => entriesFromTimes(SIMULATED_UNLOCKS[line] ?? []),
+    [line]
+  );
+  const entries = view === 'real' ? log.entries : simEntries;
+  const uptime = log.uptime;
 
   // Mesma animação de scroll da lista de produção do Reino (alvo por frame)
   const scrollAnimRef = useRef(0);
@@ -117,7 +134,7 @@ export default function Activity({ onNavigate }: ActivityProps) {
   useEffect(() => {
     if (stickRef.current) scrollToEnd();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entryCount, line]);
+  }, [entryCount, line, view]);
 
   // Setinhas esmaecidas: aparecem quando há conteúdo além das bordas
   const [edges, setEdges] = useState({ above: false, below: false });
@@ -163,6 +180,23 @@ export default function Activity({ onNavigate }: ActivityProps) {
 
   return (
     <div className={styles.wrap}>
+      {/* Abas de visão: seu save (Real) × previsão do automático (Simulada).
+          Mesma linguagem (e largura total) das abas de linha logo abaixo. */}
+      <nav className={styles.tabs}>
+        {(['real', 'sim'] as ActivityView[]).map((v) => (
+          <button
+            key={v}
+            className={`${styles.tab} ${view === v ? styles.tabActive : ''}`}
+            onClick={() => {
+              stickRef.current = true;
+              setView(v);
+            }}
+          >
+            {t(`activity.view.${v}` as TKey)}
+          </button>
+        ))}
+      </nav>
+
       {/* Sub-abas por linha de produção, espelhando as abas do Reino */}
       <nav className={styles.tabs}>
         {ENABLED_LINES.map((l) => (
@@ -195,10 +229,19 @@ export default function Activity({ onNavigate }: ActivityProps) {
               <span className={styles.summaryValue}>{entries.length}</span>
               <span className={styles.summaryLabel}>{t('activity.unlocked')}</span>
             </div>
-            <div className={styles.summaryItem}>
-              <span className={styles.summaryValue}>{fmtTime(uptime)}</span>
-              <span className={styles.summaryLabel}>{t('activity.playTime')}</span>
-            </div>
+            {view === 'real' ? (
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryValue}>{fmtTime(uptime)}</span>
+                <span className={styles.summaryLabel}>{t('activity.playTime')}</span>
+              </div>
+            ) : (
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryValue}>
+                  {last ? fmtTime(last.unlockedAt) : '—'}
+                </span>
+                <span className={styles.summaryLabel}>{t('activity.lastUnlock')}</span>
+              </div>
+            )}
             <div className={styles.summaryItem}>
               <span className={styles.summaryValue}>
                 {avgInterval !== undefined ? fmtTime(avgInterval) : '—'}
@@ -207,10 +250,12 @@ export default function Activity({ onNavigate }: ActivityProps) {
                 {t('activity.avgInterval')}
               </span>
             </div>
-            <div className={styles.summaryItem}>
-              <span className={styles.summaryValue}>{fmtTime(sinceLast)}</span>
-              <span className={styles.summaryLabel}>{t('activity.sinceLast')}</span>
-            </div>
+            {view === 'real' && (
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryValue}>{fmtTime(sinceLast)}</span>
+                <span className={styles.summaryLabel}>{t('activity.sinceLast')}</span>
+              </div>
+            )}
           </div>
 
           <div className={gstyles.listWrap}>

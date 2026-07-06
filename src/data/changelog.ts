@@ -32,6 +32,21 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.22.3',
+    date: '06/07/2026',
+    time: '05:04',
+    title: 'Real vs. simulated activity',
+    summary:
+      'Activity gains Real and Simulated views — compare your unlock log against the deterministic auto-mode forecast.',
+    minor: [
+      'Two new views in Activity, above the line tabs: Real shows your save\u2019s unlock log as before, and Simulated shows the auto-mode forecast for every line — computed by stepping the actual engine math, so a save left on automatic will match it to the second.',
+      'The simulated ladder covers a 100-year horizon and only shows genuinely simulated times, no extrapolation: Food completes its 20 generators in ~130 days and Mining in ~13 years, while Exploration reaches g18, Military g14 and Medicine g12 within the century.',
+    ],
+    qol: [
+      'Durations longer than a day now read naturally across the app: "3d 07h", and beyond a year "2y 41d".',
+    ],
+  },
+  {
     version: 'v0.22.2',
     date: '06/07/2026',
     time: '03:20',

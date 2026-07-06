@@ -32,6 +32,9 @@ export const en: Dict = {
   'cyc.cycleEvery': 'cycle {time}',
   'cyc.perCycleSuffix': '/ cycle',
 
+  'activity.view.real': 'Real',
+  'activity.view.sim': 'Simulated',
+  'activity.lastUnlock': 'last unlock',
   'activity.empty': 'No unlocks recorded in {game} yet.',
   'activity.cta': 'Start playing {game}',
   'activity.unlocked': 'generators unlocked',

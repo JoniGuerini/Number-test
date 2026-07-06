@@ -37,6 +37,9 @@ export const pt = {
   'cyc.perCycleSuffix': '/ ciclo',
 
   // Atividade (log de desbloqueios)
+  'activity.view.real': 'Real',
+  'activity.view.sim': 'Simulada',
+  'activity.lastUnlock': 'último desbloqueio',
   'activity.empty': 'Nenhum desbloqueio registrado em {game} ainda.',
   'activity.cta': 'Começar a jogar {game}',
   'activity.unlocked': 'geradores desbloqueados',
