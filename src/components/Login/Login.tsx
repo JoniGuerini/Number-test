@@ -1,9 +1,9 @@
 /** Tela de autenticação (100% mock — protótipo). Desenha o fluxo de entrar /
     criar conta que futuramente vinculará o save ao usuário. Nada valida nem
-    fala com rede: qualquer envio (ou provedor social, ou "convidado") chama
-    signIn e o app segue para o jogo. Segue a linguagem visual do card de
-    "Modo de jogo": card único centralizado, título serif em latão, campos e
-    botões dos esqueletos globais. */
+    fala com rede: "Entrar" funciona com um clique (campos vazios usam um perfil
+    mock); provedores sociais e criar conta seguem o mesmo padrão provisório.
+    Segue a linguagem visual do card de "Modo de jogo": card único centralizado,
+    título serif em latão, campos e botões dos esqueletos globais. */
 
 import { useState } from 'react';
 import { useI18n } from '../../lib/locale';
@@ -27,17 +27,19 @@ export default function Login() {
   const [password, setPassword] = useState('');
 
   const isSignup = tab === 'signup';
-  // Mock: só exige campos preenchidos para habilitar o botão (sem validar nada).
+  // Mock: entrar não exige campos; criar conta ainda pede nome/e-mail/senha preenchidos.
   const canSubmit =
-    email.trim().length > 0 &&
-    password.trim().length > 0 &&
-    (!isSignup || name.trim().length > 0);
+    !isSignup ||
+    (email.trim().length > 0 &&
+      password.trim().length > 0 &&
+      name.trim().length > 0);
 
   const submit = () => {
     if (!canSubmit) return;
+    const resolvedEmail = email.trim() || 'jogador@local.dev';
     signIn({
-      name: isSignup ? name.trim() : nameFromEmail(email),
-      email: email.trim(),
+      name: isSignup ? name.trim() : nameFromEmail(resolvedEmail),
+      email: resolvedEmail,
       provider: 'email',
     });
   };

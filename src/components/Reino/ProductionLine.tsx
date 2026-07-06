@@ -5,7 +5,9 @@
     nomeados) e o recurso base. */
 
 import { useEffect, useRef, useSyncExternalStore } from 'react';
-import { fmt, fmtCost, fmtRate, fmtTime } from '../../lib/format';
+import HoldActionButton from '../HoldActionButton';
+import Decimal from 'break_eternity.js';
+import { fmt, fmtCost, fmtTime } from '../../lib/format';
 import { getDateLocale, useI18n, type TKey } from '../../lib/locale';
 import { getVideoPrefs, subscribeVideoPrefs } from '../../lib/prefs';
 import styles from '../../styles/productionList.module.css';
@@ -15,20 +17,28 @@ import {
   SIM_STEP_S,
   cycleSecondsOf,
   cycleStepsOf,
-  costOf,
+  genPurchaseCost,
   prodPerCycleOf,
-  ratePerSecOf,
   type Gen,
   type Line,
   type LineEconomy,
 } from './engine';
 import type { LineId } from './lines';
+import {
+  cycleSecondsWithUpgrades,
+  cycleStepsWithUpgrades,
+  productionFactor,
+  type UpgradeState,
+} from './upgrades';
 
 interface ProductionLineProps {
   line: Line;
   lineId: LineId;
   eco: LineEconomy;
-  onBuy: (i: number) => void;
+  upgrades: UpgradeState;
+  mandate: number;
+  mandateCost: number;
+  onBuy: (i: number) => boolean;
   /** Alterna manual/automático do SAVE inteiro (o modo é global às linhas). */
   onToggleAuto: () => void;
 }
@@ -42,6 +52,9 @@ export default function ProductionLine({
   line,
   lineId,
   eco,
+  upgrades,
+  mandate,
+  mandateCost,
   onBuy,
   onToggleAuto,
 }: ProductionLineProps) {
@@ -51,6 +64,9 @@ export default function ProductionLine({
     subscribeVideoPrefs,
     () => getVideoPrefs().showCycleBars
   );
+
+  const canBuyGen = (cost: Decimal): boolean =>
+    line.base.gte(cost) && mandate >= mandateCost;
 
   const genName = (i: number): string => t(`reino.gen.${lineId}.${i + 1}` as TKey);
   const baseName = t(`reino.base.${lineId}` as TKey);
@@ -103,60 +119,21 @@ export default function ProductionLine({
         )
       : 0;
 
+  const cycleStepsNeed = (i: number): number =>
+    cycleStepsWithUpgrades(cycleStepsOf(i, eco), upgrades, lineId, i);
+
+  const cycleSecondsNeed = (i: number): number =>
+    cycleSecondsWithUpgrades(cycleSecondsOf(i, eco), upgrades, lineId, i);
+
+  const prodPerCycleDisplay = (gen: Gen, i: number) =>
+    gen.amount.mul(prodPerCycleOf(i, eco)).mul(productionFactor(upgrades, lineId, i));
+
   const cycleProgress = (gen: Gen, i: number): number => {
     if (gen.amount.lte(0)) return 0;
-    return Math.min((gen.cycleStep + partial / SIM_STEP_S) / cycleStepsOf(i, eco), 1);
+    return Math.min((gen.cycleStep + partial / SIM_STEP_S) / cycleStepsNeed(i), 1);
   };
 
   const dispUptime = line.uptime + (line.gens[0].bought > 0 ? partial : 0);
-
-  const exportCsv = () => {
-    const lines: string[] = [];
-    lines.push('chave,valor');
-    lines.push(
-      `inicio_do_save,${line.startedAt !== undefined ? new Date(line.startedAt).toISOString() : ''}`
-    );
-    lines.push(`tempo_de_jogo_s,${line.uptime.toFixed(1)}`);
-    lines.push(`tempo_de_jogo_fmt,${fmtTime(line.uptime)}`);
-    lines.push(`modo,${line.mode}`);
-    lines.push(`ciclo_base_s,${eco.cycleBaseS}`);
-    lines.push(`recurso_base,${baseName}`);
-    lines.push(`base,${line.base.toString()}`);
-    lines.push(`base_fmt,${fmt(line.base)}`);
-    lines.push(`total_produzido,${line.totalProduced.toString()}`);
-    lines.push(`total_produzido_fmt,${fmt(line.totalProduced)}`);
-    lines.push('');
-
-    lines.push(
-      'gerador,nome,comprados,possui,possui_fmt,ciclo_s,produz_por_ciclo,produz_fmt,desbloqueio_s,desbloqueio_fmt'
-    );
-    line.gens.forEach((gen, i) => {
-      const perCycle = gen.amount.mul(prodPerCycleOf(i, eco));
-      lines.push(
-        [
-          i + 1,
-          genName(i),
-          gen.bought,
-          gen.amount.toString(),
-          fmt(gen.amount),
-          cycleSecondsOf(i, eco),
-          perCycle.toString(),
-          fmt(perCycle),
-          gen.unlockedAt !== undefined ? gen.unlockedAt.toFixed(1) : '',
-          gen.unlockedAt !== undefined ? fmtTime(gen.unlockedAt) : '',
-        ].join(',')
-      );
-    });
-
-    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
-    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `reino-${lineId}-${stamp}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
 
   // A tela de escolha de modo vive no Reino (o início é global ao save);
   // aqui a linha já chega iniciada.
@@ -185,23 +162,12 @@ export default function ProductionLine({
           <span className={styles.timeValue}>{fmt(line.totalProduced)}</span>
           <span className={styles.timeLabel}>{t('common.produced')}</span>
         </div>
-        <button className={styles.exportBtn} onClick={exportCsv}>
-          {t('common.exportCsv')}
-        </button>
         <button
-          className={`${styles.exportBtn} ${isAuto ? styles.toggleOn : ''}`}
+          className={`${styles.cornerBtn} ${isAuto ? styles.toggleOn : ''}`}
           onClick={onToggleAuto}
         >
           {t('gen.autoToggle', { state: isAuto ? 'on' : 'off' })}
         </button>
-      </div>
-
-      <div className={styles.baseBlock}>
-        <span className={styles.baseLabel}>{baseName}</span>
-        <span className={styles.baseValue}>{fmt(line.base)}</span>
-        <span className={styles.baseRate}>
-          +{fmtRate(line.gens[0].amount.mul(ratePerSecOf(0, eco)))} / s
-        </span>
       </div>
 
       <div className={styles.listWrap}>
@@ -217,17 +183,18 @@ export default function ProductionLine({
 
         <div className={styles.list} ref={listRef}>
           {line.gens.map((gen, i) => {
-            const cost = costOf(i, gen.bought, eco);
+            const cost = genPurchaseCost(i, gen.bought, eco, lineId, upgrades);
             const target = i === 0 ? baseName : genName(i - 1);
 
             if (gen.bought === 0) {
               const progress = Math.min(line.base.div(cost).toNumber(), 1);
+              const canUnlock = progress >= 1 && canBuyGen(cost);
               return (
-                <button
+                <HoldActionButton
                   key={i}
                   className={`btn-primary ${styles.progressBtn} ${styles.unlockBtn}`}
-                  disabled={progress < 1}
-                  onClick={() => onBuy(i)}
+                  disabled={!canUnlock}
+                  onAction={() => onBuy(i)}
                 >
                   <span
                     className={styles.progressFill}
@@ -237,12 +204,13 @@ export default function ProductionLine({
                   <span className={styles.progressLabel}>
                     {genName(i)} · {fmtCost(cost)}
                   </span>
-                </button>
+                </HoldActionButton>
               );
             }
 
             const remaining = Math.max(
-              cycleSecondsOf(i, eco) - (gen.cycleStep * SIM_STEP_S + partial),
+              cycleSecondsNeed(i) -
+                (gen.cycleStep * SIM_STEP_S + partial),
               0
             );
 
@@ -265,14 +233,16 @@ export default function ProductionLine({
                       {t('gen.produces', { target })}
                     </span>
                     <span className={styles.statValue}>
-                      +{fmt(gen.amount.mul(prodPerCycleOf(i, eco)))}{' '}
+                      +{fmt(prodPerCycleDisplay(gen, i))}{' '}
                       {t('cyc.perCycleSuffix')}
                     </span>
                   </div>
 
                   <div className={styles.stat}>
                     <span className={styles.statLabel}>
-                      {t('cyc.cycleEvery', { time: fmtTime(cycleSecondsOf(i, eco)) })}
+                      {t('cyc.cycleEvery', {
+                        time: fmtTime(cycleSecondsNeed(i)),
+                      })}
                     </span>
                     <span className={styles.statValue}>
                       {fmtTime(Math.ceil(remaining))}
@@ -280,13 +250,13 @@ export default function ProductionLine({
                   </div>
                 </div>
 
-                <button
+                <HoldActionButton
                   className="btn-primary"
-                  disabled={line.base.lt(cost)}
-                  onClick={() => onBuy(i)}
+                  disabled={!canBuyGen(cost)}
+                  onAction={() => onBuy(i)}
                 >
                   {fmtCost(cost)}
-                </button>
+                </HoldActionButton>
 
                 {showCycleBars && (
                   <div className={cyc.cycleTrack} aria-hidden="true">

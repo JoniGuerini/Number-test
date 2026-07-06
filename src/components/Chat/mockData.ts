@@ -17,16 +17,6 @@ export type ChannelId = 'global' | 'rank' | 'cla';
 
 export const CHANNELS: ChannelId[] = ['global', 'rank', 'cla'];
 
-/** Ordem de prestígio (referência/ordenação). */
-export const RANKS: RankId[] = [
-  'bronze',
-  'prata',
-  'ouro',
-  'platina',
-  'diamante',
-  'mestre',
-];
-
 /** Rank do próprio jogador (as mensagens enviadas herdam este rank). */
 export const SELF_RANK: RankId = 'ouro';
 
@@ -160,8 +150,7 @@ export const SEED: Record<ChannelId, ChatMessage[]> = {
     M('g7', 'Mirena', 'platina', '@Doran empilhar o gerador mais alto até dar pra desbloquear o próximo', '13:57'),
     M('g8', 'Corvin', 'prata', 'sério? não é melhor guardar trigo pro próximo direto?', '13:57'),
     M('g9', 'Aldric', 'ouro', '@Corvin não, empilhar rende bem mais. testei e chega mais rápido', '13:58'),
-    SYS('g10', '13:59', 'chat.sys.rankup', { name: 'Bramble', rank: 'rank.diamante' }),
-    M('g11', 'Bramble', 'diamante', 'subi pra Diamante no ranking!! reino próspero demais', '13:59'),
+    M('g11', 'Bramble', 'diamante', 'subi no ranking!! reino próspero demais', '13:59'),
     M('g12', 'Corvin', 'prata', 'parabéns bram, merecido', '14:00'),
     M('g13', 'Petra', 'platina', 'boa! quanto tá teu trigo por segundo?', '14:00'),
     M('g14', 'Bramble', 'diamante', 'passou de 1 milhão/s depois que empilhei os Feudos', '14:01'),
@@ -201,8 +190,7 @@ export const SEED: Record<ChannelId, ChatMessage[]> = {
     M('r9', 'Yseult', 'mestre', 'sim, mas a produção total compensa empilhando o topo', '14:02'),
     M('r10', 'Bramble', 'diamante', 'a corrida pro gerador Dinastia é o que decide o ranking', '14:02'),
     M('r11', 'Kaelen', 'diamante', 'quem fechar a cadeia primeiro dispara na frente', '14:03'),
-    SYS('r12', '14:19', 'chat.sys.rankup', { name: 'Kaelen', rank: 'rank.mestre' }),
-    M('r13', 'Kaelen', 'mestre', 'FECHEI a linha da Comida e subi pra Mestre no ranking!!', '14:19'),
+    M('r13', 'Kaelen', 'mestre', 'FECHEI a linha da Comida e subi no ranking!!', '14:19'),
     M('r14', 'Petra', 'platina', 'monstro kkkk parabéns', '14:20'),
     M('r15', 'Yseult', 'mestre', 'bem-vindo ao topo @Kaelen, agora segura a posição', '14:20'),
     M('r16', 'Bramble', 'diamante', 'invejável, quero chegar lá ainda essa season', '14:21'),
@@ -220,8 +208,7 @@ export const SEED: Record<ChannelId, ChatMessage[]> = {
     M('c9', 'Mirena', 'platina', 'se mantivermos o ritmo a gente sobe no ranking de clãs', '13:56'),
     M('c10', 'Doran', 'bronze', 'conta comigo, deixo rodando a noite toda', '13:57'),
     M('c11', 'Aldric', 'ouro', 'é isso, o offline faz metade do trabalho', '13:57'),
-    SYS('c12', '13:58', 'chat.sys.rankup', { name: 'Corvin', rank: 'rank.ouro' }),
-    M('c13', 'Corvin', 'ouro', 'subi pra Ouro! chego no Feudo até domingo tranquilo', '13:58'),
+    M('c13', 'Corvin', 'ouro', 'subi no ranking! chego no Feudo até domingo tranquilo', '13:58'),
     M('c14', 'Petra', 'platina', 'o clã tá evoluindo junto, adoro isso', '13:59'),
     M('c15', 'Mirena', 'platina', 'bora fechar a meta, falta pouco pra todo mundo', '14:00'),
   ],

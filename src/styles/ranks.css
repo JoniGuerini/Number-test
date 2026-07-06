@@ -1,6 +1,6 @@
-/* Cores das insígnias de rank do multiplayer (independentes do tema — são
-   identidade do jogo). Qualquer elemento com data-rank ganha a var --rank;
-   usada pelo Social (chat) e pela Classificação. */
+/* Cores dos nomes de jogador no Social e na Classificação (independentes do
+   tema — identidade visual do mock). Qualquer elemento com data-rank ganha
+   a var --rank. */
 [data-rank='bronze'] {
   --rank: #c08457;
 }

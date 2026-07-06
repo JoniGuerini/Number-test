@@ -5,6 +5,7 @@
 export const pt = {
   // Navegação principal (rodapé) — também nomeia os modos pelo app todo
   'nav.reino': 'Reino',
+  'nav.melhorias': 'Melhorias',
   'nav.atividade': 'Atividade',
   'nav.chat': 'Social',
   'nav.classificacao': 'Classificação',
@@ -12,7 +13,6 @@ export const pt = {
   'nav.config': 'Configurações',
 
   // Compartilhado pelo app todo
-  'common.exportCsv': 'Exportar CSV',
   'common.start': 'Iniciar',
   'common.startLabel': 'início',
   'common.time': 'tempo',
@@ -51,6 +51,42 @@ export const pt = {
   'activity.samePace': 'mesmo ritmo',
   'activity.slower': 'mais lento',
   'activity.faster': 'mais rápido',
+
+  // Melhorias / pesquisas
+  'upg.scope.global': 'Global',
+  'upg.scope.mandate': 'Mandato',
+  'upg.section.resources': 'Recursos',
+  'upg.section.upgrades': 'Melhorias',
+  'upg.section.mandate': 'Trocas',
+  'upg.globalHint': 'Afeta todos os geradores de todas as linhas. Custa a mesma quantia de cada recurso.',
+  'upg.genListHint': 'Melhorias por gerador — escolha a linha e pesquise em cada um.',
+  'upg.mandateHint': 'Troque recurso armazenado por mandato passivo — +1/s por nível.',
+  'upg.level': 'Nível {n}',
+  'upg.perLevel': '+{n}% por nível',
+  'upg.effectCycle': '−{n}% tempo de ciclo',
+  'upg.effectProduction': '+{n}% produção',
+  'upg.effectCost': '−{n}% preço de compra',
+  'upg.effectBonus': '+{n}% chance de bônus',
+  'upg.effectBonusAmount': '{n}% recurso bônus',
+  'upg.buyCost': '{cost} {resource}',
+  'upg.buyCostAll': '{cost} (todos os recursos)',
+  'upg.empty': 'Inicie o Reino para desbloquear as pesquisas.',
+  'upg.cta': 'Ir ao Reino',
+  'upg.noGens': 'Nenhum gerador desbloqueado nesta linha.',
+  'upg.cycle.name': 'Ciclos rápidos',
+  'upg.cycle.hint': 'Reduz o tempo de ciclo em 10% por nível.',
+  'upg.production.name': 'Rendimento',
+  'upg.production.hint': 'Aumenta a produção em 10% por nível.',
+  'upg.bonus.name': 'Chance bônus',
+  'upg.bonus.hint': 'Aumenta a chance de recurso bônus em 1% por nível.',
+  'upg.bonusAmount.name': 'Volume bônus',
+  'upg.bonusAmount.hint': 'Recurso bônus começa em 10%; +1% por nível.',
+  'upg.cost.name': 'Preço baixo',
+  'upg.cost.hint': 'Reduz o preço de compra dos geradores em 10% por nível.',
+  'upg.mandate.cardHint': '+1 mandato/s por troca nesta linha.',
+  'upg.mandate.effect': '+{n}/s de mandato',
+  'upg.mandate.unlock': 'Requer {n} em estoque',
+  'upg.mandate.exchange': 'Trocar {cost} {resource}',
 
   // Cardzinhos de telemetria do topo
   'fps.production': 'produção',
@@ -134,6 +170,8 @@ export const pt = {
   'reino.line.exploracao': 'Exploração',
   'reino.line.militar': 'Militar',
   'reino.line.remedios': 'Remédios',
+  'reino.mandate': 'Mandato',
+  'reino.mandateRate': '+{n}/s',
   'reino.soon': 'Em breve',
 
   // Modo Reino: linha de Comida (recurso base + 12 geradores nomeados)
@@ -261,6 +299,9 @@ export const pt = {
   'chat.deleteChat': 'Excluir conversa',
   'chat.viewProfile': 'Ver perfil',
   'chat.addFriend': 'Adicionar amigo',
+  'chat.addFriendPlaceholder': 'Buscar nome…',
+  'chat.addFriendNotFound': 'Jogador não encontrado.',
+  'chat.addFriendAlready': 'Já está na lista.',
   'chat.removeFriend': 'Remover amigo',
   'chat.profile.online': 'Online',
   'chat.profile.offline': 'Offline',
@@ -285,15 +326,6 @@ export const pt = {
   'chat.send': 'Enviar',
   'chat.you': 'Você',
   'chat.sys.joined': '{name} entrou no canal',
-  'chat.sys.rankup': '{name} subiu para {rank}',
-
-  // Insígnias de rank do multiplayer (Social + Classificação)
-  'rank.bronze': 'Bronze',
-  'rank.prata': 'Prata',
-  'rank.ouro': 'Ouro',
-  'rank.platina': 'Platina',
-  'rank.diamante': 'Diamante',
-  'rank.mestre': 'Mestre',
 
   // Classificação (ranking — protótipo/mock)
   'lb.scope.global': 'Global',
@@ -304,8 +336,6 @@ export const pt = {
   'lb.players': '{n} jogadores',
   'lb.col.player': 'Jogador',
   'lb.col.clan': 'Clã',
-  'lb.col.topGen': 'Gerador',
-  'lb.col.wheat': 'Trigo/s',
   'lb.col.prosperity': 'Prosperidade',
   'lb.you': 'Você',
   'lb.yourPosition': 'Sua posição',

@@ -102,7 +102,7 @@
   padding: 6px 12px;
 }
 
-.exportBtn {
+.cornerBtn {
   background: var(--paper);
   border: none;
   border-radius: 4px;
@@ -115,7 +115,7 @@
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
-.exportBtn:hover {
+.cornerBtn:hover {
   background: var(--surface);
   color: var(--brass-deep);
 }
@@ -335,7 +335,7 @@
     justify-content: center;
   }
   .timePill,
-  .exportBtn {
+  .cornerBtn {
     white-space: nowrap;
   }
 

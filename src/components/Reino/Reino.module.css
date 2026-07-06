@@ -48,6 +48,51 @@
   color: var(--brass-deep);
 }
 
+.resourceCards {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.resourceCard {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  background: var(--paper);
+  border-radius: 6px;
+  box-shadow: var(--card-edge);
+}
+
+.resourceLabel {
+  font: 500 11px var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.resourceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.resourceValue {
+  font: 600 22px/1 var(--mono);
+  color: var(--brass-deep);
+  font-variant-numeric: tabular-nums;
+}
+
+.resourceRate {
+  font: 500 11px var(--mono);
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
 /* Nome do gerador nomeado: menor e com elipse (a coluna é fixa em ~150px). */
 .genName {
   font: 600 17px var(--serif);

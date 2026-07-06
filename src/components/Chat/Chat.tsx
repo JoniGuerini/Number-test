@@ -91,8 +91,13 @@ export default function Chat() {
   const [highlight, setHighlight] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+  const [friendQuery, setFriendQuery] = useState('');
+  const [friendHint, setFriendHint] = useState<'notFound' | 'already' | null>(
+    null
+  );
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const friendInputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const [edges, setEdges] = useState({ above: false, below: false });
@@ -120,6 +125,47 @@ export default function Chat() {
     setFriends((prev) => (prev.includes(name) ? prev : [...prev, name]));
   const removeFriend = (name: string) =>
     setFriends((prev) => prev.filter((n) => n !== name));
+
+  const friendMatches = useMemo(() => {
+    const q = friendQuery.trim().toLowerCase();
+    if (!q) return [];
+    return PLAYERS.filter(
+      (p) =>
+        p.name !== you &&
+        !friendSet.has(p.name) &&
+        p.name.toLowerCase().includes(q)
+    ).slice(0, 6);
+  }, [friendQuery, friendSet, you]);
+
+  const tryAddFriend = (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const player = PLAYERS.find(
+      (p) => p.name.toLowerCase() === trimmed.toLowerCase()
+    );
+    if (!player || player.name === you) {
+      setFriendHint('notFound');
+      return;
+    }
+    if (friendSet.has(player.name)) {
+      setFriendHint('already');
+      return;
+    }
+    addFriend(player.name);
+    setFriendQuery('');
+    setFriendHint(null);
+    friendInputRef.current?.focus();
+  };
+
+  const submitFriendAdd = () => {
+    const q = friendQuery.trim();
+    if (!q) return;
+    if (friendMatches.length === 1) {
+      tryAddFriend(friendMatches[0].name);
+      return;
+    }
+    tryAddFriend(q);
+  };
 
   // Perfil aberto (modal). null = fechado.
   const [profileName, setProfileName] = useState<string | null>(null);
@@ -171,10 +217,23 @@ export default function Chat() {
   }, [active]);
 
   // ===== Rolagem =====
-  useLayoutEffect(() => {
+  // Colado no fim por padrão: mensagens recentes visíveis; ao rolar pra cima,
+  // para de seguir até trocar de conversa ou voltar ao fim.
+  const stickRef = useRef(true);
+
+  const scrollToEndInstant = () => {
     const el = listRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [messages.length, active]);
+  };
+
+  useLayoutEffect(() => {
+    stickRef.current = true;
+    scrollToEndInstant();
+  }, [active]);
+
+  useLayoutEffect(() => {
+    if (stickRef.current) scrollToEndInstant();
+  }, [messages.length]);
 
   const updateEdges = useCallback(() => {
     const el = listRef.current;
@@ -201,14 +260,26 @@ export default function Chat() {
     const el = listRef.current;
     const inner = innerRef.current;
     if (!el || !inner) return;
-    updateEdges();
-    el.addEventListener('scroll', updateEdges, { passive: true });
-    window.addEventListener('resize', updateEdges);
-    const ro = new ResizeObserver(updateEdges);
+
+    const onScroll = () => {
+      stickRef.current = el.scrollTop + el.clientHeight >= el.scrollHeight - 8;
+      updateEdges();
+    };
+
+    onScroll();
+    el.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    const ro = new ResizeObserver(() => {
+      // Aba oculta tem altura 0; ao ficar visível (ou fontes carregarem),
+      // recola no fim se ainda estamos colados.
+      if (stickRef.current) scrollToEndInstant();
+      updateEdges();
+    });
+    ro.observe(el);
     ro.observe(inner);
     return () => {
-      el.removeEventListener('scroll', updateEdges);
-      window.removeEventListener('resize', updateEdges);
+      el.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
       ro.disconnect();
     };
   }, [updateEdges]);
@@ -445,9 +516,6 @@ export default function Chat() {
               <span className={styles.headerName} data-rank={activeRank}>
                 {active.user}
               </span>
-              <span className={styles.headerRank}>
-                {activeRank && t(`rank.${activeRank}` as TKey)}
-              </span>
               <span className={styles.online}>
                 {dmOnline ? (
                   <>
@@ -484,20 +552,7 @@ export default function Chat() {
                   <div key={msg.id} className={styles.system}>
                     <span className={styles.systemText}>
                       {msg.sysKey
-                        ? t(
-                            msg.sysKey,
-                            msg.sysParams
-                              ? Object.fromEntries(
-                                  Object.entries(msg.sysParams).map(([k, v]) => [
-                                    k,
-                                    typeof v === 'string' &&
-                                    v.startsWith('rank.')
-                                      ? t(v as TKey)
-                                      : v,
-                                  ])
-                                )
-                              : undefined
-                          )
+                        ? t(msg.sysKey, msg.sysParams)
                         : msg.text}
                     </span>
                   </div>
@@ -514,11 +569,6 @@ export default function Chat() {
                         <span className={styles.author} data-rank={msg.rank}>
                           {msg.self ? you : msg.author}
                         </span>
-                        {msg.rank && (
-                          <span className={styles.badge}>
-                            {t(`rank.${msg.rank}` as TKey)}
-                          </span>
-                        )}
                         <span className={styles.time}>{msg.time}</span>
                       </div>
                       <p className={styles.text}>{renderText(msg.text)}</p>
@@ -579,9 +629,6 @@ export default function Chat() {
                   <span className={styles.mentionName} data-rank={p.rank}>
                     {p.name}
                   </span>
-                  <span className={styles.mentionRank}>
-                    {t(`rank.${p.rank}` as TKey)}
-                  </span>
                 </button>
               ))}
             </div>
@@ -640,9 +687,6 @@ export default function Chat() {
                       {p.name}
                     </span>
                   </button>
-                  <span className={styles.memberRank}>
-                    {t(`rank.${p.rank}` as TKey)}
-                  </span>
                 </div>
               ))}
             </div>
@@ -655,6 +699,66 @@ export default function Chat() {
           <div className={styles.navLabel}>
             {t('chat.friends')} — {friendPlayers.length}
           </div>
+          <div className={styles.friendAdd}>
+            {friendMatches.length > 0 && (
+              <div className={styles.friendPop}>
+                {friendMatches.map((p) => (
+                  <button
+                    key={p.name}
+                    type="button"
+                    className={styles.friendOption}
+                    onClick={() => tryAddFriend(p.name)}
+                  >
+                    <span className={styles.friendOptionName} data-rank={p.rank}>
+                      {p.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+            <input
+              ref={friendInputRef}
+              className={styles.friendInput}
+              value={friendQuery}
+              onChange={(e) => {
+                setFriendQuery(e.target.value);
+                setFriendHint(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  submitFriendAdd();
+                } else if (e.key === 'Escape') {
+                  setFriendQuery('');
+                  setFriendHint(null);
+                }
+              }}
+              placeholder={t('chat.addFriendPlaceholder')}
+              maxLength={40}
+              aria-label={t('chat.addFriendPlaceholder')}
+            />
+            <button
+              type="button"
+              className={styles.friendAddBtn}
+              onClick={submitFriendAdd}
+              disabled={!friendQuery.trim()}
+              title={t('chat.addFriend')}
+              aria-label={t('chat.addFriend')}
+            >
+              +
+            </button>
+          </div>
+          {friendHint && (
+            <p
+              className={`${styles.friendHint} ${
+                friendHint === 'notFound' ? styles.friendHintError : ''
+              }`}
+            >
+              {friendHint === 'already'
+                ? t('chat.addFriendAlready')
+                : t('chat.addFriendNotFound')}
+            </p>
+          )}
           <div className={styles.memberScroll}>
             {friendPlayers.length === 0 ? (
               <p className={styles.friendsEmpty}>{t('chat.noFriends')}</p>
@@ -684,9 +788,6 @@ export default function Chat() {
                         {p.name}
                       </span>
                     </button>
-                    <span className={styles.memberRank}>
-                      {t(`rank.${p.rank}` as TKey)}
-                    </span>
                   </div>
                 ))}
               </div>
@@ -802,9 +903,6 @@ export default function Chat() {
                   <div className={styles.profileId}>
                     <span className={styles.profileName} data-rank={p.rank}>
                       {p.name}
-                    </span>
-                    <span className={styles.profileRank}>
-                      {t(`rank.${p.rank}` as TKey)}
                     </span>
                     <span className={styles.profileStatus}>
                       <i

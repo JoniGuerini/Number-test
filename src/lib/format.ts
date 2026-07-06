@@ -55,6 +55,23 @@ export function fmt(n: Decimal | number): string {
   return body + suffix;
 }
 
+/** Inteiros compactos (500, 50K, 5M…) — sem casas decimais. Trocas de mandato. */
+export function fmtWhole(n: Decimal | number): string {
+  const d = n instanceof Decimal ? n : new Decimal(n);
+  if (d.sign < 0) return '-' + fmtWhole(d.neg());
+  if (d.eq(0)) return '0';
+  if (d.lt(1000)) return Math.floor(d.toNumber() + 1e-9).toString();
+
+  const exp = d.log10().toNumber();
+  if (!Number.isFinite(exp) || exp >= 1e15) return d.toString();
+
+  const tier = Math.floor(exp / 3);
+  const scaled = d.div(Decimal.pow(10, tier * 3)).toNumber();
+  const body = Math.floor(scaled + 1e-9).toString();
+  const suffix = tier < SUFFIXES.length ? SUFFIXES[tier] : letterSuffix(tier - SUFFIXES.length);
+  return body + suffix;
+}
+
 /** Preço de compra: mantém 2 casas decimais enquanto o valor é pequeno
     (< 1000), pra que o encarecimento em % por compra apareça no botão; acima
     disso delega pro formatador curto com sufixo (K, M…), onde os centavos

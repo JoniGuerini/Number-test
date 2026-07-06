@@ -32,6 +32,25 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.23.0',
+    date: '06/07/2026',
+    time: '18:02',
+    title: 'Research & Mandate',
+    summary: 'The kingdom learns to research — and answers to a new universal resource.',
+    major: [
+      'Upgrades page: research improvements per generator or globally across every line — faster cycles, higher output, bonus resource chance and yield, and cheaper generator purchases. Global research costs the same amount of every resource; per-generator research costs the line\u2019s own resource.',
+      'Mandate: a new kingdom-wide resource that accrues +1 per second from the moment the save starts. Every generator purchase now costs mandate on top of the line\u2019s resource (Food 1 \u2026 Medicine 5) — the deeper the line, the pricier the writ.',
+      'Mandate exchanges: trade stored resources for permanent mandate income, +1/s per level with unlimited levels. Each line\u2019s exchange unlocks at 500 in stock and scales \u00d7100 per level (500 \u2192 50K \u2192 5M\u2026).',
+    ],
+    minor: [
+      'Two resource cards now sit above the line tabs: your mandate balance (with its rate) and the active line\u2019s resource stock with production per second.',
+    ],
+    qol: [
+      'Hold-to-repeat: press and hold any buy, research or exchange button to act in series until you release (or run out of funds).',
+      'Exchange buttons fill up like unlock buttons, showing progress toward the required stock.',
+    ],
+  },
+  {
     version: 'v0.22.9',
     date: '06/07/2026',
     time: '12:15',

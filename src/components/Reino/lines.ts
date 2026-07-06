@@ -31,16 +31,18 @@ export interface LineDef {
   enabled: boolean;
   /** Teto de geradores nomeados da cadeia. */
   genCount: number;
+  /** Mandato exigido por compra de gerador nesta linha (universal). */
+  mandateCost: number;
   /** Economia própria da cadeia (ritmo de ciclo e entrega). */
   eco: LineEconomy;
 }
 
 export const LINES: LineDef[] = [
-  { id: 'comida', enabled: true, genCount: 20, eco: { cycleBaseS: 2, cycleGrowth: 3, prodBase: 0.3, prodStep: 0.1, costSlope: 1.36, costCurve: 0.04 } },
-  { id: 'mineracao', enabled: true, genCount: 20, eco: { cycleBaseS: 4, cycleGrowth: 4, prodBase: 0.4, prodStep: 0.1, costSlope: 1.66, costCurve: 0.045 } },
-  { id: 'exploracao', enabled: true, genCount: 20, eco: { cycleBaseS: 8, cycleGrowth: 5, prodBase: 0.5, prodStep: 0.1, costSlope: 1.95, costCurve: 0.05 } },
-  { id: 'militar', enabled: true, genCount: 20, eco: { cycleBaseS: 16, cycleGrowth: 6, prodBase: 0.6, prodStep: 0.1, costSlope: 2.25, costCurve: 0.055 } },
-  { id: 'remedios', enabled: true, genCount: 20, eco: { cycleBaseS: 32, cycleGrowth: 7, prodBase: 0.7, prodStep: 0.1, costSlope: 2.54, costCurve: 0.06 } },
+  { id: 'comida', enabled: true, genCount: 20, mandateCost: 1, eco: { cycleBaseS: 2, cycleGrowth: 3, prodBase: 0.3, prodStep: 0.1, costSlope: 1.36, costCurve: 0.04 } },
+  { id: 'mineracao', enabled: true, genCount: 20, mandateCost: 2, eco: { cycleBaseS: 4, cycleGrowth: 4, prodBase: 0.4, prodStep: 0.1, costSlope: 1.66, costCurve: 0.045 } },
+  { id: 'exploracao', enabled: true, genCount: 20, mandateCost: 3, eco: { cycleBaseS: 8, cycleGrowth: 5, prodBase: 0.5, prodStep: 0.1, costSlope: 1.95, costCurve: 0.05 } },
+  { id: 'militar', enabled: true, genCount: 20, mandateCost: 4, eco: { cycleBaseS: 16, cycleGrowth: 6, prodBase: 0.6, prodStep: 0.1, costSlope: 2.25, costCurve: 0.055 } },
+  { id: 'remedios', enabled: true, genCount: 20, mandateCost: 5, eco: { cycleBaseS: 32, cycleGrowth: 7, prodBase: 0.7, prodStep: 0.1, costSlope: 2.54, costCurve: 0.06 } },
 ];
 
 export const ENABLED_LINES: LineDef[] = LINES.filter((l) => l.enabled);

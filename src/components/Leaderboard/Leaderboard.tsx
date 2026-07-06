@@ -5,13 +5,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getDateLocale, useI18n, type TKey } from '../../lib/locale';
+import { ENABLED_LINES } from '../Reino/lines';
 import styles from './Leaderboard.module.css';
 import {
   FRIENDS,
   CLAN,
   GLOBAL,
-  LB_GEN_CAP,
-  LB_LINE,
   SCOPES,
   SEASON,
   SEASON_ENDS,
@@ -115,25 +114,19 @@ export default function Leaderboard() {
             <span className={styles.name} data-rank={e.rank}>
               {e.you ? t('lb.you') : e.name}
             </span>
-            <span className={styles.rankLabel}>{t(`rank.${e.rank}` as TKey)}</span>
           </div>
           <span className={styles.clan}>{e.clan ?? '—'}</span>
         </div>
 
         <div className={styles.stats}>
-          <div className={styles.stat}>
-            <span className={styles.statLabel}>{t('lb.col.topGen')}</span>
-            <span className={styles.statValue}>
-              {t(`reino.gen.${LB_LINE}.${e.gens}` as TKey)}
-              <i className={styles.genCount}>
-                {e.gens}/{LB_GEN_CAP}
-              </i>
-            </span>
-          </div>
-          <div className={styles.stat}>
-            <span className={styles.statLabel}>{t('lb.col.wheat')}</span>
-            <span className={styles.statValue}>{e.wheat}</span>
-          </div>
+          {ENABLED_LINES.map((line) => (
+            <div className={styles.stat} key={line.id}>
+              <span className={styles.statLabel}>
+                {t(`reino.base.${line.id}` as TKey)}
+              </span>
+              <span className={styles.statValue}>{e.bases[line.id]}</span>
+            </div>
+          ))}
         </div>
 
         <div className={styles.scoreBox}>

@@ -5,7 +5,7 @@
     A pontuação do ranking é a "prosperidade" do reino; posições conhecidas
     vêm de PROFILES (chat) e o resto é interpolado entre essas âncoras. */
 
-import { ENABLED_LINES } from '../Reino/lines';
+import { ENABLED_LINES, type LineId } from '../Reino/lines';
 import {
   INITIAL_FRIENDS,
   PLAYERS,
@@ -17,9 +17,9 @@ import {
 export type LbScope = 'global' | 'amigos' | 'cla';
 export const SCOPES: LbScope[] = ['global', 'amigos', 'cla'];
 
-/** Linha usada para nomear o gerador mais alto (e o teto X/12). */
+/** Linha usada no perfil (Settings) — gerador mais alto da Comida. */
 export const LB_LINE = ENABLED_LINES[0]?.id ?? 'comida';
-export const LB_GEN_CAP = ENABLED_LINES[0]?.genCount ?? 12;
+export const LB_GEN_CAP = ENABLED_LINES[0]?.genCount ?? 20;
 
 export const SEASON = 5;
 /** Tempo restante da temporada (string pronta — mock). */
@@ -36,10 +36,8 @@ export interface LbEntry {
   name: string;
   rank: RankId;
   clan: string | null;
-  /** Nº do gerador mais alto desbloqueado (nome vem do i18n reino.gen.*). */
-  gens: number;
-  /** Trigo/s já formatado (mock). */
-  wheat: string;
+  /** Estoque do recurso base de cada linha (mock, já formatado). */
+  bases: Record<LineId, string>;
   /** Pontuação do ranking (prosperidade). */
   prosperity: number;
   /** Variação de posição desde ontem (+ subiu, − caiu, 0 estável). */
@@ -58,6 +56,15 @@ const ANCHOR_DELTA: Record<string, number> = {
   Isolde: 5,
   Aldric: -4,
   Rowan: 2,
+};
+
+/** Quanto cada linha mais profunda retém do estoque da Comida (mock). */
+const LINE_SCALE: Record<LineId, number> = {
+  comida: 1,
+  mineracao: 0.52,
+  exploracao: 0.3,
+  militar: 0.17,
+  remedios: 0.09,
 };
 
 // ===== Geração determinística (mesma sequência a cada load) =====
@@ -98,7 +105,7 @@ const CLANS = [
   'Sol do Feudo',
 ];
 
-/** Faixas de rank/progresso por posição (para os nomes gerados). */
+/** Faixas de rank/progresso por posição (para as cores dos nomes gerados). */
 const rankFor = (pos: number): RankId =>
   pos <= 3 ? 'mestre'
   : pos <= 12 ? 'diamante'
@@ -107,22 +114,42 @@ const rankFor = (pos: number): RankId =>
   : pos <= 95 ? 'prata'
   : 'bronze';
 
-const gensFor = (pos: number): number =>
-  pos <= 2 ? 20
-  : pos <= 12 ? 18
-  : pos <= 30 ? 16
-  : pos <= 50 ? 14
-  : pos <= 70 ? 12
-  : pos <= 90 ? 10
-  : 9;
+const parseAmt = (s: string): number => {
+  if (s.endsWith('M')) return parseFloat(s) * 1e6;
+  if (s.endsWith('K')) return parseFloat(s) * 1e3;
+  return parseFloat(s);
+};
 
-/** Trigo/s coerente com a prosperidade (razão cai com a posição). */
-const wheatFor = (prosperity: number, pos: number): string => {
+const fmtAmt = (n: number): string => {
+  if (n >= 1e6) return `${(n / 1e6).toFixed(1)}M`;
+  if (n >= 1e3) return `${Math.round(n / 1e3)}K`;
+  return `${Math.round(n)}`;
+};
+
+/** Estoque da Comida coerente com a prosperidade (razão cai com a posição). */
+const comidaFor = (prosperity: number, pos: number): number => {
   const ratio = Math.max(0.45 - pos * 0.003, 0.08);
-  const w = prosperity * ratio;
-  if (w >= 1e6) return `${(w / 1e6).toFixed(1)}M`;
-  if (w >= 1e3) return `${Math.round(w / 1e3)}K`;
-  return `${Math.round(w)}`;
+  return prosperity * ratio;
+};
+
+const basesFor = (prosperity: number, pos: number): Record<LineId, string> => {
+  const comida = comidaFor(prosperity, pos);
+  const out = {} as Record<LineId, string>;
+  for (const line of ENABLED_LINES) {
+    const jitter = 0.88 + rnd() * 0.24;
+    out[line.id] = fmtAmt(comida * LINE_SCALE[line.id] * jitter);
+  }
+  return out;
+};
+
+/** Deriva os cinco estoques a partir do trigo mock do perfil (chat). */
+const basesFromWheat = (wheat: string): Record<LineId, string> => {
+  const comida = parseAmt(wheat);
+  const out = {} as Record<LineId, string>;
+  for (const line of ENABLED_LINES) {
+    out[line.id] = fmtAmt(comida * LINE_SCALE[line.id]);
+  }
+  return out;
 };
 
 // ===== Top 100 global =====
@@ -136,8 +163,7 @@ for (const p of PLAYERS) {
     name: p.name,
     rank: p.rank,
     clan: prof.clan,
-    gens: prof.gens,
-    wheat: prof.wheat,
+    bases: basesFromWheat(prof.wheat),
     prosperity: prof.prosperity,
     delta: ANCHOR_DELTA[p.name] ?? 0,
   });
@@ -178,13 +204,15 @@ export const GLOBAL: LbEntry[] = [];
       name: genName(),
       rank: rankFor(pos),
       clan: rnd() < 0.72 ? pick(CLANS) : null,
-      gens: gensFor(pos),
-      wheat: wheatFor(v, pos),
+      bases: basesFor(v, pos),
       prosperity: v,
       delta: Math.round(rnd() * 6 - 3),
     });
   }
 }
+
+/** Gerador mais alto na Comida (mock — só perfil Settings). */
+export const YOU_GEN_LEVEL = 11;
 
 /** Você (mock): fora do top 100, em ascensão. Nome resolvido via i18n. */
 export const YOU_ENTRY: LbEntry = {
@@ -192,8 +220,7 @@ export const YOU_ENTRY: LbEntry = {
   name: '',
   rank: SELF_RANK,
   clan: YOUR_CLAN,
-  gens: 8,
-  wheat: '150K',
+  bases: basesFromWheat('150K'),
   prosperity: 838_500,
   delta: 4,
   you: true,
@@ -211,8 +238,7 @@ const CORVIN_ENTRY: LbEntry = {
   name: 'Corvin',
   rank: 'prata',
   clan: PROFILES.Corvin.clan,
-  gens: PROFILES.Corvin.gens,
-  wheat: PROFILES.Corvin.wheat,
+  bases: basesFromWheat(PROFILES.Corvin.wheat),
   prosperity: PROFILES.Corvin.prosperity,
   delta: 6,
 };

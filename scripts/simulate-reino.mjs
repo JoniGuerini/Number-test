@@ -16,11 +16,11 @@ const HORIZON_S = 72 * 3600; // 72h de jogo simulado
 // ciclo-base e custo de entrada dobram por linha; crescimento do ciclo +1;
 // produção-base +0.1; escada de preços mais íngreme quanto mais funda.
 const LINES = [
-  { id: 'comida', cycleBaseS: 2, cycleGrowth: 3, prodBase: 0.3, prodStep: 0.1, costSlope: 1.36, costCurve: 0.04 },
-  { id: 'mineracao', cycleBaseS: 4, cycleGrowth: 4, prodBase: 0.4, prodStep: 0.1, costSlope: 1.66, costCurve: 0.045 },
-  { id: 'exploracao', cycleBaseS: 8, cycleGrowth: 5, prodBase: 0.5, prodStep: 0.1, costSlope: 1.95, costCurve: 0.05 },
-  { id: 'militar', cycleBaseS: 16, cycleGrowth: 6, prodBase: 0.6, prodStep: 0.1, costSlope: 2.25, costCurve: 0.055 },
-  { id: 'remedios', cycleBaseS: 32, cycleGrowth: 7, prodBase: 0.7, prodStep: 0.1, costSlope: 2.54, costCurve: 0.06 },
+  { id: 'comida', mandateCost: 1, cycleBaseS: 2, cycleGrowth: 3, prodBase: 0.3, prodStep: 0.1, costSlope: 1.36, costCurve: 0.04 },
+  { id: 'mineracao', mandateCost: 2, cycleBaseS: 4, cycleGrowth: 4, prodBase: 0.4, prodStep: 0.1, costSlope: 1.66, costCurve: 0.045 },
+  { id: 'exploracao', mandateCost: 3, cycleBaseS: 8, cycleGrowth: 5, prodBase: 0.5, prodStep: 0.1, costSlope: 1.95, costCurve: 0.05 },
+  { id: 'militar', mandateCost: 4, cycleBaseS: 16, cycleGrowth: 6, prodBase: 0.6, prodStep: 0.1, costSlope: 2.25, costCurve: 0.055 },
+  { id: 'remedios', mandateCost: 5, cycleBaseS: 32, cycleGrowth: 7, prodBase: 0.7, prodStep: 0.1, costSlope: 2.54, costCurve: 0.06 },
 ];
 
 // Encarecimento por compra repetida: +10% fixo e universal (BUY_GROWTH).
@@ -35,42 +35,110 @@ const cycleSecondsOf = (i, eco) => eco.cycleBaseS * Math.pow(eco.cycleGrowth, i)
 const prodPerCycleOf = (i, eco) =>
   new Decimal(eco.prodBase).add(new Decimal(eco.prodStep).mul(i));
 
+// Melhorias — espelho de src/components/Reino/upgrades.ts
+const emptyUpgrades = () => ({
+  global: { cycle: 0, production: 0, bonus: 0, bonusAmount: 0, cost: 0 },
+  gen: {},
+});
+
+const upgradeLevel = (upgrades, lineId, genIndex, kind) => {
+  const g = upgrades.global[kind] ?? 0;
+  const gn = upgrades.gen[`${lineId}:${genIndex}:${kind}`] ?? 0;
+  return { g, gn };
+};
+
+const cycleStepsWithUpgrades = (baseSteps, upgrades, lineId, genIndex) => {
+  const { g, gn } = upgradeLevel(upgrades, lineId, genIndex, 'cycle');
+  return baseSteps / ((1 + g * 0.1) * (1 + gn * 0.1));
+};
+
+const productionFactor = (upgrades, lineId, genIndex) => {
+  const { g, gn } = upgradeLevel(upgrades, lineId, genIndex, 'production');
+  return new Decimal(1 + g * 0.1).mul(1 + gn * 0.1);
+};
+
+const bonusChance = (upgrades, lineId, genIndex) => {
+  const { g, gn } = upgradeLevel(upgrades, lineId, genIndex, 'bonus');
+  return Math.min(1, (g + gn) * 0.01);
+};
+
+const bonusAmountFraction = (upgrades, lineId, genIndex) => {
+  const { g, gn } = upgradeLevel(upgrades, lineId, genIndex, 'bonusAmount');
+  return (10 + (g + gn) * 1) / 100;
+};
+
+const costDiscountFactor = (upgrades, lineId, genIndex) => {
+  const { g, gn } = upgradeLevel(upgrades, lineId, genIndex, 'cost');
+  return (1 + g * 0.1) * (1 + gn * 0.1);
+};
+
+const genPurchaseCost = (i, bought, eco, lineId, upgrades) =>
+  costOf(i, bought, eco).div(costDiscountFactor(upgrades, lineId, i));
+
+const bonusRoll = (steps, lineId, genIndex) => {
+  let h = (steps ^ genIndex) >>> 0;
+  for (let i = 0; i < lineId.length; i++) {
+    h = (Math.imul(h, 31) + lineId.charCodeAt(i)) >>> 0;
+  }
+  return h % 1_000_000;
+};
+
+const bonusTriggers = (chance, roll) => roll < chance * 1_000_000;
+
+const MANDATE_PER_S = 1;
+const MANDATE_STEPS_PER_UNIT = Math.round(1 / (MANDATE_PER_S * SIM_STEP_S));
+
+const mandateBalanceFromSteps = (steps, spent) =>
+  Math.floor(steps / MANDATE_STEPS_PER_UNIT) - spent;
+
 // ===== Simulação exata (Decimal) — espelho bit a bit do engine =====
-function simulate(eco, horizonS) {
+function simulate(eco, horizonS, lineId = eco.id, upgrades = emptyUpgrades()) {
   const cycleStepsOf = (i) => cycleSecondsOf(i, eco) / SIM_STEP_S;
 
   let base = new Decimal(1);
+  let mandateSpent = 0;
+  const mCost = eco.mandateCost;
   const gens = [{ amount: new Decimal(0), bought: 0, cycleStep: 0 }];
   const unlocks = [];
   let uptime = 0;
   const steps = Math.floor(horizonS / SIM_STEP_S);
 
   for (let s = 0; s < steps && unlocks.length < CAP; s++) {
+    const earnedAt = s + 1;
     if (gens[0].bought > 0) uptime += SIM_STEP_S;
 
     for (let i = gens.length - 1; i >= 0; i--) {
       const gen = gens[i];
       if (gen.amount.lte(0)) continue;
       gen.cycleStep += 1;
-      if (gen.cycleStep >= cycleStepsOf(i)) {
+      const need = cycleStepsWithUpgrades(cycleStepsOf(i), upgrades, lineId, i);
+      if (gen.cycleStep >= need) {
         gen.cycleStep = 0;
-        const out = gen.amount.mul(prodPerCycleOf(i, eco));
+        let out = gen.amount.mul(prodPerCycleOf(i, eco)).mul(productionFactor(upgrades, lineId, i));
+        const chance = bonusChance(upgrades, lineId, i);
+        if (chance > 0 && bonusTriggers(chance, bonusRoll(s, lineId, i))) {
+          const frac = bonusAmountFraction(upgrades, lineId, i);
+          out = out.add(out.mul(frac));
+        }
         if (i === 0) base = base.add(out);
         else gens[i - 1].amount = gens[i - 1].amount.add(out);
       }
     }
 
-    // Modo automático (estrito), idêntico ao advanceLine do engine: só
+    // Modo automático (estrito), idêntico ao stepAutoBuy do engine: só
     // desbloqueia o PRÓXIMO bloqueado ou empilha o MAIS ALTO já desbloqueado.
+    // Mandato ganho até ESTE passo (earnedAt), como no advanceKingdom
+    // step-major do jogo — aqui simulando uma linha isolada.
     const last = gens.length - 1;
     const lastLocked = gens[last].bought === 0;
     const candidates = lastLocked ? [last, last - 1] : [last];
     for (const i of candidates) {
       if (i < 0) continue;
-      const cost = costOf(i, gens[i].bought, eco);
-      if (base.lt(cost)) continue;
+      const cost = genPurchaseCost(i, gens[i].bought, eco, lineId, upgrades);
+      if (base.lt(cost) || mandateBalanceFromSteps(earnedAt, mandateSpent) < mCost) continue;
       const wasLocked = gens[i].bought === 0;
       base = base.sub(cost);
+      mandateSpent += mCost;
       gens[i].bought += 1;
       gens[i].amount = gens[i].amount.add(1);
       if (wasLocked) {
