@@ -10,18 +10,24 @@ import Decimal from 'break_eternity.js';
 
 /** Timestep fixo da simulação determinística. */
 export const SIM_STEP_S = 0.25;
-/** Ciclo do Gerador 1, em segundos. Economia propositalmente lenta:
-    começa em 2s e triplica a cada nível. */
-export const CYCLE_BASE_S = 2;
-/** Fator de crescimento do ciclo entre um gerador e o seguinte (geométrico):
-    ciclo do gerador N = 2s × 3^(N-1) → 2s, 6s, 18s, 54s… */
-export const CYCLE_GROWTH = 3;
-/** Entrega por ciclo do Gerador 1, por unidade. A produção é DESACOPLADA do
-    tempo e cresce de forma ARITMÉTICA (+0.1 por nível): 0.3, 0.4, 0.5, 0.6…
-    Como o ciclo triplica e a entrega só soma 0.1, a taxa por segundo despenca
-    nos geradores mais fundos (ciclos longos, entrega modesta). */
-export const PROD_BASE = 0.3;
-export const PROD_STEP = 0.1;
+
+/** Parâmetros econômicos de UMA cadeia. Cada linha de produção tem os seus
+    (ritmo de ciclo e entrega); só a curva de CUSTO é compartilhada entre todas.
+    A produção é DESACOPLADA do tempo e cresce de forma ARITMÉTICA (+prodStep
+    por nível); o ciclo cresce de forma GEOMÉTRICA (×cycleGrowth por nível), então
+    a taxa por segundo despenca nos geradores mais fundos (ciclos longos, entrega
+    modesta). Economia propositalmente lenta e finita. */
+export interface LineEconomy {
+  /** Ciclo do gerador 1, em segundos. */
+  cycleBaseS: number;
+  /** Fator geométrico do ciclo entre um gerador e o seguinte. */
+  cycleGrowth: number;
+  /** Entrega por ciclo do gerador 1, por unidade. */
+  prodBase: number;
+  /** Incremento aritmético de entrega a cada gerador. */
+  prodStep: number;
+}
+
 /** Teto de passos por frame no catch-up. */
 export const MAX_STEPS_PER_FRAME = 2_000;
 /** Curva de custos do Reino. O expoente é `SLOPE·i + CURVE·i²`: em i=0 dá
@@ -79,17 +85,19 @@ export interface LineSave {
 }
 
 /** Duração do ciclo do gerador de índice i, em segundos (crescimento geométrico). */
-export const cycleSecondsOf = (i: number): number => CYCLE_BASE_S * Math.pow(CYCLE_GROWTH, i);
+export const cycleSecondsOf = (i: number, eco: LineEconomy): number =>
+  eco.cycleBaseS * Math.pow(eco.cycleGrowth, i);
 /** Duração do ciclo em passos de simulação. */
-export const cycleStepsOf = (i: number): number => cycleSecondsOf(i) / SIM_STEP_S;
+export const cycleStepsOf = (i: number, eco: LineEconomy): number =>
+  cycleSecondsOf(i, eco) / SIM_STEP_S;
 /** Entrega por unidade ao completar o ciclo (curva própria, independente do
-    tempo de ciclo): PROD_BASE + PROD_STEP·i → 0.3, 0.4, 0.5, 0.6… */
-export const prodPerCycleOf = (i: number): Decimal =>
-  new Decimal(PROD_BASE).add(new Decimal(PROD_STEP).mul(i));
+    tempo de ciclo): prodBase + prodStep·i. */
+export const prodPerCycleOf = (i: number, eco: LineEconomy): Decimal =>
+  new Decimal(eco.prodBase).add(new Decimal(eco.prodStep).mul(i));
 /** Taxa média por unidade do gerador i, por segundo (entrega/ciclo ÷ duração).
     Cai a cada nível, já que o ciclo cresce mais rápido que a entrega. */
-export const ratePerSecOf = (i: number): Decimal =>
-  prodPerCycleOf(i).div(cycleSecondsOf(i));
+export const ratePerSecOf = (i: number, eco: LineEconomy): Decimal =>
+  prodPerCycleOf(i, eco).div(cycleSecondsOf(i, eco));
 
 /** Fator de encarecimento por compra do gerador i (ex.: 1.10, 1.12, 1.14…). */
 export const buyGrowthOf = (i: number): number =>
@@ -156,7 +164,7 @@ export function serializeLine(g: Line): LineSave {
 
 /** Executa nSteps passos fixos. Função pura e determinística. O genCap limita
     a cadeia: ao comprar o último gerador não se cria um novo além do teto. */
-export function advanceLine(line: Line, nSteps: number, genCap: number): Line {
+export function advanceLine(line: Line, nSteps: number, genCap: number, eco: LineEconomy): Line {
   const gens = line.gens.map((x) => ({ ...x }));
   let base = line.base;
   let totalProduced = line.totalProduced;
@@ -172,9 +180,9 @@ export function advanceLine(line: Line, nSteps: number, genCap: number): Line {
       if (gen.amount.lte(0)) continue;
 
       gen.cycleStep += 1;
-      if (gen.cycleStep >= cycleStepsOf(i)) {
+      if (gen.cycleStep >= cycleStepsOf(i, eco)) {
         gen.cycleStep = 0;
-        const out = gen.amount.mul(prodPerCycleOf(i));
+        const out = gen.amount.mul(prodPerCycleOf(i, eco));
         if (i === 0) {
           base = base.add(out);
           totalProduced = totalProduced.add(out);

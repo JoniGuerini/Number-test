@@ -12,7 +12,6 @@ import styles from '../../styles/productionList.module.css';
 import cyc from '../../styles/cycleBars.module.css';
 import rn from './Reino.module.css';
 import {
-  CYCLE_BASE_S,
   SIM_STEP_S,
   cycleSecondsOf,
   cycleStepsOf,
@@ -21,16 +20,16 @@ import {
   ratePerSecOf,
   type Gen,
   type Line,
-  type Mode,
+  type LineEconomy,
 } from './engine';
 import type { LineId } from './lines';
 
 interface ProductionLineProps {
   line: Line;
   lineId: LineId;
+  eco: LineEconomy;
   onBuy: (i: number) => void;
-  onStart: () => void;
-  onSetMode: (mode: Mode) => void;
+  /** Alterna manual/automático do SAVE inteiro (o modo é global às linhas). */
   onToggleAuto: () => void;
 }
 
@@ -42,9 +41,8 @@ const NAMED_ROW_COLS = '150px 110px 170px 150px 120px';
 export default function ProductionLine({
   line,
   lineId,
+  eco,
   onBuy,
-  onStart,
-  onSetMode,
   onToggleAuto,
 }: ProductionLineProps) {
   const { t } = useI18n();
@@ -107,7 +105,7 @@ export default function ProductionLine({
 
   const cycleProgress = (gen: Gen, i: number): number => {
     if (gen.amount.lte(0)) return 0;
-    return Math.min((gen.cycleStep + partial / SIM_STEP_S) / cycleStepsOf(i), 1);
+    return Math.min((gen.cycleStep + partial / SIM_STEP_S) / cycleStepsOf(i, eco), 1);
   };
 
   const dispUptime = line.uptime + (line.gens[0].bought > 0 ? partial : 0);
@@ -121,7 +119,7 @@ export default function ProductionLine({
     lines.push(`tempo_de_jogo_s,${line.uptime.toFixed(1)}`);
     lines.push(`tempo_de_jogo_fmt,${fmtTime(line.uptime)}`);
     lines.push(`modo,${line.mode}`);
-    lines.push(`ciclo_base_s,${CYCLE_BASE_S}`);
+    lines.push(`ciclo_base_s,${eco.cycleBaseS}`);
     lines.push(`recurso_base,${baseName}`);
     lines.push(`base,${line.base.toString()}`);
     lines.push(`base_fmt,${fmt(line.base)}`);
@@ -133,7 +131,7 @@ export default function ProductionLine({
       'gerador,nome,comprados,possui,possui_fmt,ciclo_s,produz_por_ciclo,produz_fmt,desbloqueio_s,desbloqueio_fmt'
     );
     line.gens.forEach((gen, i) => {
-      const perCycle = gen.amount.mul(prodPerCycleOf(i));
+      const perCycle = gen.amount.mul(prodPerCycleOf(i, eco));
       lines.push(
         [
           i + 1,
@@ -141,7 +139,7 @@ export default function ProductionLine({
           gen.bought,
           gen.amount.toString(),
           fmt(gen.amount),
-          cycleSecondsOf(i),
+          cycleSecondsOf(i, eco),
           perCycle.toString(),
           fmt(perCycle),
           gen.unlockedAt !== undefined ? gen.unlockedAt.toFixed(1) : '',
@@ -160,37 +158,8 @@ export default function ProductionLine({
     URL.revokeObjectURL(url);
   };
 
-  // Tela de escolha de modo (save resetado, antes de iniciar a linha)
-  if (!line.started) {
-    return (
-      <div className={styles.modeScreen}>
-        <div className={styles.modeCard}>
-          <h2 className={styles.modeTitle}>{t('mode.title')}</h2>
-          <div className={styles.modeOptions}>
-            <button
-              className={`${styles.modeBtn} ${!isAuto ? styles.modeActive : ''}`}
-              onClick={() => onSetMode('manual')}
-            >
-              {t('mode.manual')}
-            </button>
-            <button
-              className={`${styles.modeBtn} ${isAuto ? styles.modeActive : ''}`}
-              onClick={() => onSetMode('auto')}
-            >
-              {t('mode.auto')}
-            </button>
-          </div>
-          <p className={styles.modeHint}>
-            {isAuto ? t('mode.hintAuto') : t('mode.hintManual')}
-          </p>
-          <button className="btn-primary" onClick={onStart}>
-            {t('common.start')}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
+  // A tela de escolha de modo vive no Reino (o início é global ao save);
+  // aqui a linha já chega iniciada.
   return (
     <div className={styles.wrap}>
       <div className={styles.corner}>
@@ -231,7 +200,7 @@ export default function ProductionLine({
         <span className={styles.baseLabel}>{baseName}</span>
         <span className={styles.baseValue}>{fmt(line.base)}</span>
         <span className={styles.baseRate}>
-          +{fmtRate(line.gens[0].amount.mul(ratePerSecOf(0)))} / s
+          +{fmtRate(line.gens[0].amount.mul(ratePerSecOf(0, eco)))} / s
         </span>
       </div>
 
@@ -273,7 +242,7 @@ export default function ProductionLine({
             }
 
             const remaining = Math.max(
-              cycleSecondsOf(i) - (gen.cycleStep * SIM_STEP_S + partial),
+              cycleSecondsOf(i, eco) - (gen.cycleStep * SIM_STEP_S + partial),
               0
             );
 
@@ -296,14 +265,14 @@ export default function ProductionLine({
                       {t('gen.produces', { target })}
                     </span>
                     <span className={styles.statValue}>
-                      +{fmt(gen.amount.mul(prodPerCycleOf(i)))}{' '}
+                      +{fmt(gen.amount.mul(prodPerCycleOf(i, eco)))}{' '}
                       {t('cyc.perCycleSuffix')}
                     </span>
                   </div>
 
                   <div className={styles.stat}>
                     <span className={styles.statLabel}>
-                      {t('cyc.cycleEvery', { time: fmtTime(cycleSecondsOf(i)) })}
+                      {t('cyc.cycleEvery', { time: fmtTime(cycleSecondsOf(i, eco)) })}
                     </span>
                     <span className={styles.statValue}>
                       {fmtTime(Math.ceil(remaining))}

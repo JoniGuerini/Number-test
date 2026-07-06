@@ -18,9 +18,9 @@ The UI ships in English, Brazilian Portuguese and Spanish — see
   visit you pick a **game mode** — *Manual* (you make every purchase) or
   *Automatic* (the game buys the highest-tier generator it can afford, either
   unlocking the next one or stacking the highest you own — handy for balance
-  testing). Four lines are planned; only **Food** (Wheat → Peasant, Mill,
-  Granary … Empire, Dynasty; 20 generators) is enabled today — Mining, Medicine
-  and Military are "coming soon" placeholders.
+  testing). Five lines are planned; only **Food** (Wheat → Peasant, Mill,
+  Granary … Empire, Dynasty; 20 generators) is enabled today — Mining,
+  Exploration, Military and Medicine are "coming soon" placeholders.
 - **Activity** — the unlock log for the current save: a summary header (total
   unlocks, play time, average interval) and every generator's timing, with pace
   color-coded against the previous unlock (slower in red, faster in green).

@@ -32,6 +32,22 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.22.0',
+    date: '06/07/2026',
+    time: '02:32',
+    title: 'The five fronts of the realm',
+    summary:
+      'Four new production lines are playable — Mining, Exploration, Military and Medicine — each with its own resource, 20 themed generators and its own pace.',
+    major: [
+      'Four new production lines join Food, completing the five fronts of the realm: Mining (Ore — Miner, Digger, Adit … Iron Throne), Exploration (Maps — Scout, Tracker, Explorer … Terra Incognita), Military (Troops — Recruit, Militia, Soldier … Crusade) and Medicine (Herbs — Herbalist, Healer, Herb Garden … Immortality). Each is a full 20-generator chain, playable today.',
+      'Each front has its own economy: the first generator\u2019s cycle doubles from line to line (2s, 4s, 8s, 16s, 32s), the cycle growth per tier rises (\u00d73, \u00d74, \u00d75, \u00d76, \u00d77) and the base delivery climbs (0.3 to 0.7). Deeper fronts are slower and heavier — the cost curve is the same for all.',
+      'Starting a save now starts the whole realm: one mode choice (Manual/Automatic) and one Start press launch all five fronts at once, anchored to the same instant. The mode applies to every line — and Automatic remains a development tool, not a launch feature.',
+    ],
+    minor: [
+      'Exploration is a brand-new front in the planned line-up, and the tabs now read Food / Mining / Exploration / Military / Medicine.',
+    ],
+  },
+  {
     version: 'v0.21.0',
     date: '06/07/2026',
     time: '01:44',
