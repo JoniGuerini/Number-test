@@ -14,7 +14,7 @@ export interface LineDef {
 }
 
 export const LINES: LineDef[] = [
-  { id: 'comida', enabled: true, genCount: 12 },
+  { id: 'comida', enabled: true, genCount: 20 },
   { id: 'mineracao', enabled: false, genCount: 0 },
   { id: 'remedios', enabled: false, genCount: 0 },
   { id: 'militar', enabled: false, genCount: 0 },

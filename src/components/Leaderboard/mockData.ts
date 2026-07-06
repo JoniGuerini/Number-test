@@ -108,13 +108,13 @@ const rankFor = (pos: number): RankId =>
   : 'bronze';
 
 const gensFor = (pos: number): number =>
-  pos <= 2 ? 12
-  : pos <= 12 ? 11
-  : pos <= 30 ? 10
-  : pos <= 50 ? 9
-  : pos <= 70 ? 8
-  : pos <= 90 ? 7
-  : 6;
+  pos <= 2 ? 20
+  : pos <= 12 ? 18
+  : pos <= 30 ? 16
+  : pos <= 50 ? 14
+  : pos <= 70 ? 12
+  : pos <= 90 ? 10
+  : 9;
 
 /** Trigo/s coerente com a prosperidade (razão cai com a posição). */
 const wheatFor = (prosperity: number, pos: number): string => {

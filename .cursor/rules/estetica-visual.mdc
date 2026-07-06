@@ -1,0 +1,38 @@
+---
+description: Estética sóbria do app — sem enfeites "vibe coded" (bordas/gradientes coloridos, brilhos, acentos gratuitos)
+alwaysApply: true
+---
+
+# Estética visual (sóbria por padrão)
+
+A identidade do app é discreta e editorial: papel, tinta, latão. Novos
+elementos herdam esse tom. NÃO invente decorações chamativas — o usuário já
+rejeitou isso mais de uma vez (badges de rank berrantes, bordas coloridas nos
+cards da Classificação). Quando estiver na dúvida entre "mais sóbrio" e "mais
+chamativo", escolha o sóbrio.
+
+## O que nunca fazer (sem pedido explícito do usuário)
+
+- Bordas coloridas em cards/linhas (ex.: `border-left` de cor por rank/pódio).
+- Gradientes coloridos, brilhos, glows, sombras coloridas, `box-shadow` com
+  cor de destaque para "enfeitar".
+- Usar `--rank`, `--brass`, `--accent` etc. como fundo/borda cheia só para
+  colorir. Cor de destaque é para texto/ícone pontual, não para molduras.
+- Emojis na UI, animações extras, "confete", badges arredondados coloridos.
+- Inventar novas cores fora dos tokens do tema.
+
+## O que fazer
+
+- Reaproveitar os tokens existentes: `--paper`, `--surface`, `--surface-deep`,
+  `--ink`, `--ink-muted`, `--ink-faint`, `--border-soft`, `--card-edge`,
+  fontes `--mono`/`--serif`. Realce de seleção/estado usa fundo sutil
+  (`--surface-deep`), não cor forte.
+- Destaque é hierarquia (peso/tamanho/espaço), não cor. Cor de marca (latão)
+  fica para 1 valor-chave por vista (ex.: a pontuação), com parcimônia.
+- Seguir o padrão dos componentes já existentes (Reino, Atividade, Social)
+  antes de criar algo novo — copie o vocabulário visual deles.
+
+## Em caso de dúvida
+
+Pergunte ou faça a versão sóbria. Nunca adicione um acento visual "porque fica
+bonito"; só quando o usuário pedir aquele destaque especificamente.

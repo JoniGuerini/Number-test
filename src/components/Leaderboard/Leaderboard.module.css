@@ -53,46 +53,12 @@
   color: var(--ink-muted);
 }
 
-/* ===== Card da tabela ===== */
+/* ===== Container que envolve a lista de cards ===== */
 .card {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  background: var(--paper);
-  border-radius: 6px;
-  box-shadow: var(--card-edge);
-  padding: 6px 8px;
-}
-
-/* Grid compartilhado por cabeçalho e linhas. Só as duas primeiras colunas
-   (posição e variação) têm largura fixa; todas as demais — inclusive as
-   numéricas (trigo e prosperidade) — são frações, de modo que o espaço se
-   distribui de forma uniforme por toda a largura em vez de acumular vãos à
-   esquerda e espremer os números à direita. */
-.headRow,
-.row {
-  display: grid;
-  grid-template-columns:
-    40px 44px minmax(0, 1.6fr) minmax(0, 1.2fr) minmax(0, 1.2fr)
-    minmax(0, 0.9fr) minmax(0, 1fr);
-  align-items: center;
-  gap: 10px;
-  padding: 9px 10px;
-}
-
-.headRow {
-  flex-shrink: 0;
-  border-bottom: 1px solid var(--border-soft);
-  font: 600 10px var(--mono);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-/* Cabeçalhos numéricos alinham com os valores */
-.headRow .wheat,
-.headRow .score {
-  color: var(--ink-faint);
 }
 
 .listWrap {
@@ -128,36 +94,50 @@
 .inner {
   display: flex;
   flex-direction: column;
-  padding: 2px 0 6px;
+  gap: 8px;
+  padding: 2px 6px 8px 2px;
 }
 
-.row {
-  border-radius: 4px;
-  transition: background 0.12s;
+/* ===== Card do jogador ===== */
+.card2 {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1.4fr) minmax(0, 1.5fr) auto;
+  align-items: center;
+  gap: 16px;
+  background: var(--paper);
+  border-radius: 6px;
+  box-shadow: var(--card-edge);
+  padding: 12px 16px;
+  transition: box-shadow 0.12s, transform 0.08s;
 }
-.row:hover {
-  background: var(--surface);
+.card2:hover {
+  box-shadow: var(--card-edge-hover, var(--card-edge));
+  transform: translateY(-1px);
 }
 
-/* Sua linha: destaque em latão, também na fixada do rodapé */
-.rowYou,
-.rowYou:hover {
-  background: color-mix(in srgb, var(--brass-deep) 12%, transparent);
+/* Seu card: leve realce de fundo (também no fixado do rodapé) */
+.cardYou,
+.cardYou:hover {
+  background: var(--surface-deep);
 }
 
-/* ===== Colunas ===== */
+/* ----- Bloco de posição + variação ----- */
+.rankBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
 .pos {
-  font: 600 13px var(--mono);
+  font: 700 20px var(--mono);
   font-variant-numeric: tabular-nums;
-  color: var(--rank, var(--ink-muted));
-  text-align: right;
+  line-height: 1;
+  color: var(--rank, var(--ink));
 }
-
 .delta {
   font: 500 10.5px var(--mono);
   font-variant-numeric: tabular-nums;
   color: var(--ink-faint);
-  text-align: center;
 }
 .up {
   color: var(--tier-startup);
@@ -166,17 +146,24 @@
   color: var(--accent);
 }
 
-.player {
+/* ----- Identidade (nome / rank / clã) ----- */
+.main {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.identity {
   display: flex;
   align-items: baseline;
   gap: 10px;
+  min-width: 0;
 }
 .name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font: 600 13.5px var(--mono);
+  font: 600 15px var(--mono);
   color: var(--rank, var(--ink));
 }
 .rankLabel {
@@ -186,22 +173,40 @@
   text-transform: uppercase;
   color: var(--ink-faint);
 }
-
 .clan {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font: 400 12.5px var(--mono);
+  font: 400 12px var(--mono);
   color: var(--ink-muted);
 }
 
-.gen {
+/* ----- Estatísticas ----- */
+.stats {
+  display: flex;
+  gap: 22px;
+  min-width: 0;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.statLabel {
+  font: 600 9px var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.statValue {
   display: flex;
   align-items: baseline;
   gap: 7px;
   overflow: hidden;
   white-space: nowrap;
   font: 400 12.5px var(--mono);
+  font-variant-numeric: tabular-nums;
   color: var(--ink-soft);
 }
 .genCount {
@@ -210,18 +215,25 @@
   color: var(--ink-faint);
 }
 
-.wheat {
-  font: 400 12.5px var(--mono);
-  font-variant-numeric: tabular-nums;
-  color: var(--ink-muted);
+/* ----- Prosperidade em destaque ----- */
+.scoreBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
   text-align: right;
 }
-
 .score {
-  font: 600 13px var(--mono);
+  font: 700 17px var(--mono);
   font-variant-numeric: tabular-nums;
   color: var(--brass-deep);
-  text-align: right;
+  line-height: 1;
+}
+.scoreLabel {
+  font: 600 9px var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
 }
 
 /* ===== Fades de rolagem (mesmo padrão das outras listas) ===== */
@@ -246,24 +258,23 @@
 }
 .fadeTop {
   top: 0;
-  border-radius: 6px 6px 0 0;
-  background: linear-gradient(to bottom, var(--paper) 35%, transparent);
+  background: linear-gradient(to bottom, var(--bg) 25%, var(--bg-fade));
 }
 .fadeBottom {
   bottom: 0;
-  border-radius: 0 0 6px 6px;
-  background: linear-gradient(to top, var(--paper) 35%, transparent);
+  background: linear-gradient(to top, var(--bg) 25%, var(--bg-fade));
 }
 
-/* ===== Sua posição (fixada no rodapé do card, fora da rolagem) ===== */
+/* ===== Sua posição (fixada no rodapé, fora da rolagem) ===== */
 .youBar {
   flex-shrink: 0;
   border-top: 1px solid var(--border-soft);
-  padding-top: 6px;
+  margin-top: 4px;
+  padding-top: 10px;
 }
 .youLabel {
   display: block;
-  padding: 2px 12px 4px;
+  padding: 0 2px 6px;
   font: 600 9.5px var(--mono);
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -272,25 +283,25 @@
 
 /* ===== Responsivo ===== */
 @media (max-width: 860px) {
-  .headRow,
-  .row {
-    grid-template-columns: 28px 34px minmax(0, 1.3fr) minmax(110px, 1fr) 110px;
+  .card2 {
+    grid-template-columns: 46px minmax(0, 1.3fr) auto;
+    gap: 12px;
   }
-  .clan,
-  .wheat {
+  .stats {
     display: none;
   }
 }
 
 @media (max-width: 640px) {
-  .headRow,
-  .row {
-    grid-template-columns: 28px 32px minmax(0, 1fr) 96px;
-    gap: 8px;
-    padding: 8px 8px;
+  .card2 {
+    padding: 10px 12px;
+    gap: 10px;
   }
-  .gen {
-    display: none;
+  .pos {
+    font-size: 17px;
+  }
+  .name {
+    font-size: 14px;
   }
   .seasonInfo {
     margin-left: 0;

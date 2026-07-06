@@ -1,11 +1,11 @@
-// Tuning da linha de Comida do Reino (12 geradores, teto finito).
+// Tuning da linha de Comida do Reino (20 geradores, teto finito).
 // Espelha exatamente src/components/Reino/engine.ts (batelada por ciclo,
 // passo fixo de 0.25s, auto-compra do próximo gerador). Uso:
 //   node scripts/simulate-reino.mjs
 import Decimal from 'break_eternity.js';
 
 const SIM_STEP_S = 0.25;
-const CAP = 12;
+const CAP = 20;
 const MAX_TIME = 48 * 3600; // 48h de jogo simulado (headroom p/ curvas duras)
 
 // Tempo de ciclo (geométrico): base * cycleGrowth^i
@@ -17,7 +17,7 @@ const makeProdFn = ({ prodBase, prodStep }) => (i) =>
   new Decimal(prodBase).add(new Decimal(prodStep).mul(i));
 
 // Expoente = slope*i + curve*i^2. Em i=0 dá 10^0 = 1, então o 1º gerador
-// (Ceifeiro) é sempre comprável com a base inicial e o jogo arranca; o
+// (Camponês) é sempre comprável com a base inicial e o jogo arranca; o
 // encarecimento se concentra nos geradores seguintes.
 const buyGrowthOf = (i) => 1 + 0.1 + 0.02 * i; // 1.10, 1.12, 1.14…
 function costOf(i, bought, slope, curve) {
@@ -77,7 +77,7 @@ const fmt = (s) =>
 // Ciclo 2s ×3, produção 0.3 +0.1/nível (fixos). Varia só o custo.
 const base = { base: 2, cycleGrowth: 3, prodBase: 0.3, prodStep: 0.1 };
 const CANDIDATES = [
-  { label: 'Camponês=25  slope1.36 c.04', ...base, slope: 1.36, curve: 0.04 },
+  { label: 'Moinho=25  slope1.36 c.04', ...base, slope: 1.36, curve: 0.04 },
 ];
 
 // Formatador de número curto (K, M, B…) só para a tabela de custos.
@@ -93,7 +93,7 @@ function n(dec) {
 
 // Tabela do ciclo e da taxa por gerador (o ponto crítico do ×3)
 console.log('\n=== Ciclo e taxa por gerador (2s ×3, prod 0.3 +0.1) ===');
-for (let i = 0; i < 12; i++) {
+for (let i = 0; i < CAP; i++) {
   const sec = 2 * Math.pow(3, i);
   const prod = 0.3 + 0.1 * i;
   console.log(`  g${i + 1}: ciclo ${fmt(sec)} (${sec}s), entrega ${prod.toFixed(1)}/ciclo → ${(prod / sec).toFixed(5)}/s`);
@@ -102,15 +102,15 @@ for (let i = 0; i < 12; i++) {
 for (const c of CANDIDATES) {
   console.log(`\n### ${c.label}`);
   console.log('  Custo da 1ª compra por gerador:');
-  const NAMES = ['Ceifeiro', 'Camponês', 'Lavrador', 'Feitor', 'Aldeia', 'Vila', 'Feudo', 'Nobre', 'Barão', 'Conde', 'Duque', 'Reino'];
-  for (let i = 0; i < 12; i++) {
-    console.log(`    g${i + 1} ${NAMES[i].padEnd(9)} ${n(costOf(i, 0, c.slope, c.curve))}`);
+  const NAMES = ['Camponês', 'Moinho', 'Celeiro', 'Lavoura', 'Fazenda', 'Feira', 'Guilda', 'Aldeia', 'Vila', 'Burgo', 'Feudo', 'Comarca', 'Cidadela', 'Cidade', 'Metrópole', 'Província', 'Principado', 'Reino', 'Império', 'Dinastia'];
+  for (let i = 0; i < CAP; i++) {
+    console.log(`    g${i + 1} ${NAMES[i].padEnd(10)} ${n(costOf(i, 0, c.slope, c.curve))}`);
   }
   console.log('  Comprar VÁRIOS do mesmo (custo da N-ésima unidade):');
   for (const gi of [0, 1, 2]) {
     const pct = ((buyGrowthOf(gi) - 1) * 100).toFixed(0);
     const buys = [0, 4, 9, 24, 49, 99].map((b) => `${b + 1}ª=${n(costOf(gi, b, c.slope, c.curve))}`);
-    console.log(`    ${NAMES[gi].padEnd(9)} (+${pct}%): ${buys.join('  ')}`);
+    console.log(`    ${NAMES[gi].padEnd(10)} (+${pct}%): ${buys.join('  ')}`);
   }
 
   const u = simulate(c);

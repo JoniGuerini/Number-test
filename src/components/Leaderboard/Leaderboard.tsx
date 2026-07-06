@@ -1,7 +1,7 @@
-/** Classificação (protótipo 100% mock). Tabela de ranking por prosperidade
-    do futuro multiplayer: abas Global / Amigos / Clã, top 100 com medalhas
-    no pódio, variação diária de posição e a sua linha fixada quando você
-    está fora da janela. Nada persiste nem fala com rede. */
+/** Classificação (protótipo 100% mock). Ranking por prosperidade do futuro
+    multiplayer, um card por jogador: abas Global / Amigos / Clã, top 100 com
+    destaque de pódio, variação diária de posição e o seu card fixado quando
+    você está fora da janela. Nada persiste nem fala com rede. */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getDateLocale, useI18n, type TKey } from '../../lib/locale';
@@ -91,38 +91,58 @@ export default function Leaderboard() {
     requestAnimationFrame(step);
   };
 
-  const renderRow = (e: LbEntry) => (
-    <div
-      key={`${e.pos}:${e.you ? 'you' : e.name}`}
-      className={`${styles.row} ${e.you ? styles.rowYou : ''}`}
-    >
-      <span className={styles.pos} data-rank={medalOf(e.pos)}>
-        {e.pos}
-      </span>
-      <span
-        className={`${styles.delta} ${
-          e.delta > 0 ? styles.up : e.delta < 0 ? styles.down : ''
-        }`}
+  const renderCard = (e: LbEntry) => {
+    const medal = medalOf(e.pos);
+    return (
+      <div
+        key={`${e.pos}:${e.you ? 'you' : e.name}`}
+        className={`${styles.card2} ${e.you ? styles.cardYou : ''}`}
+        data-rank={medal}
       >
-        {e.delta === 0 ? '—' : e.delta > 0 ? `▲${e.delta}` : `▼${-e.delta}`}
-      </span>
-      <span className={styles.player}>
-        <span className={styles.name} data-rank={e.rank}>
-          {e.you ? t('lb.you') : e.name}
-        </span>
-        <span className={styles.rankLabel}>{t(`rank.${e.rank}` as TKey)}</span>
-      </span>
-      <span className={styles.clan}>{e.clan ?? '—'}</span>
-      <span className={styles.gen}>
-        {t(`reino.gen.${LB_LINE}.${e.gens}` as TKey)}
-        <i className={styles.genCount}>
-          {e.gens}/{LB_GEN_CAP}
-        </i>
-      </span>
-      <span className={styles.wheat}>{e.wheat}</span>
-      <span className={styles.score}>{e.prosperity.toLocaleString(loc)}</span>
-    </div>
-  );
+        <div className={styles.rankBox}>
+          <span className={styles.pos}>{e.pos}</span>
+          <span
+            className={`${styles.delta} ${
+              e.delta > 0 ? styles.up : e.delta < 0 ? styles.down : ''
+            }`}
+          >
+            {e.delta === 0 ? '—' : e.delta > 0 ? `▲${e.delta}` : `▼${-e.delta}`}
+          </span>
+        </div>
+
+        <div className={styles.main}>
+          <div className={styles.identity}>
+            <span className={styles.name} data-rank={e.rank}>
+              {e.you ? t('lb.you') : e.name}
+            </span>
+            <span className={styles.rankLabel}>{t(`rank.${e.rank}` as TKey)}</span>
+          </div>
+          <span className={styles.clan}>{e.clan ?? '—'}</span>
+        </div>
+
+        <div className={styles.stats}>
+          <div className={styles.stat}>
+            <span className={styles.statLabel}>{t('lb.col.topGen')}</span>
+            <span className={styles.statValue}>
+              {t(`reino.gen.${LB_LINE}.${e.gens}` as TKey)}
+              <i className={styles.genCount}>
+                {e.gens}/{LB_GEN_CAP}
+              </i>
+            </span>
+          </div>
+          <div className={styles.stat}>
+            <span className={styles.statLabel}>{t('lb.col.wheat')}</span>
+            <span className={styles.statValue}>{e.wheat}</span>
+          </div>
+        </div>
+
+        <div className={styles.scoreBox}>
+          <span className={styles.score}>{e.prosperity.toLocaleString(loc)}</span>
+          <span className={styles.scoreLabel}>{t('lb.col.prosperity')}</span>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className={styles.wrap}>
@@ -148,16 +168,6 @@ export default function Leaderboard() {
       </div>
 
       <div className={styles.card}>
-        <div className={styles.headRow}>
-          <span className={styles.pos}>#</span>
-          <span className={styles.delta} aria-hidden="true" />
-          <span className={styles.player}>{t('lb.col.player')}</span>
-          <span className={styles.clan}>{t('lb.col.clan')}</span>
-          <span className={styles.gen}>{t('lb.col.topGen')}</span>
-          <span className={styles.wheat}>{t('lb.col.wheat')}</span>
-          <span className={styles.score}>{t('lb.col.prosperity')}</span>
-        </div>
-
         <div className={styles.listWrap}>
           {edges.above && (
             <button
@@ -170,7 +180,7 @@ export default function Leaderboard() {
           )}
           <div className={styles.scroll} ref={listRef}>
             <div className={styles.inner} ref={innerRef}>
-              {rows.map(renderRow)}
+              {rows.map(renderCard)}
             </div>
           </div>
           {edges.below && (
@@ -188,7 +198,7 @@ export default function Leaderboard() {
         {scope === 'global' && (
           <div className={styles.youBar}>
             <span className={styles.youLabel}>{t('lb.yourPosition')}</span>
-            {renderRow(YOU_ENTRY)}
+            {renderCard(YOU_ENTRY)}
           </div>
         )}
       </div>

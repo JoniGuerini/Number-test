@@ -25,8 +25,9 @@ export const PROD_STEP = 0.1;
 /** Teto de passos por frame no catch-up. */
 export const MAX_STEPS_PER_FRAME = 2_000;
 /** Curva de custos do Reino. O expoente é `SLOPE·i + CURVE·i²`: em i=0 dá
-    10^0 = 1 (o 1º gerador é sempre comprável e o jogo arranca). Calibrada para
-    o 2º gerador (Camponês) custar ~25 e escalar dali (Lavrador ~759, etc.). */
+    10^0 = 1 (o 1º gerador, o Camponês, é sempre comprável e o jogo arranca).
+    Calibrada para o 2º gerador (Moinho) custar ~25 e escalar dali (Celeiro
+    ~759, etc.) até o 20º. */
 const COST_SLOPE = 1.36;
 const COST_CURVE = 0.04;
 /** Encarecimento por unidade repetida do MESMO gerador, em porcentagem (não

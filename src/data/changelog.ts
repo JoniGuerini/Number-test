@@ -32,6 +32,24 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.21.0',
+    date: '06/07/2026',
+    time: '01:44',
+    title: 'The 20-generator kingdom',
+    summary:
+      'The Food chain is renamed and grown from 12 to 20 generators, plus a card-based leaderboard.',
+    major: [
+      'The Food production chain is renamed and expanded from 12 to 20 generators, with a coherent wheat-to-realm theme. It now starts with the Peasant (who works the wheat), then the Mill, Granary, Cropfield, Farmstead, Market, Guild, Hamlet, Village, Borough, Fief, Shire, Citadel, City, Metropolis, Province, Principality, Kingdom, Empire and finally the Dynasty. No more out-of-place nobility titles producing wheat — every tier now reads as a step in growing the realm, and the eight new deep tiers stand as long-term goals.',
+    ],
+    qol: [
+      'Leaderboard redesign: each player now gets their own card instead of a table row — position and daily change on the left, name, rank and clan in the middle, top generator and wheat/s as labelled stats, and prosperity highlighted on the right.',
+      'Calmer look across the ranking: dropped the coloured card borders in favour of the app\u2019s paper-and-ink aesthetic, where hierarchy comes from weight and spacing rather than colour.',
+    ],
+    fixes: [
+      'Fixed a harsh gradient band at the top and bottom of the ranking list — the scroll fades now blend into the page background like the game\u2019s other lists.',
+    ],
+  },
+  {
     version: 'v0.20.0',
     date: '05/07/2026',
     time: '03:17',
