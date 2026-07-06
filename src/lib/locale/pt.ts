@@ -89,7 +89,6 @@ export const pt = {
   'upg.mandate.exchange': 'Trocar {cost} {resource}',
 
   // Cardzinhos de telemetria do topo
-  'fps.production': 'produção',
   'fps.max': 'máx',
   'fps.newVersion': 'Nova versão pendente',
 

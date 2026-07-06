@@ -82,7 +82,6 @@ export const en: Dict = {
   'upg.mandate.unlock': 'Requires {n} in stock',
   'upg.mandate.exchange': 'Trade {cost} {resource}',
 
-  'fps.production': 'production',
   'fps.max': 'max',
   'fps.newVersion': 'New version pending',
 

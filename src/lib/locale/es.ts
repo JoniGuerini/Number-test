@@ -82,7 +82,6 @@ export const es: Dict = {
   'upg.mandate.unlock': 'Requiere {n} en reserva',
   'upg.mandate.exchange': 'Intercambiar {cost} {resource}',
 
-  'fps.production': 'producción',
   'fps.max': 'máx',
   'fps.newVersion': 'Nueva versión pendiente',
 

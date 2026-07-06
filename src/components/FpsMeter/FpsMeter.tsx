@@ -163,11 +163,11 @@ export default function FpsMeter() {
 
   return (
     <div className={styles.bar}>
-      <div className={styles.pill}>
-        <span className={import.meta.env.DEV ? styles.envDev : styles.envProd}>
-          {import.meta.env.DEV ? 'localhost' : t('fps.production')}
-        </span>
-      </div>
+      {import.meta.env.DEV && (
+        <div className={styles.pill}>
+          <span className={styles.envDev}>localhost</span>
+        </div>
+      )}
       {prefs.showFps && (
         <div className={styles.pill}>
           <span className={styles.value}>{stats.fps}</span>

@@ -32,6 +32,16 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.23.1',
+    date: '06/07/2026',
+    time: '18:10',
+    title: 'Quieter telemetry',
+    summary: 'The environment badge only shows on local dev builds now.',
+    qol: [
+      'The telemetry bar no longer displays a PRODUCTION pill on the live site — the environment badge is a dev-only aid and now only appears as "localhost" on local builds.',
+    ],
+  },
+  {
     version: 'v0.23.0',
     date: '06/07/2026',
     time: '18:02',
