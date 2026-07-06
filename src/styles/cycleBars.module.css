@@ -31,11 +31,17 @@
   position: absolute;
   left: 0;
   top: 50%;
-  transform: translateY(-50%);
+  width: 100%;
   height: 5px;
   border-radius: 3px;
   background: var(--brass-deep);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.15),
     0 2px 4px rgba(0, 0, 0, 0.55);
+  /* Anima por transform (compositor, precisão subpixel): ciclos longos como
+     os dos Remédios (32s+) movem frações de pixel por frame e, animados por
+     width, o arredondamento para pixel inteiro faz a barra andar em trancos. */
+  transform-origin: left center;
+  transform: translateY(-50%) scaleX(0);
+  will-change: transform;
 }

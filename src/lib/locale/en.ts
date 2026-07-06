@@ -3,7 +3,7 @@
 import type { Dict } from './pt';
 
 export const en: Dict = {
-  'nav.reino': 'Kingdom',
+  'nav.reino': 'Production',
   'nav.melhorias': 'Upgrades',
   'nav.atividade': 'Activity',
   'nav.chat': 'Social',
@@ -155,6 +155,7 @@ export const en: Dict = {
   'reino.mandate': 'Mandate',
   'reino.mandateRate': '+{n}/s',
   'reino.soon': 'Coming soon',
+  'reino.sub.section': 'Sub-resources',
 
   'reino.base.comida': 'Wheat',
   'reino.gen.comida.1': 'Peasant',
@@ -178,7 +179,18 @@ export const en: Dict = {
   'reino.gen.comida.19': 'Empire',
   'reino.gen.comida.20': 'Dynasty',
 
-  'reino.base.mineracao': 'Ore',
+  'reino.sub.comida.farinha': 'Flour',
+  'reino.sub.comida.pao': 'Bread',
+  'reino.sub.comida.cerveja': 'Ale',
+  'reino.sub.comida.queijo': 'Cheese',
+  'reino.sub.comida.sal': 'Salt',
+  'reino.sub.comida.mel': 'Honey',
+  'reino.sub.comida.vinho': 'Wine',
+  'reino.sub.comida.oleo': 'Oil',
+  'reino.sub.comida.especiarias': 'Spices',
+  'reino.sub.comida.banquete': 'Feast',
+
+  'reino.base.mineracao': 'Coal',
   'reino.gen.mineracao.1': 'Miner',
   'reino.gen.mineracao.2': 'Digger',
   'reino.gen.mineracao.3': 'Adit',
@@ -199,6 +211,17 @@ export const en: Dict = {
   'reino.gen.mineracao.18': 'Iron Kingdom',
   'reino.gen.mineracao.19': 'Mineral Empire',
   'reino.gen.mineracao.20': 'Iron Throne',
+
+  'reino.sub.mineracao.ferro': 'Iron',
+  'reino.sub.mineracao.cobre': 'Copper',
+  'reino.sub.mineracao.estanho': 'Tin',
+  'reino.sub.mineracao.bronze': 'Bronze',
+  'reino.sub.mineracao.prata': 'Silver',
+  'reino.sub.mineracao.ouro': 'Gold',
+  'reino.sub.mineracao.aco': 'Steel',
+  'reino.sub.mineracao.gemas': 'Gems',
+  'reino.sub.mineracao.cristal': 'Crystal',
+  'reino.sub.mineracao.pedra_estrela': 'Starstone',
 
   'reino.base.exploracao': 'Maps',
   'reino.gen.exploracao.1': 'Scout',
@@ -222,6 +245,17 @@ export const en: Dict = {
   'reino.gen.exploracao.19': 'Maritime Empire',
   'reino.gen.exploracao.20': 'Terra Incognita',
 
+  'reino.sub.exploracao.trilhas': 'Trails',
+  'reino.sub.exploracao.atalhos': 'Shortcuts',
+  'reino.sub.exploracao.marco': 'Landmark',
+  'reino.sub.exploracao.ruinas': 'Ruins',
+  'reino.sub.exploracao.cavernas': 'Caves',
+  'reino.sub.exploracao.artefatos': 'Artifacts',
+  'reino.sub.exploracao.reliquias': 'Relics',
+  'reino.sub.exploracao.tesouros': 'Treasure',
+  'reino.sub.exploracao.segredos': 'Secrets',
+  'reino.sub.exploracao.incognita': 'Terra incognita',
+
   'reino.base.militar': 'Troops',
   'reino.gen.militar.1': 'Recruit',
   'reino.gen.militar.2': 'Militia',
@@ -244,6 +278,17 @@ export const en: Dict = {
   'reino.gen.militar.19': 'Military Order',
   'reino.gen.militar.20': 'Crusade',
 
+  'reino.sub.militar.lanceiros': 'Spearmen',
+  'reino.sub.militar.arqueiros': 'Archers',
+  'reino.sub.militar.cavalaria': 'Cavalry',
+  'reino.sub.militar.escudeiros': 'Shield-bearers',
+  'reino.sub.militar.besteiros': 'Crossbowmen',
+  'reino.sub.militar.cavaleiros': 'Knights',
+  'reino.sub.militar.veteranos': 'Veterans',
+  'reino.sub.militar.elite': 'Elite',
+  'reino.sub.militar.campeoes': 'Champions',
+  'reino.sub.militar.legiao': 'Legion',
+
   'reino.base.remedios': 'Herbs',
   'reino.gen.remedios.1': 'Herbalist',
   'reino.gen.remedios.2': 'Healer',
@@ -265,6 +310,17 @@ export const en: Dict = {
   'reino.gen.remedios.18': 'Elixir of Life',
   'reino.gen.remedios.19': 'Fountain of Youth',
   'reino.gen.remedios.20': 'Immortality',
+
+  'reino.sub.remedios.cataplasma': 'Poultice',
+  'reino.sub.remedios.tintura': 'Tincture',
+  'reino.sub.remedios.elixir': 'Elixir',
+  'reino.sub.remedios.antidoto': 'Antidote',
+  'reino.sub.remedios.balsamo': 'Balm',
+  'reino.sub.remedios.unguento': 'Ointment',
+  'reino.sub.remedios.essencia': 'Essence',
+  'reino.sub.remedios.panaceia': 'Panacea',
+  'reino.sub.remedios.quintessencia': 'Quintessence',
+  'reino.sub.remedios.vida_longa': 'Longlife',
 
   // Chat (multiplayer — prototype/mock)
   'chat.preview': 'Preview',

@@ -3,7 +3,7 @@
 import type { Dict } from './pt';
 
 export const es: Dict = {
-  'nav.reino': 'Reino',
+  'nav.reino': 'Producción',
   'nav.melhorias': 'Mejoras',
   'nav.atividade': 'Actividad',
   'nav.chat': 'Social',
@@ -155,6 +155,7 @@ export const es: Dict = {
   'reino.mandate': 'Mandato',
   'reino.mandateRate': '+{n}/s',
   'reino.soon': 'Próximamente',
+  'reino.sub.section': 'Sub-recursos',
 
   'reino.base.comida': 'Trigo',
   'reino.gen.comida.1': 'Campesino',
@@ -178,7 +179,18 @@ export const es: Dict = {
   'reino.gen.comida.19': 'Imperio',
   'reino.gen.comida.20': 'Dinastía',
 
-  'reino.base.mineracao': 'Mineral',
+  'reino.sub.comida.farinha': 'Harina',
+  'reino.sub.comida.pao': 'Pan',
+  'reino.sub.comida.cerveja': 'Cerveza',
+  'reino.sub.comida.queijo': 'Queso',
+  'reino.sub.comida.sal': 'Sal',
+  'reino.sub.comida.mel': 'Miel',
+  'reino.sub.comida.vinho': 'Vino',
+  'reino.sub.comida.oleo': 'Aceite',
+  'reino.sub.comida.especiarias': 'Especias',
+  'reino.sub.comida.banquete': 'Banquete',
+
+  'reino.base.mineracao': 'Carbón',
   'reino.gen.mineracao.1': 'Minero',
   'reino.gen.mineracao.2': 'Excavador',
   'reino.gen.mineracao.3': 'Galería',
@@ -199,6 +211,17 @@ export const es: Dict = {
   'reino.gen.mineracao.18': 'Reino del Hierro',
   'reino.gen.mineracao.19': 'Imperio Mineral',
   'reino.gen.mineracao.20': 'Trono de Hierro',
+
+  'reino.sub.mineracao.ferro': 'Hierro',
+  'reino.sub.mineracao.cobre': 'Cobre',
+  'reino.sub.mineracao.estanho': 'Estaño',
+  'reino.sub.mineracao.bronze': 'Bronce',
+  'reino.sub.mineracao.prata': 'Plata',
+  'reino.sub.mineracao.ouro': 'Oro',
+  'reino.sub.mineracao.aco': 'Acero',
+  'reino.sub.mineracao.gemas': 'Gemas',
+  'reino.sub.mineracao.cristal': 'Cristal',
+  'reino.sub.mineracao.pedra_estrela': 'Piedra estrella',
 
   'reino.base.exploracao': 'Mapas',
   'reino.gen.exploracao.1': 'Batidor',
@@ -222,6 +245,17 @@ export const es: Dict = {
   'reino.gen.exploracao.19': 'Imperio Marítimo',
   'reino.gen.exploracao.20': 'Terra Incógnita',
 
+  'reino.sub.exploracao.trilhas': 'Senderos',
+  'reino.sub.exploracao.atalhos': 'Atajos',
+  'reino.sub.exploracao.marco': 'Hito',
+  'reino.sub.exploracao.ruinas': 'Ruinas',
+  'reino.sub.exploracao.cavernas': 'Cavernas',
+  'reino.sub.exploracao.artefatos': 'Artefactos',
+  'reino.sub.exploracao.reliquias': 'Reliquias',
+  'reino.sub.exploracao.tesouros': 'Tesoros',
+  'reino.sub.exploracao.segredos': 'Secretos',
+  'reino.sub.exploracao.incognita': 'Terra incógnita',
+
   'reino.base.militar': 'Tropas',
   'reino.gen.militar.1': 'Recluta',
   'reino.gen.militar.2': 'Milicia',
@@ -244,6 +278,17 @@ export const es: Dict = {
   'reino.gen.militar.19': 'Orden Militar',
   'reino.gen.militar.20': 'Cruzada',
 
+  'reino.sub.militar.lanceiros': 'Lanceros',
+  'reino.sub.militar.arqueiros': 'Arqueros',
+  'reino.sub.militar.cavalaria': 'Caballería',
+  'reino.sub.militar.escudeiros': 'Escuderos',
+  'reino.sub.militar.besteiros': 'Ballesteros',
+  'reino.sub.militar.cavaleiros': 'Caballeros',
+  'reino.sub.militar.veteranos': 'Veteranos',
+  'reino.sub.militar.elite': 'Élite',
+  'reino.sub.militar.campeoes': 'Campeones',
+  'reino.sub.militar.legiao': 'Legión',
+
   'reino.base.remedios': 'Hierbas',
   'reino.gen.remedios.1': 'Herborista',
   'reino.gen.remedios.2': 'Curandero',
@@ -265,6 +310,17 @@ export const es: Dict = {
   'reino.gen.remedios.18': 'Elixir de la Vida',
   'reino.gen.remedios.19': 'Fuente de la Juventud',
   'reino.gen.remedios.20': 'Inmortalidad',
+
+  'reino.sub.remedios.cataplasma': 'Cataplasma',
+  'reino.sub.remedios.tintura': 'Tintura',
+  'reino.sub.remedios.elixir': 'Elixir',
+  'reino.sub.remedios.antidoto': 'Antídoto',
+  'reino.sub.remedios.balsamo': 'Bálsamo',
+  'reino.sub.remedios.unguento': 'Ungüento',
+  'reino.sub.remedios.essencia': 'Esencia',
+  'reino.sub.remedios.panaceia': 'Panacea',
+  'reino.sub.remedios.quintessencia': 'Quintaesencia',
+  'reino.sub.remedios.vida_longa': 'Vida larga',
 
   // Chat (multijugador — prototipo/mock)
   'chat.preview': 'Vista previa',

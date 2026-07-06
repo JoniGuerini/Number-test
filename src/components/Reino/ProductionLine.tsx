@@ -38,6 +38,9 @@ interface ProductionLineProps {
   upgrades: UpgradeState;
   mandate: number;
   mandateCost: number;
+  /** Fração de segundo desde o último passo GLOBAL (âncora do reino) —
+      anima as barras entre passos. Vem do Reino, dono do loop. */
+  partialS: number;
   onBuy: (i: number) => boolean;
   /** Alterna manual/automático do SAVE inteiro (o modo é global às linhas). */
   onToggleAuto: () => void;
@@ -55,6 +58,7 @@ export default function ProductionLine({
   upgrades,
   mandate,
   mandateCost,
+  partialS,
   onBuy,
   onToggleAuto,
 }: ProductionLineProps) {
@@ -110,14 +114,10 @@ export default function ProductionLine({
 
   const isAuto = line.mode === 'auto';
 
-  // Fração de segundo desde o último passo — anima as barras entre passos.
-  const partial =
-    line.started && line.startedAt !== undefined
-      ? Math.min(
-          Math.max((Date.now() - line.startedAt) / 1000 - line.steps * SIM_STEP_S, 0),
-          SIM_STEP_S
-        )
-      : 0;
+  // Fração de segundo desde o último passo — vem da âncora global do Reino
+  // (o loop agenda TODAS as linhas por ela; usar startedAt/steps da própria
+  // linha dessincroniza se o contador tiver qualquer desvio da âncora).
+  const partial = line.started ? partialS : 0;
 
   const cycleStepsNeed = (i: number): number =>
     cycleStepsWithUpgrades(cycleStepsOf(i, eco), upgrades, lineId, i);
@@ -263,7 +263,9 @@ export default function ProductionLine({
                     <div className={cyc.cycleGroove} />
                     <div
                       className={cyc.cycleFill}
-                      style={{ width: `${cycleProgress(gen, i) * 100}%` }}
+                      style={{
+                        transform: `translateY(-50%) scaleX(${cycleProgress(gen, i)})`,
+                      }}
                     />
                   </div>
                 )}

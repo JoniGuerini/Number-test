@@ -15,6 +15,7 @@ import { fmt, fmtRate } from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
 import { loadSave, saveKeyFor, writeSave } from '../../lib/storage';
 import ProductionLine from './ProductionLine';
+import SubResourcePanel from './SubResourcePanel';
 import styles from './Reino.module.css';
 import pl from '../../styles/productionList.module.css';
 import {
@@ -266,6 +267,20 @@ export default function Reino() {
   }
 
   const anchorSteps = lines.comida?.steps ?? 0;
+  // Fração de segundo desde o último passo GLOBAL — calculada pela mesma
+  // âncora que agenda a simulação, para a interpolação das barras nunca
+  // dessincronizar do avanço real dos passos.
+  const anchor = lines.comida;
+  const partialS =
+    anchor?.started && anchor.startedAt !== undefined
+      ? Math.min(
+          Math.max(
+            (Date.now() - anchor.startedAt) / 1000 - anchor.steps * SIM_STEP_S,
+            0
+          ),
+          SIM_STEP_S
+        )
+      : 0;
   const mandateRate = totalMandatePerS(mandateExchange);
   const mandateBal = mandateBalance(
     anchorSteps,
@@ -276,6 +291,18 @@ export default function Reino() {
 
   return (
     <div className={styles.reino}>
+      <nav className={styles.lineTabs}>
+        {LINES.map((l) => (
+          <button
+            key={l.id}
+            className={`${styles.lineTab} ${activeLine === l.id ? styles.lineTabActive : ''}`}
+            onClick={() => setActiveLine(l.id)}
+          >
+            {t(`reino.line.${l.id}` as TKey)}
+          </button>
+        ))}
+      </nav>
+
       <div className={styles.resourceCards}>
         <div className={styles.resourceCard}>
           <span className={styles.resourceLabel}>{t('reino.mandate')}</span>
@@ -297,26 +324,17 @@ export default function Reino() {
         </div>
       </div>
 
-      <nav className={styles.lineTabs}>
-        {LINES.map((l) => (
-          <button
-            key={l.id}
-            className={`${styles.lineTab} ${activeLine === l.id ? styles.lineTabActive : ''}`}
-            onClick={() => setActiveLine(l.id)}
-          >
-            {t(`reino.line.${l.id}` as TKey)}
-          </button>
-        ))}
-      </nav>
-
       {def.enabled && line ? (
-        <ProductionLine
+        <>
+          <SubResourcePanel lineId={def.id} />
+          <ProductionLine
           line={line}
           lineId={def.id}
           eco={def.eco}
           upgrades={upgrades}
           mandate={mandateBal}
           mandateCost={def.mandateCost}
+          partialS={partialS}
           onBuy={(i) => {
             const cur = saveRef.current.lines[def.id];
             if (!cur) return false;
@@ -350,6 +368,7 @@ export default function Reino() {
             }))
           }
         />
+        </>
       ) : (
         <div className={styles.placeholder}>
           <span>{t('reino.soon')}</span>
