@@ -32,6 +32,19 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.22.7',
+    date: '06/07/2026',
+    time: '10:17',
+    title: 'The deep ledger',
+    summary: 'The Simulated activity now covers a 1500-year horizon.',
+    minor: [
+      'The Simulated tab\u2019s forecast now reaches 1500 years of strict auto mode: Exploration completes its chain (g20 at ~313 years), Military reaches g18 and Medicine g15 — every time genuinely simulated step by step, no extrapolation.',
+    ],
+    fixes: [
+      'The bundled simulation data had accidentally regressed to a 1-year horizon in an earlier release today; the Simulated tab shows the full ladders again.',
+    ],
+  },
+  {
     version: 'v0.22.6',
     date: '06/07/2026',
     time: '09:43',
