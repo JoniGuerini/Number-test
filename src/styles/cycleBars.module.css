@@ -27,21 +27,31 @@
   box-shadow: var(--card-edge-press);
 }
 
+/* O preenchimento é um par wrapper+inner: o wrapper (largura total, cantos
+   arredondados, overflow hidden) recorta; o inner desliza com translateX.
+   Animar por transform mantém a barra no compositor (precisão subpixel — em
+   ciclos longos como Remédios, width arredondava para pixel e andava em
+   trancos), e o translateX, ao contrário do scaleX, não deforma o raio dos
+   cantos nem o brilho interno do preenchimento. */
 .cycleFill {
   position: absolute;
   left: 0;
   top: 50%;
+  transform: translateY(-50%);
   width: 100%;
   height: 5px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.cycleFillInner {
+  position: absolute;
+  inset: 0;
   border-radius: 3px;
   background: var(--brass-deep);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.15),
     0 2px 4px rgba(0, 0, 0, 0.55);
-  /* Anima por transform (compositor, precisão subpixel): ciclos longos como
-     os dos Remédios (32s+) movem frações de pixel por frame e, animados por
-     width, o arredondamento para pixel inteiro faz a barra andar em trancos. */
-  transform-origin: left center;
-  transform: translateY(-50%) scaleX(0);
+  transform: translateX(-100%);
   will-change: transform;
 }

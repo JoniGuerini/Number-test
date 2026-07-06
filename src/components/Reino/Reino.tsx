@@ -9,7 +9,7 @@
     As cinco frentes do reino estão ativas (Comida, Mineração, Exploração,
     Militar, Remédios), cada uma com seu próprio balanceamento (ver lines.ts). */
 
-import { useEffect, useReducer, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Decimal from 'break_eternity.js';
 import { fmt, fmtRate } from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
@@ -136,7 +136,6 @@ export default function Reino() {
   const [mandateExchange, setMandateExchange] = useState<MandateExchangeState>(
     () => loadReino(saveKey).mandateExchange
   );
-  const [, bumpFrame] = useReducer((x: number) => x + 1, 0);
   const [activeLine, setActiveLine] = useState<LineId>('comida');
 
   const setLine = (id: LineId, updater: (l: Line) => Line) =>
@@ -189,31 +188,38 @@ export default function Reino() {
     let rafId: number;
     const tick = () => {
       const now = Date.now();
-      const u = saveRef.current.upgrades;
-      let nextMandate = saveRef.current.mandate;
-      setLines((ls) => {
-        const anchor = ls.comida;
-        if (!anchor?.started || anchor.startedAt === undefined) return ls;
-
+      // Só toca no React quando há passo novo a executar (4x/s) — os números
+      // só mudam por passo; renderizar a 60fps era puro desperdício. A
+      // animação das barras entre passos é imperativa (ProductionLine).
+      const anchor = saveRef.current.lines.comida;
+      if (anchor?.started && anchor.startedAt !== undefined) {
         const target = Math.floor((now - anchor.startedAt) / (SIM_STEP_S * 1000));
-        const todo = Math.min(target - anchor.steps, MAX_STEPS_PER_FRAME);
-        if (todo <= 0) return ls;
+        if (target > anchor.steps) {
+          const u = saveRef.current.upgrades;
+          let nextMandate = saveRef.current.mandate;
+          setLines((ls) => {
+            const a = ls.comida;
+            if (!a?.started || a.startedAt === undefined) return ls;
 
-        const result = advanceKingdom(
-          ls,
-          ENABLED_LINES,
-          todo,
-          u,
-          nextMandate,
-          saveRef.current.mandateExchange.purchases
-        );
-        nextMandate = result.mandate;
-        if (nextMandate.spent !== saveRef.current.mandate.spent) {
-          setMandate(nextMandate);
+            const todo = Math.min(target - a.steps, MAX_STEPS_PER_FRAME);
+            if (todo <= 0) return ls;
+
+            const result = advanceKingdom(
+              ls,
+              ENABLED_LINES,
+              todo,
+              u,
+              nextMandate,
+              saveRef.current.mandateExchange.purchases
+            );
+            nextMandate = result.mandate;
+            if (nextMandate.spent !== saveRef.current.mandate.spent) {
+              setMandate(nextMandate);
+            }
+            return result.lines;
+          });
         }
-        return result.lines;
-      });
-      bumpFrame();
+      }
       rafId = requestAnimationFrame(tick);
     };
     rafId = requestAnimationFrame(tick);
@@ -267,20 +273,6 @@ export default function Reino() {
   }
 
   const anchorSteps = lines.comida?.steps ?? 0;
-  // Fração de segundo desde o último passo GLOBAL — calculada pela mesma
-  // âncora que agenda a simulação, para a interpolação das barras nunca
-  // dessincronizar do avanço real dos passos.
-  const anchor = lines.comida;
-  const partialS =
-    anchor?.started && anchor.startedAt !== undefined
-      ? Math.min(
-          Math.max(
-            (Date.now() - anchor.startedAt) / 1000 - anchor.steps * SIM_STEP_S,
-            0
-          ),
-          SIM_STEP_S
-        )
-      : 0;
   const mandateRate = totalMandatePerS(mandateExchange);
   const mandateBal = mandateBalance(
     anchorSteps,
@@ -334,7 +326,8 @@ export default function Reino() {
           upgrades={upgrades}
           mandate={mandateBal}
           mandateCost={def.mandateCost}
-          partialS={partialS}
+          anchorStartedAt={lines.comida?.startedAt}
+          anchorSteps={anchorSteps}
           onBuy={(i) => {
             const cur = saveRef.current.lines[def.id];
             if (!cur) return false;

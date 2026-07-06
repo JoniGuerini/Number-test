@@ -4,7 +4,7 @@
     (productionList/cycleBars) — o que muda é a coluna de nomes (geradores
     nomeados) e o recurso base. */
 
-import { useEffect, useRef, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import HoldActionButton from '../HoldActionButton';
 import Decimal from 'break_eternity.js';
 import { fmt, fmtCost, fmtTime } from '../../lib/format';
@@ -38,9 +38,10 @@ interface ProductionLineProps {
   upgrades: UpgradeState;
   mandate: number;
   mandateCost: number;
-  /** Fração de segundo desde o último passo GLOBAL (âncora do reino) —
-      anima as barras entre passos. Vem do Reino, dono do loop. */
-  partialS: number;
+  /** Âncora GLOBAL da simulação (linha comida): base de tempo das barras.
+      A interpolação entre passos é imperativa (rAF local), fora do React. */
+  anchorStartedAt: number | undefined;
+  anchorSteps: number;
   onBuy: (i: number) => boolean;
   /** Alterna manual/automático do SAVE inteiro (o modo é global às linhas). */
   onToggleAuto: () => void;
@@ -58,7 +59,8 @@ export default function ProductionLine({
   upgrades,
   mandate,
   mandateCost,
-  partialS,
+  anchorStartedAt,
+  anchorSteps,
   onBuy,
   onToggleAuto,
 }: ProductionLineProps) {
@@ -104,20 +106,26 @@ export default function ProductionLine({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [genCount]);
 
-  // Bordas recalculadas a cada render (o Reino re-renderiza todo frame).
-  const listEl = listRef.current;
-  const edges = {
-    above: !!listEl && listEl.scrollTop > 4,
-    below:
-      !!listEl && listEl.scrollTop + listEl.clientHeight < listEl.scrollHeight - 4,
+  // Bordas do scroll por EVENTO (não por leitura de layout no render, que
+  // forçava reflow síncrono). O scroll programático também dispara onScroll.
+  const [edges, setEdges] = useState({ above: false, below: false });
+  const updateEdges = () => {
+    const el = listRef.current;
+    if (!el) return;
+    const above = el.scrollTop > 4;
+    const below = el.scrollTop + el.clientHeight < el.scrollHeight - 4;
+    setEdges((prev) =>
+      prev.above === above && prev.below === below ? prev : { above, below }
+    );
   };
+  useEffect(() => {
+    updateEdges();
+    window.addEventListener('resize', updateEdges);
+    return () => window.removeEventListener('resize', updateEdges);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [genCount]);
 
   const isAuto = line.mode === 'auto';
-
-  // Fração de segundo desde o último passo — vem da âncora global do Reino
-  // (o loop agenda TODAS as linhas por ela; usar startedAt/steps da própria
-  // linha dessincroniza se o contador tiver qualquer desvio da âncora).
-  const partial = line.started ? partialS : 0;
 
   const cycleStepsNeed = (i: number): number =>
     cycleStepsWithUpgrades(cycleStepsOf(i, eco), upgrades, lineId, i);
@@ -128,12 +136,60 @@ export default function ProductionLine({
   const prodPerCycleDisplay = (gen: Gen, i: number) =>
     gen.amount.mul(prodPerCycleOf(i, eco)).mul(productionFactor(upgrades, lineId, i));
 
-  const cycleProgress = (gen: Gen, i: number): number => {
-    if (gen.amount.lte(0)) return 0;
-    return Math.min((gen.cycleStep + partial / SIM_STEP_S) / cycleStepsNeed(i), 1);
+  // ===== Animação das barras de ciclo (60fps, fora do React) =====
+  // O React só renderiza quando a simulação avança (4x/s). Entre passos, um
+  // rAF local escreve transform:scaleX direto nos elementos (compositor —
+  // sem layout, sem paint em árvore, sem re-render). O estado mais recente
+  // fica num ref para o loop ler sem depender de closure.
+  const barRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const animRef = useRef({
+    gens: line.gens,
+    needs: [] as number[],
+    started: line.started,
+    anchorStartedAt,
+    anchorSteps,
+  });
+  animRef.current = {
+    gens: line.gens,
+    needs: line.gens.map((_, i) => cycleStepsNeed(i)),
+    started: line.started,
+    anchorStartedAt,
+    anchorSteps,
   };
 
-  const dispUptime = line.uptime + (line.gens[0].bought > 0 ? partial : 0);
+  useEffect(() => {
+    if (!showCycleBars) return;
+    let rafId: number;
+    const tick = () => {
+      const a = animRef.current;
+      const partial =
+        a.started && a.anchorStartedAt !== undefined
+          ? Math.min(
+              Math.max(
+                (Date.now() - a.anchorStartedAt) / 1000 -
+                  a.anchorSteps * SIM_STEP_S,
+                0
+              ),
+              SIM_STEP_S
+            )
+          : 0;
+      for (let i = 0; i < a.gens.length; i++) {
+        const el = barRefs.current[i];
+        if (!el) continue;
+        const gen = a.gens[i];
+        const p = gen.amount.lte(0)
+          ? 0
+          : Math.min((gen.cycleStep + partial / SIM_STEP_S) / a.needs[i], 1);
+        // Desliza o inner: -100% = vazio, 0 = cheio (recorte no wrapper).
+        el.style.transform = `translateX(${(p - 1) * 100}%)`;
+      }
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [showCycleBars]);
+
+  const dispUptime = line.uptime;
 
   // A tela de escolha de modo vive no Reino (o início é global ao save);
   // aqui a linha já chega iniciada.
@@ -181,7 +237,7 @@ export default function ProductionLine({
           </button>
         )}
 
-        <div className={styles.list} ref={listRef}>
+        <div className={styles.list} ref={listRef} onScroll={updateEdges}>
           {line.gens.map((gen, i) => {
             const cost = genPurchaseCost(i, gen.bought, eco, lineId, upgrades);
             const target = i === 0 ? baseName : genName(i - 1);
@@ -209,8 +265,7 @@ export default function ProductionLine({
             }
 
             const remaining = Math.max(
-              cycleSecondsNeed(i) -
-                (gen.cycleStep * SIM_STEP_S + partial),
+              cycleSecondsNeed(i) - gen.cycleStep * SIM_STEP_S,
               0
             );
 
@@ -261,12 +316,16 @@ export default function ProductionLine({
                 {showCycleBars && (
                   <div className={cyc.cycleTrack} aria-hidden="true">
                     <div className={cyc.cycleGroove} />
-                    <div
-                      className={cyc.cycleFill}
-                      style={{
-                        transform: `translateY(-50%) scaleX(${cycleProgress(gen, i)})`,
-                      }}
-                    />
+                    {/* transform do inner escrito pelo rAF local — sem style
+                        no JSX para o React nunca disputar o atributo. */}
+                    <div className={cyc.cycleFill}>
+                      <div
+                        className={cyc.cycleFillInner}
+                        ref={(el) => {
+                          barRefs.current[i] = el;
+                        }}
+                      />
+                    </div>
                   </div>
                 )}
               </div>

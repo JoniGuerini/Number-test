@@ -32,6 +32,23 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.23.2',
+    date: '06/07/2026',
+    time: '19:16',
+    title: 'Sub-resources on the map',
+    summary: 'Every line now displays its 10 future sub-resources — plus a smoother, lighter production screen.',
+    qol: [
+      'Each production line now shows a row of 10 sub-resource cards (Mining: Iron, Copper, Tin \u2026 Starstone; Food: Flour, Bread \u2026 Feast; and so on). They all sit at 0 for now — the mechanic that produces them arrives in a future update.',
+      'Mining\u2019s base resource is now Coal (it was a generic Ore), making room for the rarer metals among its sub-resources.',
+      'The main navigation tab is now called Production — that screen is the kingdom\u2019s production hub.',
+      'The line tabs moved above the mandate and resource cards, so the cards always reflect the line you just picked.',
+      'Performance pass on the production screen: the interface now only re-renders when the simulation advances (4\u00d7/s) while cycle bars keep animating at full 60fps on the GPU compositor — much lighter on CPU, especially with many generators unlocked.',
+    ],
+    fixes: [
+      'Cycle progress bars no longer stutter on long cycles (most visible in Medicine) and no longer lose their rounded ends or texture at low progress.',
+    ],
+  },
+  {
     version: 'v0.23.1',
     date: '06/07/2026',
     time: '18:10',
