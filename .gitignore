@@ -5,6 +5,3 @@ dist
 .DS_Store
 .vercel
 .claude
-
-# Checkpoint local das rodadas longas do simulate-reino.mjs
-scripts/.sim-checkpoint.json

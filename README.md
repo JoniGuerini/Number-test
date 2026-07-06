@@ -97,8 +97,8 @@ npm install
 npm run dev
 ```
 
-Balance study script (Node): `node scripts/simulate-reino.mjs` mirrors the Food
-line's engine exactly to tune its cost and cycle curves.
+Balance study script (Node): `node scripts/simulate-reino.mjs` mirrors the
+engine exactly (all five lines) to tune cost and cycle curves.
 
 ## Stack
 

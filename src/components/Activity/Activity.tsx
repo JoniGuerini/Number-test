@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { SIMULATED_UNLOCKS } from '../../data/simulatedUnlocks';
+import { useEffect, useRef, useState } from 'react';
 import { fmtTime } from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
 import { loadSave, saveKeyFor } from '../../lib/storage';
@@ -7,10 +6,6 @@ import { ENABLED_LINES, type LineId } from '../Reino/lines';
 // Reusa o esqueleto visual das listas de produção (scroll, fades)
 import gstyles from '../../styles/productionList.module.css';
 import styles from './Activity.module.css';
-
-/** Real = desbloqueios do seu save; Simulada = previsão determinística do
-    modo automático (pré-computada por scripts/simulate-reino.mjs deep). */
-type ActivityView = 'real' | 'sim';
 
 /** Campos de uma linha do Reino que interessam ao log. */
 interface LineSaveLite {
@@ -33,8 +28,7 @@ interface Entry {
 }
 
 /** Converte a sequência de tempos de desbloqueio (g1, g2, …) em entradas do
-    log com intervalo e ritmo. Serve tanto pro save real quanto pra simulação
-    (os desbloqueios são sempre sequenciais). */
+    log com intervalo e ritmo (os desbloqueios são sempre sequenciais). */
 function entriesFromTimes(times: number[]): Entry[] {
   return times.map((unlockedAt, idx) => {
     const prev = idx === 0 ? 0 : times[idx - 1];
@@ -73,13 +67,12 @@ interface ActivityProps {
   onNavigate: (page: 'reino') => void;
 }
 
-/** Log de desbloqueios do Reino: abas Real (seu save) / Simulada (previsão
-    do automático), uma sub-aba por linha de produção, cada tempo explicado. */
+/** Log de desbloqueios do Reino, uma sub-aba por linha de produção, com
+    cada tempo explicado. */
 export default function Activity({ onNavigate }: ActivityProps) {
   const { t } = useI18n();
   // Chave do save do slot ativo (trocar de slot remonta o componente)
   const [key] = useState(() => saveKeyFor('reino'));
-  const [view, setView] = useState<ActivityView>('real');
   const [line, setLine] = useState<LineId>(ENABLED_LINES[0]?.id ?? 'comida');
   const [log, setLog] = useState(() => readLog(key, line));
   const listRef = useRef<HTMLDivElement>(null);
@@ -87,18 +80,12 @@ export default function Activity({ onNavigate }: ActivityProps) {
   // O save é gravado 1x/s; reler no mesmo ritmo mantém o log vivo. Trocar de
   // aba relê na hora (o efeito re-executa com a nova linha).
   useEffect(() => {
-    if (view !== 'real') return;
     setLog(readLog(key, line));
     const id = setInterval(() => setLog(readLog(key, line)), 1000);
     return () => clearInterval(id);
-  }, [key, line, view]);
+  }, [key, line]);
 
-  const simEntries = useMemo(
-    () => entriesFromTimes(SIMULATED_UNLOCKS[line] ?? []),
-    [line]
-  );
-  const entries = view === 'real' ? log.entries : simEntries;
-  const uptime = log.uptime;
+  const { entries, uptime } = log;
 
   // Mesma animação de scroll da lista de produção do Reino (alvo por frame)
   const scrollAnimRef = useRef(0);
@@ -134,7 +121,7 @@ export default function Activity({ onNavigate }: ActivityProps) {
   useEffect(() => {
     if (stickRef.current) scrollToEnd();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entryCount, line, view]);
+  }, [entryCount, line]);
 
   // Setinhas esmaecidas: aparecem quando há conteúdo além das bordas
   const [edges, setEdges] = useState({ above: false, below: false });
@@ -180,23 +167,6 @@ export default function Activity({ onNavigate }: ActivityProps) {
 
   return (
     <div className={styles.wrap}>
-      {/* Abas de visão: seu save (Real) × previsão do automático (Simulada).
-          Mesma linguagem (e largura total) das abas de linha logo abaixo. */}
-      <nav className={styles.tabs}>
-        {(['real', 'sim'] as ActivityView[]).map((v) => (
-          <button
-            key={v}
-            className={`${styles.tab} ${view === v ? styles.tabActive : ''}`}
-            onClick={() => {
-              stickRef.current = true;
-              setView(v);
-            }}
-          >
-            {t(`activity.view.${v}` as TKey)}
-          </button>
-        ))}
-      </nav>
-
       {/* Sub-abas por linha de produção, espelhando as abas do Reino */}
       <nav className={styles.tabs}>
         {ENABLED_LINES.map((l) => (
@@ -229,19 +199,10 @@ export default function Activity({ onNavigate }: ActivityProps) {
               <span className={styles.summaryValue}>{entries.length}</span>
               <span className={styles.summaryLabel}>{t('activity.unlocked')}</span>
             </div>
-            {view === 'real' ? (
-              <div className={styles.summaryItem}>
-                <span className={styles.summaryValue}>{fmtTime(uptime)}</span>
-                <span className={styles.summaryLabel}>{t('activity.playTime')}</span>
-              </div>
-            ) : (
-              <div className={styles.summaryItem}>
-                <span className={styles.summaryValue}>
-                  {last ? fmtTime(last.unlockedAt) : '—'}
-                </span>
-                <span className={styles.summaryLabel}>{t('activity.lastUnlock')}</span>
-              </div>
-            )}
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryValue}>{fmtTime(uptime)}</span>
+              <span className={styles.summaryLabel}>{t('activity.playTime')}</span>
+            </div>
             <div className={styles.summaryItem}>
               <span className={styles.summaryValue}>
                 {avgInterval !== undefined ? fmtTime(avgInterval) : '—'}
@@ -250,12 +211,10 @@ export default function Activity({ onNavigate }: ActivityProps) {
                 {t('activity.avgInterval')}
               </span>
             </div>
-            {view === 'real' && (
-              <div className={styles.summaryItem}>
-                <span className={styles.summaryValue}>{fmtTime(sinceLast)}</span>
-                <span className={styles.summaryLabel}>{t('activity.sinceLast')}</span>
-              </div>
-            )}
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryValue}>{fmtTime(sinceLast)}</span>
+              <span className={styles.summaryLabel}>{t('activity.sinceLast')}</span>
+            </div>
           </div>
 
           <div className={gstyles.listWrap}>

@@ -7,8 +7,7 @@
   gap: 14px;
 }
 
-/* Abas da Atividade (visão Real × Simulada e linhas de produção): mesma
-   linguagem das abas do Reino, todas ocupando a largura inteira. */
+/* Sub-abas das linhas de produção (mesma linguagem das abas do Reino) */
 .tabs {
   display: flex;
   gap: 8px;

@@ -32,6 +32,16 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.22.9',
+    date: '06/07/2026',
+    time: '12:15',
+    title: 'The simulation experiment ends',
+    summary: 'The Simulated activity view is retired; Activity is back to your real unlock log.',
+    qol: [
+      'Removed the Simulated tab and its forecast data from Activity. The experiment taught us a lot about the economy\u2019s deep tiers, but the upcoming upgrade mechanics will reshape those curves anyway — the forecasts would go stale with every rebalance. Activity now shows just your real log, one tab per production line, as before.',
+    ],
+  },
+  {
     version: 'v0.22.8',
     date: '06/07/2026',
     time: '10:24',
