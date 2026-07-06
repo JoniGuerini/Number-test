@@ -32,6 +32,20 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.23.3',
+    date: '06/07/2026',
+    time: '20:30',
+    title: 'Silky cycle bars',
+    summary: 'Cycle bars glide without the 4×/s hitch, and the sim loop got a correctness fix.',
+    qol: [
+      'Build tooling upgraded to Vite 8, clearing the dev-server security advisories flagged by npm audit.',
+    ],
+    fixes: [
+      'Cycle progress bars no longer freeze and jump 4 times per second: the between-steps interpolation was capped at the next unconfirmed sim step, so the bar stalled at each boundary waiting for React to commit. It now runs free on the wall clock and stays continuous when the state lands.',
+      'The simulation advance was moved out of the React state updater. Updaters must be pure — in dev, StrictMode invokes them twice and the mandate accounting leaked between invocations, doubling the per-step cost and risking wrong mandate totals.',
+    ],
+  },
+  {
     version: 'v0.23.2',
     date: '06/07/2026',
     time: '19:16',

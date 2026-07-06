@@ -162,15 +162,16 @@ export default function ProductionLine({
     let rafId: number;
     const tick = () => {
       const a = animRef.current;
+      // Sem teto no partial: o commit do React chega 1–3 frames DEPOIS do
+      // relógio cruzar a fronteira do passo; travar em SIM_STEP_S fazia a
+      // barra congelar e pular 4x/s. Deixar correr é contínuo — quando o
+      // estado chega, cycleStep sobe na mesma proporção em que partial cai.
       const partial =
         a.started && a.anchorStartedAt !== undefined
-          ? Math.min(
-              Math.max(
-                (Date.now() - a.anchorStartedAt) / 1000 -
-                  a.anchorSteps * SIM_STEP_S,
-                0
-              ),
-              SIM_STEP_S
+          ? Math.max(
+              (Date.now() - a.anchorStartedAt) / 1000 -
+                a.anchorSteps * SIM_STEP_S,
+              0
             )
           : 0;
       for (let i = 0; i < a.gens.length; i++) {

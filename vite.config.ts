@@ -22,6 +22,11 @@ function emitVersionJson(): Plugin {
 
 export default defineConfig({
   plugins: [react(), emitVersionJson()],
+  server: {
+    // Expõe o dev server na rede local (LAN) para testar de outras máquinas
+    // (ex.: o PC Windows ao lado) contra o mesmo servidor do Mac.
+    host: true,
+  },
   define: {
     // Carimbo de quando este build foi gerado (cada deploy = build novo)
     __BUILD_TIME__: JSON.stringify(buildTime),

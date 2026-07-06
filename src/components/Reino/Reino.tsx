@@ -194,30 +194,30 @@ export default function Reino() {
       const anchor = saveRef.current.lines.comida;
       if (anchor?.started && anchor.startedAt !== undefined) {
         const target = Math.floor((now - anchor.startedAt) / (SIM_STEP_S * 1000));
-        if (target > anchor.steps) {
-          const u = saveRef.current.upgrades;
-          let nextMandate = saveRef.current.mandate;
-          setLines((ls) => {
-            const a = ls.comida;
-            if (!a?.started || a.startedAt === undefined) return ls;
-
-            const todo = Math.min(target - a.steps, MAX_STEPS_PER_FRAME);
-            if (todo <= 0) return ls;
-
-            const result = advanceKingdom(
-              ls,
-              ENABLED_LINES,
-              todo,
-              u,
-              nextMandate,
-              saveRef.current.mandateExchange.purchases
-            );
-            nextMandate = result.mandate;
-            if (nextMandate.spent !== saveRef.current.mandate.spent) {
-              setMandate(nextMandate);
-            }
-            return result.lines;
-          });
+        const todo = Math.min(target - anchor.steps, MAX_STEPS_PER_FRAME);
+        if (todo > 0) {
+          // Avança FORA do setState (updater precisa ser puro — o StrictMode
+          // o invoca duas vezes e um setMandate lá dentro vazava estado entre
+          // as invocações). O saveRef é a fonte fresca, como no onBuy; ele é
+          // atualizado na hora para o próximo tick não reprocessar o lote.
+          const prev = saveRef.current;
+          const result = advanceKingdom(
+            prev.lines,
+            ENABLED_LINES,
+            todo,
+            prev.upgrades,
+            prev.mandate,
+            prev.mandateExchange.purchases
+          );
+          saveRef.current = {
+            ...prev,
+            lines: result.lines,
+            mandate: result.mandate,
+          };
+          setLines(result.lines);
+          if (result.mandate.spent !== prev.mandate.spent) {
+            setMandate(result.mandate);
+          }
         }
       }
       rafId = requestAnimationFrame(tick);
