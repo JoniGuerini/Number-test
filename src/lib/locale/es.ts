@@ -32,7 +32,7 @@ export const es: Dict = {
   'cyc.cycleEvery': 'ciclo {time}',
   'cyc.perCycleSuffix': '/ ciclo',
 
-  'activity.empty': 'Ningún desbloqueo registrado en el modo {game} todavía.',
+  'activity.empty': 'Ningún desbloqueo registrado en {game} todavía.',
   'activity.cta': 'Empezar a jugar {game}',
   'activity.unlocked': 'generadores desbloqueados',
   'activity.playTime': 'tiempo de juego',

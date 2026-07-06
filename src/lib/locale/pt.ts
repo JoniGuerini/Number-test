@@ -37,7 +37,7 @@ export const pt = {
   'cyc.perCycleSuffix': '/ ciclo',
 
   // Atividade (log de desbloqueios)
-  'activity.empty': 'Nenhum desbloqueio registrado no modo {game} ainda.',
+  'activity.empty': 'Nenhum desbloqueio registrado em {game} ainda.',
   'activity.cta': 'Começar a jogar {game}',
   'activity.unlocked': 'geradores desbloqueados',
   'activity.playTime': 'tempo de jogo',

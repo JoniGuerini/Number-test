@@ -2,14 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { fmtTime } from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
 import { loadSave, saveKeyFor } from '../../lib/storage';
-import { ENABLED_LINES } from '../Reino/lines';
+import { ENABLED_LINES, type LineId } from '../Reino/lines';
 // Reusa o esqueleto visual das listas de produção (scroll, fades)
 import gstyles from '../../styles/productionList.module.css';
 import styles from './Activity.module.css';
-
-/** Linha do Reino exibida na Atividade. Só a Comida está jogável por ora;
-    quando houver mais linhas ativas, dá para virar sub-abas aqui. */
-const REINO_LINE = ENABLED_LINES[0]?.id;
 
 /** Campos de uma linha do Reino que interessam ao log. */
 interface LineSaveLite {
@@ -57,12 +53,10 @@ function buildEntries(save: LineSaveLite | null | undefined): {
   return { entries, uptime: save.uptime };
 }
 
-/** Lê o log do Reino: mora numa chave só (uma linha por sub-chave), então
-    extraímos a linha habilitada. */
-function readLog(key: string): { entries: Entry[]; uptime: number } {
-  if (!REINO_LINE) return { entries: [], uptime: 0 };
+/** Lê o log de UMA linha do Reino (o save tem uma sub-chave por linha). */
+function readLog(key: string, line: LineId): { entries: Entry[]; uptime: number } {
   const save = loadSave<ReinoSaveLite>(key);
-  return buildEntries(save?.lines?.[REINO_LINE]);
+  return buildEntries(save?.lines?.[line]);
 }
 
 interface ActivityProps {
@@ -70,20 +64,24 @@ interface ActivityProps {
   onNavigate: (page: 'reino') => void;
 }
 
-/** Log de desbloqueios do Reino, com cada tempo explicado. */
+/** Log de desbloqueios do Reino, uma sub-aba por linha de produção, com
+    cada tempo explicado. */
 export default function Activity({ onNavigate }: ActivityProps) {
   const { t } = useI18n();
   // Chave do save do slot ativo (trocar de slot remonta o componente)
   const [key] = useState(() => saveKeyFor('reino'));
-  const [log, setLog] = useState(() => readLog(key));
+  const [line, setLine] = useState<LineId>(ENABLED_LINES[0]?.id ?? 'comida');
+  const [log, setLog] = useState(() => readLog(key, line));
   const { entries, uptime } = log;
   const listRef = useRef<HTMLDivElement>(null);
 
-  // O save é gravado 1x/s; reler no mesmo ritmo mantém o log vivo.
+  // O save é gravado 1x/s; reler no mesmo ritmo mantém o log vivo. Trocar de
+  // aba relê na hora (o efeito re-executa com a nova linha).
   useEffect(() => {
-    const id = setInterval(() => setLog(readLog(key)), 1000);
+    setLog(readLog(key, line));
+    const id = setInterval(() => setLog(readLog(key, line)), 1000);
     return () => clearInterval(id);
-  }, [key]);
+  }, [key, line]);
 
   // Mesma animação de scroll da lista de produção do Reino (alvo por frame)
   const scrollAnimRef = useRef(0);
@@ -114,12 +112,12 @@ export default function Activity({ onNavigate }: ActivityProps) {
   // rolado para cima para ler o histórico.
   const stickRef = useRef(true);
 
-  // Entrada nova no log → rola até o fim
+  // Entrada nova no log (ou troca de aba) → rola até o fim
   const entryCount = entries.length;
   useEffect(() => {
     if (stickRef.current) scrollToEnd();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entryCount]);
+  }, [entryCount, line]);
 
   // Setinhas esmaecidas: aparecem quando há conteúdo além das bordas
   const [edges, setEdges] = useState({ above: false, below: false });
@@ -161,13 +159,30 @@ export default function Activity({ onNavigate }: ActivityProps) {
   const sinceLast = last ? Math.max(uptime - last.unlockedAt, 0) : 0;
 
   const gameName = t('nav.reino');
+  const lineName = t(`reino.line.${line}` as TKey);
 
   return (
     <div className={styles.wrap}>
+      {/* Sub-abas por linha de produção, espelhando as abas do Reino */}
+      <nav className={styles.tabs}>
+        {ENABLED_LINES.map((l) => (
+          <button
+            key={l.id}
+            className={`${styles.tab} ${line === l.id ? styles.tabActive : ''}`}
+            onClick={() => {
+              stickRef.current = true;
+              setLine(l.id);
+            }}
+          >
+            {t(`reino.line.${l.id}` as TKey)}
+          </button>
+        ))}
+      </nav>
+
       {entries.length === 0 ? (
         <div className={styles.empty}>
           <p className={styles.emptyText}>
-            {t('activity.empty', { game: gameName })}
+            {t('activity.empty', { game: lineName })}
           </p>
           <button className="btn-primary" onClick={() => onNavigate('reino')}>
             {t('activity.cta', { game: gameName })}
@@ -213,7 +228,7 @@ export default function Activity({ onNavigate }: ActivityProps) {
               {entries.map((entry) => (
                 <div key={entry.gen} className={styles.entry}>
                   <span className={styles.entryTitle}>
-                    {t(`reino.gen.${REINO_LINE}.${entry.gen}` as TKey)}
+                    {t(`reino.gen.${line}.${entry.gen}` as TKey)}
                   </span>
 
                   <div className={styles.fields}>

@@ -32,6 +32,17 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.22.2',
+    date: '06/07/2026',
+    time: '03:20',
+    title: 'Activity covers every front',
+    summary: 'The unlock log now has one tab per production line, not just Food.',
+    qol: [
+      'Activity gained line tabs (Food / Mining / Exploration / Military / Medicine), mirroring the Kingdom tabs: each one shows that front\u2019s unlock log with its own summary — unlocks, play time, average interval and time since the last one — so pace comparisons stay within the same chain.',
+      'Switching tabs reads the save immediately and jumps to the latest entry; fronts with no unlocks yet show their own empty state with a shortcut to the Kingdom.',
+    ],
+  },
+  {
     version: 'v0.22.1',
     date: '06/07/2026',
     time: '03:09',

@@ -7,6 +7,43 @@
   gap: 14px;
 }
 
+/* Sub-abas das linhas de produção (mesma linguagem das abas do Reino) */
+.tabs {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.tab {
+  flex: 1;
+  background: var(--paper);
+  border: none;
+  box-shadow: var(--card-edge);
+  border-radius: 4px;
+  padding: 11px 16px;
+  font: 500 12px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.1s, transform 0.1s;
+}
+.tab:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+.tab:active {
+  box-shadow: var(--card-edge-press);
+  transform: translateY(1px);
+}
+
+.tabActive,
+.tabActive:hover {
+  background: var(--surface-deep);
+  color: var(--brass-deep);
+}
+
 /* Estado vazio com convite pra começar o modo */
 .emptyText {
   font: 400 13px/1.6 var(--mono);
@@ -112,6 +149,12 @@
 }
 
 @media (max-width: 640px) {
+  .tab {
+    padding: 10px 4px;
+    font-size: 10px;
+    letter-spacing: 0.02em;
+  }
+
   .summary {
     flex-wrap: wrap;
   }
