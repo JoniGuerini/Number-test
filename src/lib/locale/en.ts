@@ -52,7 +52,6 @@ export const en: Dict = {
 
   'fps.production': 'production',
   'fps.max': 'max',
-  'fps.speed': 'speed',
   'fps.newVersion': 'New version pending',
 
   'tab.perfil': 'Profile',

@@ -32,6 +32,16 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.22.8',
+    date: '06/07/2026',
+    time: '10:24',
+    title: 'Speed dial retired',
+    summary: 'The dev speed card is gone — the deep simulation script covers that job better.',
+    qol: [
+      'Removed the 1×/10×/…/5000× speed card from the top bar. Fast-forwarding the live game is obsolete now that the simulation tooling answers "what unlocks when" directly (and feeds the Simulated activity tab). Saves accelerated earlier keep their progress — nothing changes in how the game runs.',
+    ],
+  },
+  {
     version: 'v0.22.7',
     date: '06/07/2026',
     time: '10:17',

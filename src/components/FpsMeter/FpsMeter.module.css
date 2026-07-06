@@ -60,23 +60,6 @@
   color: var(--accent);
 }
 
-/* Acelerador de dev (1× ⇄ 10×): pill clicável; aceso quando ativo */
-.speedPill {
-  border: none;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.speedPill:hover {
-  background: var(--surface);
-}
-.speedPill .value {
-  color: var(--ink-muted);
-}
-.speedOn .value,
-.speedOn .label {
-  color: var(--brass-deep);
-}
-
 /* Deploy mais novo disponível: pill vira botão de recarregar */
 .updatePill {
   border: none;

@@ -1,5 +1,4 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import { getGameSpeed, subscribeGameSpeed, toggleGameSpeed } from '../../lib/devSpeed';
 import { useI18n } from '../../lib/locale';
 import { getVideoPrefs, subscribeVideoPrefs } from '../../lib/prefs';
 import styles from './FpsMeter.module.css';
@@ -128,7 +127,6 @@ export default function FpsMeter() {
   const battery = useBattery();
   const updateAvailable = useUpdateAvailable();
   const prefs = useSyncExternalStore(subscribeVideoPrefs, getVideoPrefs);
-  const speed = useSyncExternalStore(subscribeGameSpeed, getGameSpeed);
 
   useEffect(() => {
     let rafId: number;
@@ -210,14 +208,6 @@ export default function FpsMeter() {
           <span className={styles.label}>dom</span>
         </div>
       )}
-      {/* Acelerador de dev: 1× → 10× → … → 5000× no relógio do jogo (não encurta ciclos) */}
-      <button
-        className={`${styles.pill} ${styles.speedPill} ${speed !== 1 ? styles.speedOn : ''}`}
-        onClick={toggleGameSpeed}
-      >
-        <span className={styles.value}>{speed}×</span>
-        <span className={styles.label}>{t('fps.speed')}</span>
-      </button>
       {updateAvailable ? (
         <button
           className={`${styles.pill} ${styles.updatePill}`}

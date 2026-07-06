@@ -58,7 +58,6 @@ export const pt = {
   // Cardzinhos de telemetria do topo
   'fps.production': 'produção',
   'fps.max': 'máx',
-  'fps.speed': 'velocidade',
   'fps.newVersion': 'Nova versão pendente',
 
   // Config: tabs
