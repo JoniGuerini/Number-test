@@ -10,6 +10,7 @@
     Militar, Remédios), cada uma com seu próprio balanceamento (ver lines.ts). */
 
 import { useEffect, useReducer, useRef, useState } from 'react';
+import { getGameSpeed } from '../../lib/devSpeed';
 import { useI18n, type TKey } from '../../lib/locale';
 import { loadSave, saveKeyFor, writeSave } from '../../lib/storage';
 import ProductionLine from './ProductionLine';
@@ -91,17 +92,31 @@ export default function Reino() {
   // Loop único: avança todas as linhas ativas a partir do relógio de parede.
   useEffect(() => {
     let rafId: number;
+    let lastTick = Date.now();
     const tick = () => {
+      const now = Date.now();
+      const dt = now - lastTick;
+      lastTick = now;
+      // Acelerador de dev (1× ⇄ 10×): em 10×, arrasta a âncora startedAt para
+      // trás (9·dt por frame). A contagem de passos continua derivada só da
+      // âncora — determinismo e catch-up offline intactos — e os ciclos mantêm
+      // a duração em TEMPO DE JOGO (nada é encurtado; o relógio é que corre).
+      const speed = getGameSpeed();
       setLines((ls) => {
         let changed = false;
         const next: Lines = { ...ls };
         for (const def of ENABLED_LINES) {
           const g = next[def.id];
           if (!g || !g.started || g.startedAt === undefined) continue;
-          const target = Math.floor((Date.now() - g.startedAt) / (SIM_STEP_S * 1000));
+          const startedAt =
+            speed > 1 && dt > 0 ? g.startedAt - (speed - 1) * dt : g.startedAt;
+          const target = Math.floor((now - startedAt) / (SIM_STEP_S * 1000));
           const todo = Math.min(target - g.steps, MAX_STEPS_PER_FRAME);
           if (todo > 0) {
-            next[def.id] = advanceLine(g, todo, def.genCount, def.eco);
+            next[def.id] = advanceLine({ ...g, startedAt }, todo, def.genCount, def.eco);
+            changed = true;
+          } else if (startedAt !== g.startedAt) {
+            next[def.id] = { ...g, startedAt };
             changed = true;
           }
         }

@@ -32,6 +32,17 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.22.4',
+    date: '06/07/2026',
+    time: '09:30',
+    title: 'The speed dial',
+    summary:
+      'A dev speed card in the top bar cycles the game clock through 1×, 10× and 100×.',
+    qol: [
+      'New clickable card next to the telemetry pills: each click cycles the game clock through 1×, 10× and 100× (lit while accelerated). It speeds up time itself — generator cycles keep their full in-game duration, nothing is shortened — by dragging the save\u2019s time anchor backwards, so determinism and offline catch-up stay intact. Reloading the page returns to 1×. A development tool for this phase; it will not ship at launch.',
+    ],
+  },
+  {
     version: 'v0.22.3',
     date: '06/07/2026',
     time: '05:04',
