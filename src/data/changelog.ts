@@ -32,6 +32,16 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.24.2',
+    date: '07/07/2026',
+    time: '15:49',
+    title: 'Catch-up unstuck',
+    summary: 'The offline catch-up loading bar now actually advances — it was rewinding its own progress every frame.',
+    fixes: [
+      'The catch-up loading screen stalled and never finished (the game only looked right after a page refresh): the simulation progress was kept out of React state during catch-up, but every render overwrites the sim anchor with that state — so each frame rewound the batch it had just processed. State is now applied on every batch; with the loading card replacing the generator list, those renders are cheap.',
+    ],
+  },
+  {
     version: 'v0.24.1',
     date: '07/07/2026',
     time: '15:44',

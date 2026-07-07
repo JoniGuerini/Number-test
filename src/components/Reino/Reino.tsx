@@ -221,11 +221,14 @@ export default function Reino() {
       if (anchor?.started && anchor.startedAt !== undefined) {
         const target = Math.floor((now - anchor.startedAt) / (SIM_STEP_S * 1000));
         const pending = target - anchor.steps;
-        // Muito atraso acumulado (volta de offline): liga a tela de
-        // carregamento e segura os re-renders da UI até o lote terminar.
+        // Muito atraso acumulado (volta de offline): mostra a tela de
+        // carregamento no lugar da UI pesada. O estado continua sendo
+        // aplicado a cada lote (setLines) — segurá-lo quebrava o avanço,
+        // porque o render sobrescreve o saveRef com o estado do React e o
+        // progresso do lote era rebobinado a cada frame. Com o overlay no
+        // lugar da lista de geradores, esses renders são baratos.
         if (!catchUpRef.current && pending > CATCHUP_MIN_STEPS) {
           catchUpRef.current = { total: pending };
-          setCatchUp({ total: pending, done: 0 });
         }
         const todo = Math.min(pending, MAX_STEPS_PER_FRAME);
         if (todo > 0) {
@@ -247,22 +250,18 @@ export default function Reino() {
             lines: result.lines,
             mandate: result.mandate,
           };
+          setLines(result.lines);
+          if (result.mandate.spent !== prev.mandate.spent) {
+            setMandate(result.mandate);
+          }
           if (catchUpRef.current) {
             const remaining = pending - todo;
             if (remaining > 0) {
-              // Só a barra de progresso re-renderiza durante o catch-up.
               const { total } = catchUpRef.current;
               setCatchUp({ total, done: total - remaining });
             } else {
               catchUpRef.current = null;
               setCatchUp(null);
-              setLines(result.lines);
-              setMandate(result.mandate);
-            }
-          } else {
-            setLines(result.lines);
-            if (result.mandate.spent !== prev.mandate.spent) {
-              setMandate(result.mandate);
             }
           }
         }
