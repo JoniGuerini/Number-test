@@ -1,9 +1,14 @@
 /** Melhorias / pesquisas do Reino. Ciclo/produção: +10% por nível (sem teto).
     Bônus: chance +1%/nível; volume base 10% +1%/nível (global + gen acumulam).
-    Bônus usa rolagem determinística (hash de passos) — sem Math.random(). */
+    Bônus usa rolagem determinística (hash de passos) — sem Math.random().
+
+    Preços: escada única por gerador, IGUAL nas 5 linhas (cada uma paga no seu
+    recurso base) — 200 no gerador 1, ~8K no 2, ~400K no 3… seguindo a mesma
+    curva dos desbloqueios da Comida ×200, pra melhoria nunca virar troco em
+    nenhuma profundidade. Cada nível DOBRA o preço. */
 
 import Decimal from 'break_eternity.js';
-import { ENABLED_LINES, type LineId } from './lines';
+import { ENABLED_LINES, lineDefOf, type LineId } from './lines';
 import type { Line } from './engine';
 
 export type UpgradeKind =
@@ -27,26 +32,35 @@ export const EFFECT_PCT = 10;
 export const BONUS_CHANCE_PCT = 1;
 export const BONUS_AMOUNT_BASE_PCT = 10;
 export const BONUS_AMOUNT_PCT = 1;
-export const COST_GROWTH = 1.12;
+/** Cada nível DOBRA o preço da melhoria. */
+export const LEVEL_GROWTH = 2;
 
-export const BASE_HOURLY: Record<LineId, number> = {
-  comida: 120,
-  mineracao: 80,
-  exploracao: 55,
-  militar: 38,
-  remedios: 26,
+/** Preço-base da melhoria = custo de desbloqueio do gerador na curva da
+    Comida × este fator. Assim a escada acompanha a profundidade (200, 8K,
+    400K, 25M…) e vale IGUAL nas 5 linhas — cada uma paga no seu recurso. */
+export const UPGRADE_COST_MULTIPLIER = 200;
+const COMIDA_ECO = lineDefOf('comida').eco;
+
+/** Arredonda para 2 algarismos significativos — a curva crua dá valores como
+    1995×200 = 399.000, que viravam "399K" no botão; assim viram 400K, 25M… */
+const roundToSig2 = (d: Decimal): Decimal => {
+  const mag = Math.floor(d.log10().toNumber()) - 1;
+  if (mag <= 0) return d.round();
+  const unit = Decimal.pow(10, mag);
+  return d.div(unit).round().mul(unit);
 };
 
-/** Global afeta todas as linhas — tarifa total × escopo, repartida igual por recurso. */
-export const GLOBAL_SCOPE_MULTIPLIER = 4;
-const LINE_COUNT = (Object.keys(BASE_HOURLY) as LineId[]).length;
-export const GLOBAL_HOURLY_BASE = Math.round(
-  (Object.values(BASE_HOURLY) as number[]).reduce((s, v) => s + v, 0) *
-    GLOBAL_SCOPE_MULTIPLIER
-);
-/** Mesma quantia debitada de cada recurso base (Comida, Mineração, …). */
-export const globalCostPerResource = (level: number): number =>
-  Math.round((GLOBAL_HOURLY_BASE / LINE_COUNT) * COST_GROWTH ** level);
+const genBaseCost = (index: number): Decimal =>
+  roundToSig2(
+    Decimal.pow(
+      10,
+      COMIDA_ECO.costSlope * index + COMIDA_ECO.costCurve * index * index
+    ).mul(UPGRADE_COST_MULTIPLIER)
+  );
+
+/** Global afeta todos os geradores de todas as linhas — preço premium (5× o
+    tier do gerador 1), debitado por igual de CADA recurso base. */
+export const GLOBAL_BASE_COST = 1_000;
 
 /** Sincroniza Reino ↔ Melhorias após gravar o save. */
 export const REINO_SAVE_EVENT = 'number-test:reino-updated';
@@ -96,17 +110,13 @@ export const genKey = (lineId: LineId, index: number, kind: UpgradeKind): string
 export const costLineOf = (target: 'global' | GenRef): LineId =>
   target === 'global' ? 'comida' : target.lineId;
 
-export const hourlyCost = (
-  target: 'global' | GenRef,
-  level: number
-): number => {
-  if (target === 'global') return globalCostPerResource(level);
-  const depth = 1 + target.index * 0.12;
-  return Math.round(BASE_HOURLY[target.lineId] * depth * COST_GROWTH ** level);
+/** Preço da melhoria no nível dado: base do gerador (escada única, igual nas
+    5 linhas) × 2^nível. Global usa a base premium própria. */
+export const purchaseCost = (target: 'global' | GenRef, level: number): Decimal => {
+  const base =
+    target === 'global' ? new Decimal(GLOBAL_BASE_COST) : genBaseCost(target.index);
+  return base.mul(Decimal.pow(LEVEL_GROWTH, level));
 };
-
-export const purchaseCost = (target: 'global' | GenRef, level: number): Decimal =>
-  new Decimal(hourlyCost(target, level));
 
 export const getLevel = (
   upgrades: UpgradeState,

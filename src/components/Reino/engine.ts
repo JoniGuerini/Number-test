@@ -115,7 +115,7 @@ export const ratePerSecOf = (i: number, eco: LineEconomy): Decimal =>
   prodPerCycleOf(i, eco).div(cycleSecondsOf(i, eco));
 
 /** Custo do gerador N (índice i) na próxima compra: custo-base da linha ×
-    1.10^comprados. O round() arredonda só o CUSTO-BASE (deixa 1, 25, 759…
+    1.10^comprados. O round() arredonda só o CUSTO-BASE (deixa 1, 40, 2000…
     limpos e corrige o pow do break_eternity); o +10% é aplicado por cima SEM
     arredondar, então as repetições ficam fracionárias (ex.: 1.10, 1.21) e o
     aumento por compra aparece de verdade, inclusive nas casas decimais. */

@@ -16,11 +16,11 @@ const HORIZON_S = 72 * 3600; // 72h de jogo simulado
 // ciclo-base e custo de entrada dobram por linha; crescimento do ciclo +1;
 // produção-base +0.1; escada de preços mais íngreme quanto mais funda.
 const LINES = [
-  { id: 'comida', mandateCost: 1, cycleBaseS: 2, cycleGrowth: 3, prodBase: 0.3, prodStep: 0.1, costSlope: 1.36, costCurve: 0.04 },
-  { id: 'mineracao', mandateCost: 2, cycleBaseS: 4, cycleGrowth: 4, prodBase: 0.4, prodStep: 0.1, costSlope: 1.66, costCurve: 0.045 },
-  { id: 'exploracao', mandateCost: 3, cycleBaseS: 8, cycleGrowth: 5, prodBase: 0.5, prodStep: 0.1, costSlope: 1.95, costCurve: 0.05 },
-  { id: 'militar', mandateCost: 4, cycleBaseS: 16, cycleGrowth: 6, prodBase: 0.6, prodStep: 0.1, costSlope: 2.25, costCurve: 0.055 },
-  { id: 'remedios', mandateCost: 5, cycleBaseS: 32, cycleGrowth: 7, prodBase: 0.7, prodStep: 0.1, costSlope: 2.54, costCurve: 0.06 },
+  { id: 'comida', mandateCost: 1, cycleBaseS: 2, cycleGrowth: 3, prodBase: 0.3, prodStep: 0.1, costSlope: 1.55, costCurve: 0.05 },
+  { id: 'mineracao', mandateCost: 2, cycleBaseS: 4, cycleGrowth: 4, prodBase: 0.4, prodStep: 0.1, costSlope: 1.85, costCurve: 0.055 },
+  { id: 'exploracao', mandateCost: 3, cycleBaseS: 8, cycleGrowth: 5, prodBase: 0.5, prodStep: 0.1, costSlope: 2.15, costCurve: 0.06 },
+  { id: 'militar', mandateCost: 4, cycleBaseS: 16, cycleGrowth: 6, prodBase: 0.6, prodStep: 0.1, costSlope: 2.45, costCurve: 0.065 },
+  { id: 'remedios', mandateCost: 5, cycleBaseS: 32, cycleGrowth: 7, prodBase: 0.7, prodStep: 0.1, costSlope: 2.75, costCurve: 0.07 },
 ];
 
 // Encarecimento por compra repetida: +10% fixo e universal (BUY_GROWTH).

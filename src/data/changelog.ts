@@ -32,6 +32,23 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.24.0',
+    date: '07/07/2026',
+    time: '12:14',
+    title: 'The great repricing',
+    summary: 'The kingdom\u2019s economy got a full rebalance: generator unlocks are much steeper and research prices were rebuilt from the ground up.',
+    major: [
+      'Generator unlock costs are far steeper on all five lines. Food now climbs 1 \u2192 40 \u2192 2,000 \u2192 126K \u2192 10M\u2026 (it used to be 1 \u2192 25 \u2192 759 \u2192 27.5K), and the deeper lines (Mining, Exploration, Military, Medicine) keep their relative weight on top of the new curve. Repeat purchases of the same generator stay at a flat +10%.',
+      'Research prices were rebuilt: every generator\u2019s five upgrades share a single price ladder tied to the new unlock curve \u2014 200 for the first generator, 8K for the second, 400K, 25M, 2B\u2026 \u2014 identical across all five lines, each paying in its own base resource. Every level bought doubles the price (it was +12%, which made late-game research cost pocket change).',
+    ],
+    minor: [
+      'Global research now starts at 1,000 of EACH base resource and doubles per level, keeping its premium as the upgrade that touches everything.',
+    ],
+    qol: [
+      'Research prices are rounded to two significant digits, so the ladder reads clean in the buttons: 400K instead of 399K, 25M instead of 25.1M.',
+    ],
+  },
+  {
     version: 'v0.23.5',
     date: '06/07/2026',
     time: '22:35',

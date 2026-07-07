@@ -26,7 +26,7 @@ import {
   EFFECT_PCT,
   canAffordUpgrade,
   getLevel,
-  hourlyCost,
+  purchaseCost,
   loadUpgrades,
   notifyReinoSave,
   serializeUpgrades,
@@ -192,7 +192,7 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
     () =>
       UPGRADE_KINDS.map((kind) => {
         const level = getLevel(upgrades, 'global', kind);
-        const cost = hourlyCost('global', level);
+        const cost = purchaseCost('global', level);
         const canAfford = canAffordUpgrade(lines, 'global', level);
         return { kind, level, cost, canAfford };
       }),
@@ -207,7 +207,7 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
       cards: UPGRADE_KINDS.map((kind) => {
         const gen = { lineId: view, index } satisfies GenRef;
         const level = getLevel(upgrades, gen, kind);
-        const cost = hourlyCost(gen, level);
+        const cost = purchaseCost(gen, level);
         const canAfford = canAffordUpgrade(lines, gen, level);
         return { kind, level, line: view, cost, canAfford };
       }),
@@ -238,7 +238,7 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
     kind: UpgradeKind,
     level: number,
     line: LineId | null,
-    cost: number,
+    cost: Decimal,
     canAfford: boolean
   ) => (
     <article key={kind} className={styles.card}>
