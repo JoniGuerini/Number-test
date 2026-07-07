@@ -1,14 +1,53 @@
 .bar {
   position: fixed;
   top: 12px;
-  right: 12px;
+  /* Abre espaço para o par fullscreen + engrenagem de Config no canto:
+     12 da borda + 32 + 8 + 32 + 8 */
+  right: 92px;
   display: flex;
   gap: 8px;
 }
 
+/* Card da versão: canto oposto, onde morava o botão de fullscreen */
+.verBar {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  display: flex;
+}
+
+/* Sem atualização pendente, o card da versão é o atalho para as Notas */
+.verBtn {
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.08s;
+}
+.verBtn:hover {
+  background: var(--surface);
+}
+.verBtn:active {
+  box-shadow: var(--card-edge-press);
+  transform: translateY(1px);
+}
+.verBtnOn,
+.verBtnOn:hover {
+  background: var(--surface-deep);
+}
+
+/* Seta do "Voltar": mesma cor do texto da versão */
+.backIcon {
+  width: 13px;
+  height: 13px;
+  stroke-width: 2.25;
+  align-self: center;
+  color: var(--brass-deep);
+  flex-shrink: 0;
+}
+
 /* Mobile: entra no fluxo, no topo da página */
 @media (max-width: 640px) {
-  .bar {
+  .bar,
+  .verBar {
     position: static;
     justify-content: center;
     flex-wrap: wrap;

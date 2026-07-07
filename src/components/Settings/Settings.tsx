@@ -1,6 +1,18 @@
 import { useState, useSyncExternalStore } from 'react';
+import Decimal from 'break_eternity.js';
+import {
+  Languages,
+  Monitor,
+  Palette,
+  Save,
+  UserRound,
+  Volume2,
+  type LucideIcon,
+} from 'lucide-react';
 import type { GameTab } from '../../App';
 import { signOut, useAuth } from '../../lib/auth';
+import { fmt, fmtTime } from '../../lib/format';
+import { ENABLED_LINES } from '../Reino/lines';
 import {
   getDateLocale,
   LOCALES,
@@ -45,7 +57,16 @@ const GAMES: GameTab[] = ['reino'];
 /** Campos que sinalizam progresso iniciado no save. */
 interface SaveProbe {
   /** Reino: uma linha por chave; conta se qualquer linha foi iniciada. */
-  lines?: Record<string, { started?: boolean } | undefined>;
+  lines?: Record<
+    string,
+    | {
+        started?: boolean;
+        startedAt?: number;
+        uptime?: number;
+        totalProduced?: string;
+      }
+    | undefined
+  >;
 }
 
 /** Há progresso para zerar? (jogo de fato iniciado, não só o save gravado
@@ -70,6 +91,16 @@ const VIDEO_TOGGLES: {
 type ConfigTab = 'perfil' | 'saves' | 'temas' | 'som' | 'video' | 'idioma';
 
 const TABS: ConfigTab[] = ['perfil', 'saves', 'temas', 'som', 'video', 'idioma'];
+
+/* Ícones das abas (Lucide) — neutros, herdam a cor do rótulo. */
+const TAB_ICONS: Record<ConfigTab, LucideIcon> = {
+  perfil: UserRound,
+  saves: Save,
+  temas: Palette,
+  som: Volume2,
+  video: Monitor,
+  idioma: Languages,
+};
 
 /** Card de tema pintado com as cores dele mesmo, com mini-mockup dentro. */
 function ThemeCard({
@@ -143,6 +174,9 @@ export default function Settings({
   const [tab, setTab] = useState<ConfigTab>('perfil');
   // Slot com as opções (carregar / renomear / zerar) abertas abaixo dele
   const [expandedSlotId, setExpandedSlotId] = useState<string | null>(null);
+  // Confirmação em duas etapas do resetar jogo salvo (o botão grande vira
+  // o par Resetar/Cancelar); zera ao expandir/recolher outro slot
+  const [confirmResetGame, setConfirmResetGame] = useState<GameTab | null>(null);
   // Rascunho do nome no painel expandido (renomear)
   const [renameDraft, setRenameDraft] = useState('');
   // Criação de save: input com nome pré-preenchido antes de confirmar
@@ -182,17 +216,22 @@ export default function Settings({
   return (
     <div className={styles.panel}>
       <nav className={styles.tabs}>
-        {TABS.map((id) => (
-          <button
-            key={id}
-            className={`${styles.tab} ${tab === id ? styles.tabActive : ''}`}
-            onClick={() => setTab(id)}
-          >
-            {t(`tab.${id}`)}
-          </button>
-        ))}
+        {TABS.map((id) => {
+          const Icon = TAB_ICONS[id];
+          return (
+            <button
+              key={id}
+              className={`${styles.tab} ${tab === id ? styles.tabActive : ''}`}
+              onClick={() => setTab(id)}
+            >
+              <Icon className={styles.tabIcon} aria-hidden="true" />
+              <span>{t(`tab.${id}`)}</span>
+            </button>
+          );
+        })}
       </nav>
 
+      <div className={styles.main}>
       <div className={styles.body}>
         {tab === 'perfil' && authUser && (
           <section className={styles.section}>
@@ -253,6 +292,7 @@ export default function Settings({
                       <button
                         className={`${styles.option} ${active ? styles.active : ''}`}
                         onClick={() => {
+                          setConfirmResetGame(null);
                           if (expanded) {
                             setExpandedSlotId(null);
                           } else {
@@ -319,6 +359,59 @@ export default function Settings({
 
                     {expanded && (
                       <div className={styles.slotOptions}>
+                        {(() => {
+                          // Raio-X do save: início, tempo decorrido e o total
+                          // produzido por linha (dados que moravam na tela de
+                          // Produção). Snapshot do localStorage — o save do
+                          // slot ativo persiste a cada 1s.
+                          const probe = loadSave<SaveProbe>(
+                            saveKeyForSlot(slot.id, 'reino')
+                          );
+                          const anchor = probe?.lines?.comida;
+                          if (!anchor?.started || anchor.startedAt === undefined)
+                            return null;
+                          return (
+                            <>
+                              <div className={styles.statGrid}>
+                                <div className={styles.statCard}>
+                                  <span className={styles.statCardLabel}>
+                                    {t('common.startLabel')}
+                                  </span>
+                                  <span className={styles.statCardValue}>
+                                    {fmtSlotDate(anchor.startedAt, getDateLocale())}
+                                  </span>
+                                </div>
+                                <div className={styles.statCard}>
+                                  <span className={styles.statCardLabel}>
+                                    {t('common.time')}
+                                  </span>
+                                  <span className={styles.statCardValue}>
+                                    {fmtTime(anchor.uptime ?? 0)}
+                                  </span>
+                                </div>
+                              </div>
+                              <span className={styles.subLabel}>
+                                {t('common.produced')}
+                              </span>
+                              <div className={styles.statGrid}>
+                                {ENABLED_LINES.map((d) => (
+                                  <div className={styles.statCard} key={d.id}>
+                                    <span className={styles.statCardLabel}>
+                                      {t(`reino.line.${d.id}` as TKey)}
+                                    </span>
+                                    <span className={styles.statCardValue}>
+                                      {fmt(
+                                        new Decimal(
+                                          probe?.lines?.[d.id]?.totalProduced ?? 0
+                                        )
+                                      )}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </>
+                          );
+                        })()}
                         <div className={styles.nameRow}>
                           <input
                             className={styles.nameInput}
@@ -354,16 +447,36 @@ export default function Settings({
                           </button>
                         )}
                         <div className={styles.resetRow}>
-                          {GAMES.map((game) => (
-                            <button
-                              key={game}
-                              className={styles.dangerBtn}
-                              disabled={!hasProgress(slot.id, game)}
-                              onClick={() => onReset(slot.id, game)}
-                            >
-                              {t('saves.reset', { game: t(`nav.${game}`) })}
-                            </button>
-                          ))}
+                          {GAMES.map((game) =>
+                            confirmResetGame === game ? (
+                              <div key={game} className={styles.resetPair}>
+                                <button
+                                  className={styles.dangerBtn}
+                                  onClick={() => {
+                                    onReset(slot.id, game);
+                                    setConfirmResetGame(null);
+                                  }}
+                                >
+                                  {t('saves.resetConfirm')}
+                                </button>
+                                <button
+                                  className="btn-secondary"
+                                  onClick={() => setConfirmResetGame(null)}
+                                >
+                                  {t('saves.cancel')}
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                key={game}
+                                className={styles.dangerBtn}
+                                disabled={!hasProgress(slot.id, game)}
+                                onClick={() => setConfirmResetGame(game)}
+                              >
+                                {t('saves.reset')}
+                              </button>
+                            )
+                          )}
                         </div>
                       </div>
                     )}
@@ -576,6 +689,7 @@ export default function Settings({
             </div>
           </section>
         )}
+
       </div>
 
       <div className={styles.footer}>
@@ -602,6 +716,7 @@ export default function Settings({
             {t('config.reset')}
           </button>
         )}
+      </div>
       </div>
     </div>
   );

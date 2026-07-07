@@ -1,4 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { useI18n } from '../../lib/locale';
 import { getVideoPrefs, subscribeVideoPrefs } from '../../lib/prefs';
 import styles from './FpsMeter.module.css';
@@ -125,7 +126,6 @@ export default function FpsMeter() {
     domNodes: 0,
   });
   const battery = useBattery();
-  const updateAvailable = useUpdateAvailable();
   const prefs = useSyncExternalStore(subscribeVideoPrefs, getVideoPrefs);
 
   useEffect(() => {
@@ -208,6 +208,25 @@ export default function FpsMeter() {
           <span className={styles.label}>dom</span>
         </div>
       )}
+    </div>
+  );
+}
+
+/** Card da versão, no canto oposto ao da telemetria (topo-esquerdo).
+    Com deploy novo detectado, vira o botão de recarregar; sem atualização
+    pendente, o clique abre a página de notas de atualização. */
+export function VersionBadge({
+  notesOpen,
+  onOpenNotes,
+}: {
+  notesOpen: boolean;
+  onOpenNotes: () => void;
+}) {
+  const { t } = useI18n();
+  const updateAvailable = useUpdateAvailable();
+
+  return (
+    <div className={styles.verBar}>
       {updateAvailable ? (
         <button
           className={`${styles.pill} ${styles.updatePill}`}
@@ -216,9 +235,23 @@ export default function FpsMeter() {
           {t('fps.newVersion')}
         </button>
       ) : (
-        <div className={styles.pill}>
+        <button
+          className={`${styles.pill} ${styles.verBtn} ${notesOpen ? styles.verBtnOn : ''}`}
+          onClick={onOpenNotes}
+          aria-label={notesOpen ? t('common.back') : t('nav.notas')}
+          title={notesOpen ? t('common.back') : t('nav.notas')}
+        >
+          {/* Com as Notas abertas, o mesmo botão é o caminho de volta:
+              ← Voltar | v0.0.0 — a versão empurrada para o final */}
+          {notesOpen && (
+            <>
+              <ArrowLeft className={styles.backIcon} aria-hidden="true" />
+              <span className={styles.value}>{t('common.back')}</span>
+              <span className={styles.divider} />
+            </>
+          )}
           <span className={styles.value}>v{__APP_VERSION__}</span>
-        </div>
+        </button>
       )}
     </div>
   );

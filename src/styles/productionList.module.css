@@ -80,26 +80,16 @@
 }
 
 
-/* Hub de cardzinhos no canto superior esquerdo, lado a lado */
+/* Hub do canto superior esquerdo (hoje só o toggle de modo automático) */
 .corner {
   position: fixed;
   top: 12px;
-  /* Reserva o espaço do botão de tela cheia (fixo em left:12, ~32px de largura)
-     para os cardzinhos começarem logo depois dele, sem sobreposição */
-  left: 52px;
+  /* Reserva o espaço do card da versão (fixo em left:12, ~85px de largura)
+     para começar logo depois dele, sem sobreposição */
+  left: 104px;
   display: flex;
   align-items: stretch;
   gap: 8px;
-}
-
-.timePill {
-  display: flex;
-  align-items: baseline;
-  gap: 5px;
-  background: var(--paper);
-  border-radius: 4px;
-  box-shadow: var(--card-edge-pill);
-  padding: 6px 12px;
 }
 
 .cornerBtn {
@@ -124,19 +114,6 @@
 .toggleOn:hover {
   background: var(--surface-deep);
   color: var(--brass-deep);
-}
-
-.timeValue {
-  font: 600 14px/1 var(--mono);
-  color: var(--brass-deep);
-  font-variant-numeric: tabular-nums;
-}
-
-.timeLabel {
-  font: 500 11px/1 var(--mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-muted);
 }
 
 .baseBlock {
@@ -334,7 +311,6 @@
     flex-wrap: wrap;
     justify-content: center;
   }
-  .timePill,
   .cornerBtn {
     white-space: nowrap;
   }

@@ -1,37 +1,60 @@
-/* Conteúdo do modal de Config: abas no topo (dentro do card) + corpo rolável.
-   O card em si é o próprio modal (definido em App.module.css). */
+/* Conteúdo do modal de Config: sidebar de abas à esquerda + coluna de
+   conteúdo (corpo rolável + rodapé) à direita. O card em si é o próprio
+   modal (definido em App.module.css). */
 .panel {
   width: 100%;
   flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+}
+
+/* Sidebar de navegação, dentro do card */
+.tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+  width: 168px;
+}
+
+/* Coluna de conteúdo: corpo rolável + rodapé fixo embaixo */
+.main {
+  flex: 1;
+  min-width: 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-/* Abas de navegação, dentro do card */
-.tabs {
-  display: flex;
-  gap: 6px;
-  flex-shrink: 0;
-  width: 100%;
-}
-
 .tab {
-  flex: 1;
   min-width: 0;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  text-align: left;
   background: var(--surface);
   border: none;
   box-shadow: var(--card-edge);
   border-radius: 4px;
-  padding: 10px 8px;
+  padding: 10px 12px;
   font: 500 12px/1.25 var(--mono);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--ink-muted);
   cursor: pointer;
   transition: background 0.15s, color 0.15s, box-shadow 0.15s, transform 0.08s;
+}
+
+/* Ícone da aba: neutro, na cor do rótulo */
+.tabIcon {
+  width: 14px;
+  height: 14px;
+  stroke-width: 1.75;
+  flex-shrink: 0;
 }
 .tab:hover {
   background: var(--surface-hover);
@@ -299,6 +322,17 @@
 }
 .resetRow .dangerBtn {
   flex: 1 1 45%;
+  min-width: 0;
+}
+
+/* Confirmação: o botão grande vira este par Resetar/Cancelar lado a lado */
+.resetPair {
+  display: flex;
+  gap: 8px;
+  flex: 1 1 100%;
+}
+.resetPair > button {
+  flex: 1;
   min-width: 0;
 }
 
@@ -599,7 +633,25 @@
 }
 
 @media (max-width: 640px) {
+  /* No mobile a sidebar não cabe: volta a ser uma faixa de abas no topo,
+     em duas linhas se preciso, só com os rótulos */
+  .panel {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .tabs {
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+  }
   .tab {
+    flex: 1 1 30%;
+    justify-content: center;
+    text-align: center;
     letter-spacing: 0.02em;
+    padding: 10px 8px;
+  }
+  .tabIcon {
+    display: none;
   }
 }

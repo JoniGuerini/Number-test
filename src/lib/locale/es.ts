@@ -11,6 +11,7 @@ export const es: Dict = {
   'nav.notas': 'Notas de actualización',
   'nav.config': 'Ajustes',
 
+  'common.back': 'Volver',
   'common.start': 'Iniciar',
   'common.startLabel': 'inicio',
   'common.time': 'tiempo',
@@ -99,7 +100,8 @@ export const es: Dict = {
   'saves.hint': 'Tus partidas guardadas.',
   'saves.active': 'activa',
   'saves.load': 'Cargar partida',
-  'saves.reset': 'Reiniciar {game}',
+  'saves.reset': 'Restablecer partida guardada',
+  'saves.resetConfirm': 'Restablecer',
   'saves.rename': 'Renombrar',
   'saves.create': 'Crear nueva partida +',
   'saves.confirmCreate': 'Crear',

@@ -32,6 +32,24 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.23.4',
+    date: '06/07/2026',
+    time: '21:55',
+    title: 'A cleaner chrome',
+    summary: 'Icons arrive in the UI chrome, Settings becomes a sidebar panel, and the top corners get a full reorganization.',
+    minor: [
+      'The interface chrome now uses icons (Lucide): each footer menu has one, Settings tabs got theirs, and the fullscreen toggle joined the same family. Generators and production-line tabs stay text-only by design.',
+      'Settings turned into a proper panel: the tabs moved into a left sidebar, and the gear became an icon-only button in the top-right corner — freeing a menu slot in the footer.',
+      'Patch notes left the footer: the version card in the top-left corner now opens them. While reading, the same card shows "← Back | version" and returns exactly where you were. When a new deploy is available it still turns into the reload notice.',
+      'The save\u2019s vitals (start date, elapsed time and total produced per production line) moved from the production screen into Settings → Saves, shown when you expand a slot.',
+    ],
+    qol: [
+      'Resetting a save is now a two-step flow: the button reads "Reset saved game" and swaps into a Reset/Cancel pair before anything is wiped.',
+      'The fullscreen button moved next to the Settings gear in the top-right corner, and the telemetry row shifted to make room.',
+      'Page content now aligns with the fixed top cards (frame padding 16px → 12px), gaining a little useful width.',
+    ],
+  },
+  {
     version: 'v0.23.3',
     date: '06/07/2026',
     time: '20:30',

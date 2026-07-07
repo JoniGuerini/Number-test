@@ -1,4 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Castle,
+  FlaskConical,
+  History,
+  MessagesSquare,
+  Settings as SettingsIcon,
+  Trophy,
+  type LucideIcon,
+} from 'lucide-react';
 import Reino from './components/Reino/Reino';
 import Activity from './components/Activity/Activity';
 import Chat from './components/Chat/Chat';
@@ -7,7 +16,7 @@ import Upgrades from './components/Upgrades/Upgrades';
 import Login from './components/Login/Login';
 import PatchNotes from './components/PatchNotes/PatchNotes';
 import Settings from './components/Settings/Settings';
-import FpsMeter from './components/FpsMeter/FpsMeter';
+import FpsMeter, { VersionBadge } from './components/FpsMeter/FpsMeter';
 import FullscreenToggle from './components/FullscreenToggle/FullscreenToggle';
 import { useAuth } from './lib/auth';
 import { useWakeLock } from './hooks/useWakeLock';
@@ -30,12 +39,24 @@ type Page = GameTab | 'melhorias' | 'atividade' | 'chat' | 'classificacao' | 'no
 
 /* A última página visitada sobrevive ao refresh */
 const PAGE_KEY = 'number-test:page';
-const PAGES: Page[] = ['reino', 'melhorias', 'atividade', 'chat', 'classificacao', 'notas'];
+/* Abas do rodapé — Notas fica fora: abre pelo cardzinho da versão no topo */
+const PAGES: Exclude<Page, 'notas'>[] = ['reino', 'melhorias', 'atividade', 'chat', 'classificacao'];
+const VALID_PAGES: Page[] = [...PAGES, 'notas'];
+
+/* Ícones do menu (Lucide): só no chrome da UI — geradores e abas de linha de
+   produção seguem só com texto, por decisão de design. */
+const PAGE_ICONS: Record<Exclude<Page, 'notas'>, LucideIcon> = {
+  reino: Castle,
+  melhorias: FlaskConical,
+  atividade: History,
+  chat: MessagesSquare,
+  classificacao: Trophy,
+};
 
 function readStoredPage(): Page {
   try {
     const stored = localStorage.getItem(PAGE_KEY);
-    if (stored && (PAGES as string[]).includes(stored)) return stored as Page;
+    if (stored && (VALID_PAGES as string[]).includes(stored)) return stored as Page;
   } catch {
     // Sem localStorage — cai no padrão
   }
@@ -77,6 +98,9 @@ export default function App() {
   }, []);
 
   const [page, setPage] = useState<Page>(readStoredPage);
+  // Página a restaurar ao sair das Notas pelo botão da versão. Se o app já
+  // abriu direto nas Notas (refresh), o retorno cai no Reino.
+  const notesReturnRef = useRef<Page>('reino');
   useEffect(() => {
     try {
       localStorage.setItem(PAGE_KEY, page);
@@ -159,7 +183,31 @@ export default function App() {
   return (
     <div className={styles.frame}>
       <FullscreenToggle />
+      {/* Engrenagem só-ícone ao lado do fullscreen (lado oposto à telemetria):
+          libera um slot de menu no rodapé. */}
+      <button
+        className={`${styles.configBtn} ${settingsOpen ? styles.configBtnOn : ''}`}
+        onClick={() => setSettingsOpen((o) => !o)}
+        aria-label={t('nav.config')}
+        aria-pressed={settingsOpen}
+        title={t('nav.config')}
+      >
+        <SettingsIcon className={styles.configIcon} aria-hidden="true" />
+      </button>
       <FpsMeter />
+      <VersionBadge
+        notesOpen={page === 'notas' && !settingsOpen}
+        onOpenNotes={() => {
+          setSettingsOpen(false);
+          if (page === 'notas') {
+            // Mesmo botão volta para onde o jogador estava antes das Notas
+            setPage(notesReturnRef.current);
+          } else {
+            notesReturnRef.current = page;
+            setPage('notas');
+          }
+        }}
+      />
 
       {/* As telas ficam sempre montadas para o progresso não resetar ao trocar de aba. */}
       <main
@@ -199,24 +247,22 @@ export default function App() {
 
       <footer className={styles.footer}>
         <nav className={styles.tabs}>
-          {PAGES.map((p) => (
-            <button
-              key={p}
-              className={`${styles.tab} ${page === p && !settingsOpen ? styles.active : ''}`}
-              onClick={() => {
-                setSettingsOpen(false);
-                setPage(p);
-              }}
-            >
-              {t(`nav.${p}`)}
-            </button>
-          ))}
-          <button
-            className={`${styles.tab} ${settingsOpen ? styles.active : ''}`}
-            onClick={() => setSettingsOpen((o) => !o)}
-          >
-            {t('nav.config')}
-          </button>
+          {PAGES.map((p) => {
+            const Icon = PAGE_ICONS[p];
+            return (
+              <button
+                key={p}
+                className={`${styles.tab} ${page === p && !settingsOpen ? styles.active : ''}`}
+                onClick={() => {
+                  setSettingsOpen(false);
+                  setPage(p);
+                }}
+              >
+                <Icon className={styles.tabIcon} aria-hidden="true" />
+                <span>{t(`nav.${p}`)}</span>
+              </button>
+            );
+          })}
         </nav>
       </footer>
 

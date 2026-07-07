@@ -11,6 +11,7 @@ export const en: Dict = {
   'nav.notas': 'Patch notes',
   'nav.config': 'Settings',
 
+  'common.back': 'Back',
   'common.start': 'Start',
   'common.startLabel': 'started',
   'common.time': 'time',
@@ -99,7 +100,8 @@ export const en: Dict = {
   'saves.hint': 'Your saved games.',
   'saves.active': 'active',
   'saves.load': 'Load save',
-  'saves.reset': 'Reset {game}',
+  'saves.reset': 'Reset saved game',
+  'saves.resetConfirm': 'Reset',
   'saves.rename': 'Rename',
   'saves.create': 'Create new save +',
   'saves.confirmCreate': 'Create',

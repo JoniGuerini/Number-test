@@ -8,7 +8,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import HoldActionButton from '../HoldActionButton';
 import Decimal from 'break_eternity.js';
 import { fmt, fmtCost, fmtTime } from '../../lib/format';
-import { getDateLocale, useI18n, type TKey } from '../../lib/locale';
+import { useI18n, type TKey } from '../../lib/locale';
 import { getVideoPrefs, subscribeVideoPrefs } from '../../lib/prefs';
 import styles from '../../styles/productionList.module.css';
 import cyc from '../../styles/cycleBars.module.css';
@@ -190,35 +190,12 @@ export default function ProductionLine({
     return () => cancelAnimationFrame(rafId);
   }, [showCycleBars]);
 
-  const dispUptime = line.uptime;
-
   // A tela de escolha de modo vive no Reino (o início é global ao save);
-  // aqui a linha já chega iniciada.
+  // aqui a linha já chega iniciada. As infos do save (início/tempo/produzido)
+  // moraram aqui como pills — hoje vivem na Config, em Jogos salvos.
   return (
     <div className={styles.wrap}>
       <div className={styles.corner}>
-        <div className={styles.timePill}>
-          <span className={styles.timeValue}>
-            {line.startedAt !== undefined
-              ? new Date(line.startedAt).toLocaleString(getDateLocale(), {
-                  day: '2-digit',
-                  month: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                })
-              : '—'}
-          </span>
-          <span className={styles.timeLabel}>{t('common.startLabel')}</span>
-        </div>
-        <div className={styles.timePill}>
-          <span className={styles.timeValue}>{fmtTime(dispUptime)}</span>
-          <span className={styles.timeLabel}>{t('common.time')}</span>
-        </div>
-        <div className={styles.timePill}>
-          <span className={styles.timeValue}>{fmt(line.totalProduced)}</span>
-          <span className={styles.timeLabel}>{t('common.produced')}</span>
-        </div>
         <button
           className={`${styles.cornerBtn} ${isAuto ? styles.toggleOn : ''}`}
           onClick={onToggleAuto}

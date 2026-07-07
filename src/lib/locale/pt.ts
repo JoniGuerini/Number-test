@@ -13,6 +13,7 @@ export const pt = {
   'nav.config': 'Configurações',
 
   // Compartilhado pelo app todo
+  'common.back': 'Voltar',
   'common.start': 'Iniciar',
   'common.startLabel': 'início',
   'common.time': 'tempo',
@@ -109,7 +110,8 @@ export const pt = {
   'saves.hint': 'Seus jogos salvos.',
   'saves.active': 'ativo',
   'saves.load': 'Carregar jogo salvo',
-  'saves.reset': 'Zerar {game}',
+  'saves.reset': 'Resetar jogo salvo',
+  'saves.resetConfirm': 'Resetar',
   'saves.rename': 'Renomear',
   'saves.create': 'Criar novo jogo salvo +',
   'saves.confirmCreate': 'Criar',
