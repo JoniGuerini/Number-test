@@ -32,6 +32,17 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.24.1',
+    date: '07/07/2026',
+    time: '15:44',
+    title: 'A calmer homecoming',
+    summary: 'Coming back after time offline now shows a loading screen while the kingdom catches up.',
+    qol: [
+      'Returning from a long offline period (roughly 17+ minutes) no longer floods the Production screen with flickering numbers and cascading unlocks: a loading card ("Updating the kingdom") shows the offline time being processed with a progress bar, and the normal screen only appears once everything is settled.',
+      'While catching up, the heavy UI stops re-rendering entirely — which also makes the catch-up itself finish faster.',
+    ],
+  },
+  {
     version: 'v0.24.0',
     date: '07/07/2026',
     time: '12:14',

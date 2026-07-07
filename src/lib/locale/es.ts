@@ -157,6 +157,8 @@ export const es: Dict = {
   'reino.mandate': 'Mandato',
   'reino.mandateRate': '+{n}/s',
   'reino.soon': 'Próximamente',
+  'reino.catchup.title': 'Actualizando el reino',
+  'reino.catchup.hint': 'Procesando {time} de progreso offline…',
   'reino.sub.section': 'Sub-recursos',
 
   'reino.base.comida': 'Trigo',

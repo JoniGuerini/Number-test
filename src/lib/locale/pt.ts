@@ -174,6 +174,8 @@ export const pt = {
   'reino.mandate': 'Mandato',
   'reino.mandateRate': '+{n}/s',
   'reino.soon': 'Em breve',
+  'reino.catchup.title': 'Atualizando o reino',
+  'reino.catchup.hint': 'Processando {time} de progresso offline…',
   'reino.sub.section': 'Sub-recursos',
 
   // Modo Reino: linha de Comida (recurso base + 12 geradores nomeados)

@@ -11,7 +11,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Decimal from 'break_eternity.js';
-import { fmt, fmtRate } from '../../lib/format';
+import { fmt, fmtRate, fmtTime } from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
 import { loadSave, saveKeyFor, writeSave } from '../../lib/storage';
 import ProductionLine from './ProductionLine';
@@ -59,6 +59,26 @@ import {
 } from './upgrades';
 
 type Lines = Partial<Record<LineId, Line>>;
+
+/** Passos pendentes acima disso ligam a tela de carregamento do catch-up
+    offline. Abaixo (≈2 frames de simulação) resolve sem alarde; acima, a UI
+    normal viraria um frenesi de re-renders no meio do avanço em lote. */
+const CATCHUP_MIN_STEPS = MAX_STEPS_PER_FRAME * 2;
+
+interface CatchUp {
+  total: number;
+  done: number;
+}
+
+/** Catch-up pendente já na montagem (volta de um período offline) — deixa a
+    tela de carregamento aparecer no primeiro paint, sem flash da UI normal. */
+function initialCatchUp(saveKey: string): CatchUp | null {
+  const l = loadReino(saveKey).lines.comida;
+  if (!l?.started || l.startedAt === undefined) return null;
+  const target = Math.floor((Date.now() - l.startedAt) / (SIM_STEP_S * 1000));
+  const pending = target - l.steps;
+  return pending > CATCHUP_MIN_STEPS ? { total: pending, done: 0 } : null;
+}
 
 interface ReinoSave {
   lines: Partial<Record<LineId, LineSave>>;
@@ -137,6 +157,12 @@ export default function Reino() {
     () => loadReino(saveKey).mandateExchange
   );
   const [activeLine, setActiveLine] = useState<LineId>('comida');
+  const [catchUp, setCatchUp] = useState<CatchUp | null>(() =>
+    initialCatchUp(saveKey)
+  );
+  const catchUpRef = useRef<{ total: number } | null>(
+    catchUp ? { total: catchUp.total } : null
+  );
 
   const setLine = (id: LineId, updater: (l: Line) => Line) =>
     setLines((ls) => (ls[id] ? { ...ls, [id]: updater(ls[id]!) } : ls));
@@ -194,7 +220,14 @@ export default function Reino() {
       const anchor = saveRef.current.lines.comida;
       if (anchor?.started && anchor.startedAt !== undefined) {
         const target = Math.floor((now - anchor.startedAt) / (SIM_STEP_S * 1000));
-        const todo = Math.min(target - anchor.steps, MAX_STEPS_PER_FRAME);
+        const pending = target - anchor.steps;
+        // Muito atraso acumulado (volta de offline): liga a tela de
+        // carregamento e segura os re-renders da UI até o lote terminar.
+        if (!catchUpRef.current && pending > CATCHUP_MIN_STEPS) {
+          catchUpRef.current = { total: pending };
+          setCatchUp({ total: pending, done: 0 });
+        }
+        const todo = Math.min(pending, MAX_STEPS_PER_FRAME);
         if (todo > 0) {
           // Avança FORA do setState (updater precisa ser puro — o StrictMode
           // o invoca duas vezes e um setMandate lá dentro vazava estado entre
@@ -214,9 +247,23 @@ export default function Reino() {
             lines: result.lines,
             mandate: result.mandate,
           };
-          setLines(result.lines);
-          if (result.mandate.spent !== prev.mandate.spent) {
-            setMandate(result.mandate);
+          if (catchUpRef.current) {
+            const remaining = pending - todo;
+            if (remaining > 0) {
+              // Só a barra de progresso re-renderiza durante o catch-up.
+              const { total } = catchUpRef.current;
+              setCatchUp({ total, done: total - remaining });
+            } else {
+              catchUpRef.current = null;
+              setCatchUp(null);
+              setLines(result.lines);
+              setMandate(result.mandate);
+            }
+          } else {
+            setLines(result.lines);
+            if (result.mandate.spent !== prev.mandate.spent) {
+              setMandate(result.mandate);
+            }
           }
         }
       }
@@ -266,6 +313,31 @@ export default function Reino() {
             >
               {t('common.start')}
             </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (catchUp) {
+    const pct = catchUp.total > 0 ? Math.min(catchUp.done / catchUp.total, 1) : 0;
+    return (
+      <div className={styles.reino}>
+        <div className={pl.modeScreen}>
+          <div className={pl.modeCard}>
+            <h2 className={pl.modeTitle}>{t('reino.catchup.title')}</h2>
+            <p className={pl.modeHint}>
+              {t('reino.catchup.hint', {
+                time: fmtTime(catchUp.total * SIM_STEP_S),
+              })}
+            </p>
+            <div className={styles.catchupTrack} role="progressbar">
+              <div
+                className={styles.catchupFill}
+                style={{ width: `${pct * 100}%` }}
+              />
+            </div>
+            <span className={styles.catchupPct}>{Math.floor(pct * 100)}%</span>
           </div>
         </div>
       </div>
