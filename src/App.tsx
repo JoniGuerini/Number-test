@@ -39,18 +39,16 @@ type Page = GameTab | 'melhorias' | 'atividade' | 'chat' | 'classificacao' | 'no
 
 /* A última página visitada sobrevive ao refresh */
 const PAGE_KEY = 'number-test:page';
-/* Abas do rodapé — Notas fica fora: abre pelo cardzinho da versão no topo */
-const PAGES: Exclude<Page, 'notas'>[] = ['reino', 'melhorias', 'atividade', 'chat', 'classificacao'];
-const VALID_PAGES: Page[] = [...PAGES, 'notas'];
+/* Abas do rodapé — Notas, Atividade, Classificação e Social ficam fora:
+   abrem pelos botões do topo (cardzinho da versão e a fileira direita) */
+const PAGES: Exclude<Page, 'notas' | 'atividade' | 'classificacao' | 'chat'>[] = ['reino', 'melhorias'];
+const VALID_PAGES: Page[] = [...PAGES, 'chat', 'classificacao', 'atividade', 'notas'];
 
 /* Ícones do menu (Lucide): só no chrome da UI — geradores e abas de linha de
    produção seguem só com texto, por decisão de design. */
-const PAGE_ICONS: Record<Exclude<Page, 'notas'>, LucideIcon> = {
+const PAGE_ICONS: Record<Exclude<Page, 'notas' | 'atividade' | 'classificacao' | 'chat'>, LucideIcon> = {
   reino: Castle,
   melhorias: FlaskConical,
-  atividade: History,
-  chat: MessagesSquare,
-  classificacao: Trophy,
 };
 
 function readStoredPage(): Page {
@@ -98,9 +96,13 @@ export default function App() {
   }, []);
 
   const [page, setPage] = useState<Page>(readStoredPage);
-  // Página a restaurar ao sair das Notas pelo botão da versão. Se o app já
-  // abriu direto nas Notas (refresh), o retorno cai no Reino.
-  const notesReturnRef = useRef<Page>('reino');
+  // Fechar um menu do topo volta sempre ao último menu PRINCIPAL (rodapé:
+  // Produção/Melhorias) — nunca a outro menu do topo. O ref acompanha a
+  // navegação: só páginas do rodapé o atualizam.
+  const mainReturnRef = useRef<Page>('reino');
+  useEffect(() => {
+    if ((PAGES as string[]).includes(page)) mainReturnRef.current = page;
+  }, [page]);
   useEffect(() => {
     try {
       localStorage.setItem(PAGE_KEY, page);
@@ -182,30 +184,60 @@ export default function App() {
 
   return (
     <div className={styles.frame}>
-      <FullscreenToggle />
-      {/* Engrenagem só-ícone ao lado do fullscreen (lado oposto à telemetria):
-          libera um slot de menu no rodapé. */}
-      <button
-        className={`${styles.configBtn} ${settingsOpen ? styles.configBtnOn : ''}`}
-        onClick={() => setSettingsOpen((o) => !o)}
-        aria-label={t('nav.config')}
-        aria-pressed={settingsOpen}
-        title={t('nav.config')}
-      >
-        <SettingsIcon className={styles.configIcon} aria-hidden="true" />
-      </button>
-      <FpsMeter />
+      {/* Fileira de controles do topo-direito: telemetria, Atividade,
+          fullscreen e a engrenagem de Config colada na borda */}
+      <div className={styles.topRight}>
+        <FpsMeter />
+        <button
+          className={`${styles.cornerBtn} ${page === 'chat' && !settingsOpen ? styles.cornerBtnOn : ''}`}
+          onClick={() => {
+            setSettingsOpen(false);
+            setPage(page === 'chat' ? mainReturnRef.current : 'chat');
+          }}
+          title={t('nav.chat')}
+        >
+          <MessagesSquare className={styles.cornerIcon} aria-hidden="true" />
+          <span>{t('nav.chat')}</span>
+        </button>
+        <button
+          className={`${styles.cornerBtn} ${page === 'classificacao' && !settingsOpen ? styles.cornerBtnOn : ''}`}
+          onClick={() => {
+            setSettingsOpen(false);
+            setPage(page === 'classificacao' ? mainReturnRef.current : 'classificacao');
+          }}
+          title={t('nav.classificacao')}
+        >
+          <Trophy className={styles.cornerIcon} aria-hidden="true" />
+          <span>{t('nav.classificacao')}</span>
+        </button>
+        <button
+          className={`${styles.cornerBtn} ${page === 'atividade' && !settingsOpen ? styles.cornerBtnOn : ''}`}
+          onClick={() => {
+            setSettingsOpen(false);
+            setPage(page === 'atividade' ? mainReturnRef.current : 'atividade');
+          }}
+          title={t('nav.atividade')}
+        >
+          <History className={styles.cornerIcon} aria-hidden="true" />
+          <span>{t('nav.atividade')}</span>
+        </button>
+        <FullscreenToggle />
+        <button
+          className={`${styles.cornerBtn} ${styles.cornerBtnSquare} ${settingsOpen ? styles.cornerBtnOn : ''}`}
+          onClick={() => setSettingsOpen((o) => !o)}
+          aria-label={t('nav.config')}
+          aria-pressed={settingsOpen}
+          title={t('nav.config')}
+        >
+          <SettingsIcon className={styles.cornerIcon} aria-hidden="true" />
+        </button>
+      </div>
       <VersionBadge
         notesOpen={page === 'notas' && !settingsOpen}
         onOpenNotes={() => {
           setSettingsOpen(false);
-          if (page === 'notas') {
-            // Mesmo botão volta para onde o jogador estava antes das Notas
-            setPage(notesReturnRef.current);
-          } else {
-            notesReturnRef.current = page;
-            setPage('notas');
-          }
+          // O mesmo botão fecha as Notas, voltando ao último menu principal
+          setPage(page === 'notas' ? mainReturnRef.current : 'notas');
         }}
       />
 

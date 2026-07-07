@@ -9,6 +9,8 @@ import {
   Volume2,
   type LucideIcon,
 } from 'lucide-react';
+// Bandeiras em SVG (emoji de bandeira varia por SO — no Windows viram letras)
+import { BR, ES, US } from 'country-flag-icons/react/3x2';
 import type { GameTab } from '../../App';
 import { signOut, useAuth } from '../../lib/auth';
 import { fmt, fmtTime } from '../../lib/format';
@@ -91,6 +93,13 @@ const VIDEO_TOGGLES: {
 type ConfigTab = 'perfil' | 'saves' | 'temas' | 'som' | 'video' | 'idioma';
 
 const TABS: ConfigTab[] = ['perfil', 'saves', 'temas', 'som', 'video', 'idioma'];
+
+/* Bandeira de cada idioma (país de referência do dialeto usado). */
+const LOCALE_FLAGS: Record<string, typeof BR> = {
+  pt: BR,
+  en: US,
+  es: ES,
+};
 
 /* Ícones das abas (Lucide) — neutros, herdam a cor do rótulo. */
 const TAB_ICONS: Record<ConfigTab, LucideIcon> = {
@@ -359,59 +368,6 @@ export default function Settings({
 
                     {expanded && (
                       <div className={styles.slotOptions}>
-                        {(() => {
-                          // Raio-X do save: início, tempo decorrido e o total
-                          // produzido por linha (dados que moravam na tela de
-                          // Produção). Snapshot do localStorage — o save do
-                          // slot ativo persiste a cada 1s.
-                          const probe = loadSave<SaveProbe>(
-                            saveKeyForSlot(slot.id, 'reino')
-                          );
-                          const anchor = probe?.lines?.comida;
-                          if (!anchor?.started || anchor.startedAt === undefined)
-                            return null;
-                          return (
-                            <>
-                              <div className={styles.statGrid}>
-                                <div className={styles.statCard}>
-                                  <span className={styles.statCardLabel}>
-                                    {t('common.startLabel')}
-                                  </span>
-                                  <span className={styles.statCardValue}>
-                                    {fmtSlotDate(anchor.startedAt, getDateLocale())}
-                                  </span>
-                                </div>
-                                <div className={styles.statCard}>
-                                  <span className={styles.statCardLabel}>
-                                    {t('common.time')}
-                                  </span>
-                                  <span className={styles.statCardValue}>
-                                    {fmtTime(anchor.uptime ?? 0)}
-                                  </span>
-                                </div>
-                              </div>
-                              <span className={styles.subLabel}>
-                                {t('common.produced')}
-                              </span>
-                              <div className={styles.statGrid}>
-                                {ENABLED_LINES.map((d) => (
-                                  <div className={styles.statCard} key={d.id}>
-                                    <span className={styles.statCardLabel}>
-                                      {t(`reino.line.${d.id}` as TKey)}
-                                    </span>
-                                    <span className={styles.statCardValue}>
-                                      {fmt(
-                                        new Decimal(
-                                          probe?.lines?.[d.id]?.totalProduced ?? 0
-                                        )
-                                      )}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </>
-                          );
-                        })()}
                         <div className={styles.nameRow}>
                           <input
                             className={styles.nameInput}
@@ -435,6 +391,59 @@ export default function Settings({
                             {t('saves.rename')}
                           </button>
                         </div>
+                        {(() => {
+                          // Raio-X do save: início, tempo decorrido e o total
+                          // produzido por linha (dados que moravam na tela de
+                          // Produção). Snapshot do localStorage — o save do
+                          // slot ativo persiste a cada 1s.
+                          const probe = loadSave<SaveProbe>(
+                            saveKeyForSlot(slot.id, 'reino')
+                          );
+                          const anchor = probe?.lines?.comida;
+                          if (!anchor?.started || anchor.startedAt === undefined)
+                            return null;
+                          return (
+                            <div className={styles.saveStats}>
+                              <div className={styles.statGrid}>
+                                <div className={styles.statCard}>
+                                  <span className={styles.statCardLabel}>
+                                    {t('common.startLabel')}
+                                  </span>
+                                  <span className={styles.statCardValue}>
+                                    {fmtSlotDate(anchor.startedAt, getDateLocale())}
+                                  </span>
+                                </div>
+                                <div className={styles.statCard}>
+                                  <span className={styles.statCardLabel}>
+                                    {t('common.time')}
+                                  </span>
+                                  <span className={styles.statCardValue}>
+                                    {fmtTime(anchor.uptime ?? 0)}
+                                  </span>
+                                </div>
+                              </div>
+                              <span className={styles.subLabel}>
+                                {t('common.produced')}
+                              </span>
+                              <div className={styles.lineStatsGrid}>
+                                {ENABLED_LINES.map((d) => (
+                                  <div className={styles.statCard} key={d.id}>
+                                    <span className={styles.statCardLabel}>
+                                      {t(`reino.line.${d.id}` as TKey)}
+                                    </span>
+                                    <span className={styles.statCardValue}>
+                                      {fmt(
+                                        new Decimal(
+                                          probe?.lines?.[d.id]?.totalProduced ?? 0
+                                        )
+                                      )}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })()}
                         {!active && (
                           <button
                             className={`btn-primary ${styles.loadBtn}`}
@@ -673,13 +682,17 @@ export default function Settings({
             <div className={styles.sectionBody}>
               {LOCALES.map((l) => {
                 const active = l.id === locale;
+                const Flag = LOCALE_FLAGS[l.id];
                 return (
                   <button
                     key={l.id}
                     className={`${styles.option} ${active ? styles.active : ''}`}
                     onClick={() => setLocale(l.id)}
                   >
-                    <span>{l.name}</span>
+                    <span className={styles.langName}>
+                      <Flag className={styles.flag} aria-hidden="true" />
+                      {l.name}
+                    </span>
                     {active && (
                       <span className={styles.badge}>{t('saves.active')}</span>
                     )}

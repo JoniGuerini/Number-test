@@ -1,11 +1,15 @@
+/* Vive dentro da fileira .topRight do App — o posicionamento é dela */
 .bar {
-  position: fixed;
-  top: 12px;
-  /* Abre espaço para o par fullscreen + engrenagem de Config no canto:
-     12 da borda + 32 + 8 + 32 + 8 */
-  right: 92px;
   display: flex;
   gap: 8px;
+}
+
+/* Separador vertical entre a telemetria e os menus padrões da fileira */
+.groupDivider {
+  width: 1px;
+  align-self: center;
+  height: 14px;
+  background: var(--border);
 }
 
 /* Card da versão: canto oposto, onde morava o botão de fullscreen */
@@ -46,7 +50,10 @@
 
 /* Mobile: entra no fluxo, no topo da página */
 @media (max-width: 640px) {
-  .bar,
+  .bar {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
   .verBar {
     position: static;
     justify-content: center;

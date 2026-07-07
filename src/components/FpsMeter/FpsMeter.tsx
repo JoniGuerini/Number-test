@@ -208,6 +208,15 @@ export default function FpsMeter() {
           <span className={styles.label}>dom</span>
         </div>
       )}
+      {/* Com telemetria visível, um separador a aparta dos menus padrões */}
+      {(import.meta.env.DEV ||
+        prefs.showFps ||
+        prefs.showFrameTime ||
+        (prefs.showBattery && battery !== null) ||
+        (prefs.showMemory && stats.heapMb !== null) ||
+        prefs.showDomNodes) && (
+        <span className={styles.groupDivider} aria-hidden="true" />
+      )}
     </div>
   );
 }

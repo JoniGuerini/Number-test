@@ -32,6 +32,22 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.23.5',
+    date: '06/07/2026',
+    time: '22:35',
+    title: 'The top row takes over',
+    summary: 'Social, Leaderboard and Activity move to the top row — the footer keeps only the gameplay screens.',
+    minor: [
+      'Social, Leaderboard and Activity are now icon+text buttons in the top-right row, next to fullscreen and the Settings gear. The footer keeps just Production and Upgrades — the gameplay screens.',
+      'Closing any top-row menu (including Patch notes) always returns to the last MAIN screen visited (Production/Upgrades), never to another top-row menu.',
+      'Language cards now show each locale\u2019s flag as an SVG (emoji flags render differently across operating systems — on Windows they turn into plain letters).',
+    ],
+    qol: [
+      'A thin separator now sits between the telemetry pills and the standard menus in the top row, and only shows when telemetry is visible.',
+      'The save\u2019s stat cards in Settings → Saves got a proper layout: name field on top, start/time and per-line production in tidy grids, reset at the bottom.',
+    ],
+  },
+  {
     version: 'v0.23.4',
     date: '06/07/2026',
     time: '21:55',
