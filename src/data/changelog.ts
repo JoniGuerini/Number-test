@@ -32,6 +32,25 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.25.1',
+    date: '08/07/2026',
+    time: '01:15',
+    title: 'Steel foundations',
+    summary: 'Every number you watch now ticks at the true cycle pace, and the engine gained a proper test suite that already caught its first bug.',
+    minor: [
+      'ALL live numbers now move at the real rhythm of each cycle instead of the simulation\u2019s 0.25s heartbeat: the base resource odometer, generator amounts, the "produces" column, the +X/s rate, the unlock button\u2019s progress fill and the resource stock on the Research screen \u2014 a 0.1s cycle visibly ticks every 0.1s.',
+      'The deterministic engine moved into its own home (src/game/), cleanly separated from the UI, and gained a test suite: a bit-for-bit golden master, batch invariance (the property behind offline catch-up), save round-trips and live-counter equivalence.',
+      'The balance-tuning script now runs the REAL engine instead of a hand-maintained mirror \u2014 a whole class of "tuned against stale math" mistakes is gone.',
+    ],
+    qol: [
+      'Settings was split into one component per tab under the hood \u2014 same look, easier to grow.',
+      'Purchases while holding a buy button no longer serialize the save a dozen times per second (writes coalesce to at most one per 200ms), and a full/private-mode storage no longer spams errors every second.',
+    ],
+    fixes: [
+      'The live counters could drift from the engine by a hair (one unit in the last decimal digit) because deliveries were summed in a different order than the engine\u2019s \u2014 caught by the new equivalence test on its first run, fixed by replaying additions in the exact engine order.',
+    ],
+  },
+  {
     version: 'v0.25.0',
     date: '07/07/2026',
     time: '23:44',
