@@ -5,7 +5,7 @@
     A pontuação do ranking é a "prosperidade" do reino; posições conhecidas
     vêm de PROFILES (chat) e o resto é interpolado entre essas âncoras. */
 
-import { ENABLED_LINES, type LineId } from '../Reino/lines';
+import { ENABLED_LINES, type LineId } from '../../game/lines';
 import {
   INITIAL_FRIENDS,
   PLAYERS,

@@ -14,7 +14,7 @@ import { BR, ES, US } from 'country-flag-icons/react/3x2';
 import type { GameTab } from '../../App';
 import { signOut, useAuth } from '../../lib/auth';
 import { fmt, fmtTime } from '../../lib/format';
-import { ENABLED_LINES } from '../Reino/lines';
+import { ENABLED_LINES } from '../../game/lines';
 import {
   getDateLocale,
   LOCALES,

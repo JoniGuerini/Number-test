@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getDateLocale, useI18n, type TKey } from '../../lib/locale';
-import { ENABLED_LINES } from '../Reino/lines';
+import { ENABLED_LINES } from '../../game/lines';
 import styles from './Leaderboard.module.css';
 import {
   FRIENDS,

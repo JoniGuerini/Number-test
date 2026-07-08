@@ -1,5 +1,5 @@
 ---
-description: Pilar do jogo — simulação determinística bit a bit do Reino (engine.ts e novas mecânicas)
+description: Pilar do jogo — simulação determinística bit a bit do Reino (src/game/ e novas mecânicas)
 alwaysApply: true
 ---
 
@@ -9,6 +9,11 @@ O Reino é uma simulação determinística: **estado = função pura do número 
 passos fixos**, ancorado no `startedAt` da linha. Duas máquinas com o mesmo
 save produzem a MESMA sequência de contas, bit a bit. É isso que sustenta o
 catch-up offline e o futuro ranking multiplayer justo. Nunca quebre isso.
+
+O núcleo determinístico mora em `src/game/` (engine, sim, lines, upgrades,
+mandate, mandateExchange) — módulos PUROS: nada de DOM, React, localStorage
+ou relógio. A UI (`src/components/`, `src/store/`) consome o domínio; nunca
+o contrário.
 
 ## O que nunca pode (quebra o determinismo em si)
 
@@ -36,3 +41,7 @@ existente só evolui com corte explícito (versão de save / temporada).
 `scripts/simulate-reino.mjs` espelha o motor. Ao mexer no engine, atualize o
 script junto — ele é a prova de que a simulação continua reproduzível e a
 ferramenta para tunar a economia antes de commitar.
+
+(Nota: as Etapas 2 e 3 do refino técnico substituem este arranjo — testes do
+motor viram a prova de reprodutibilidade e o script passa a importar o motor
+real. Atualize esta seção quando aterrissarem.)

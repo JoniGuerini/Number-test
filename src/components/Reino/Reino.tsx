@@ -9,141 +9,19 @@
     As cinco frentes do reino estão ativas (Comida, Mineração, Exploração,
     Militar, Remédios), cada uma com seu próprio balanceamento (ver lines.ts). */
 
-import { useEffect, useRef, useState } from 'react';
-import Decimal from 'break_eternity.js';
-import { fmt, fmtLive, fmtRate, fmtTime } from '../../lib/format';
+import { useState } from 'react';
+import { fmt, fmtTime } from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
 import { useGameStore } from '../../store/gameStore';
 import ProductionLine from './ProductionLine';
 import SubResourcePanel from './SubResourcePanel';
+import { LiveBaseRate, LiveBaseValue } from './LiveValues';
 import styles from './Reino.module.css';
 import pl from '../../styles/productionList.module.css';
-import {
-  SIM_STEP_S,
-  cycleSecondsOf,
-  cycleStepsOf,
-  prodPerCycleOf,
-  type Line,
-  type LineEconomy,
-  type Mode,
-} from './engine';
-import { ENABLED_LINES, LINES, lineDefOf, type LineId } from './lines';
-import { mandateBalance } from './mandate';
-import { totalMandatePerS } from './mandateExchange';
-import {
-  applyBonusOutput,
-  bonusAmountFraction,
-  bonusChance,
-  bonusRoll,
-  bonusTriggers,
-  cycleSecondsWithUpgrades,
-  cycleSpeedFactor,
-  productionFactor,
-  type UpgradeState,
-} from './upgrades';
-
-/** Odômetro do recurso base a 60fps: entre commits do React (4x/s), REPRODUZ
-    as entregas do gerador 1 com as mesmas contas do motor (velocidade
-    acumulada, resto carregado, bônus determinístico) e escreve o valor direto
-    no nó de texto — o número gira a cada entrega real, sem re-render e sem
-    inventar valor. Aproximação única: o amount do g1 fica no committed (a
-    alimentação do g2 dentro da janela é ignorada — corrige no commit). */
-function LiveBaseValue({
-  className,
-  line,
-  lineId,
-  eco,
-  upgrades,
-  anchorStartedAt,
-  anchorSteps,
-}: {
-  className: string;
-  line: Line | undefined;
-  lineId: LineId;
-  eco: LineEconomy;
-  upgrades: UpgradeState;
-  anchorStartedAt: number | undefined;
-  anchorSteps: number;
-}) {
-  const elRef = useRef<HTMLSpanElement>(null);
-  const snap = useRef({ line, lineId, eco, upgrades, anchorStartedAt, anchorSteps });
-  snap.current = { line, lineId, eco, upgrades, anchorStartedAt, anchorSteps };
-
-  useEffect(() => {
-    let rafId: number;
-    const tick = () => {
-      const el = elRef.current;
-      const s = snap.current;
-      if (el && s.line) {
-        let value = s.line.base;
-        const g0 = s.line.gens[0];
-        if (
-          s.line.started &&
-          s.anchorStartedAt !== undefined &&
-          g0 &&
-          g0.amount.gt(0)
-        ) {
-          const n = cycleStepsOf(0, s.eco);
-          const v = cycleSpeedFactor(
-            s.upgrades,
-            s.lineId,
-            0,
-            cycleSecondsOf(0, s.eco)
-          );
-          const t =
-            (Date.now() - s.anchorStartedAt) / 1000 / SIM_STEP_S -
-            s.anchorSteps;
-          const replay = Math.min(Math.floor(t), 256);
-          const per = g0.amount
-            .mul(prodPerCycleOf(0, s.eco))
-            .mul(productionFactor(s.upgrades, s.lineId, 0));
-          const chance = bonusChance(s.upgrades, s.lineId, 0);
-          const frac = bonusAmountFraction(s.upgrades, s.lineId, 0);
-          let cc = g0.cycleStep;
-          for (let j = 1; j <= replay; j++) {
-            cc += v;
-            if (cc >= n) {
-              const cycles = Math.floor(cc / n);
-              cc -= cycles * n;
-              let out = per.mul(cycles);
-              if (
-                chance > 0 &&
-                bonusTriggers(
-                  chance,
-                  bonusRoll(s.anchorSteps + j - 1, s.lineId, 0)
-                )
-              ) {
-                out = applyBonusOutput(out, frac);
-              }
-              value = value.add(out);
-            }
-          }
-        }
-        el.textContent = fmtLive(value);
-      }
-      rafId = requestAnimationFrame(tick);
-    };
-    rafId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafId);
-  }, []);
-
-  return <span className={className} ref={elRef} />;
-}
-
-function lineResourceRate(
-  line: Line,
-  eco: LineEconomy,
-  lineId: LineId,
-  upgrades: UpgradeState
-): Decimal {
-  const g0 = line.gens[0];
-  if (!g0 || g0.amount.lte(0)) return new Decimal(0);
-  const perCycle = g0
-    .amount.mul(prodPerCycleOf(0, eco))
-    .mul(productionFactor(upgrades, lineId, 0));
-  const cycleS = cycleSecondsWithUpgrades(cycleSecondsOf(0, eco), upgrades, lineId, 0);
-  return perCycle.div(cycleS);
-}
+import { SIM_STEP_S, type Mode } from '../../game/engine';
+import { ENABLED_LINES, LINES, lineDefOf, type LineId } from '../../game/lines';
+import { mandateBalance } from '../../game/mandate';
+import { totalMandatePerS } from '../../game/mandateExchange';
 
 export default function Reino() {
   const { t } = useI18n();
@@ -227,7 +105,6 @@ export default function Reino() {
     mandate.spent,
     mandateExchange.purchases
   );
-  const resourceRate = line ? lineResourceRate(line, def.eco, def.id, upgrades) : new Decimal(0);
 
   return (
     <div className={styles.reino}>
@@ -267,7 +144,15 @@ export default function Reino() {
               anchorStartedAt={lines.comida?.startedAt}
               anchorSteps={anchorSteps}
             />
-            <span className={styles.resourceRate}>+{fmtRate(resourceRate)} / s</span>
+            <LiveBaseRate
+              className={styles.resourceRate}
+              line={line}
+              lineId={def.id}
+              eco={def.eco}
+              upgrades={upgrades}
+              anchorStartedAt={lines.comida?.startedAt}
+              anchorSteps={anchorSteps}
+            />
           </div>
         </div>
       </div>

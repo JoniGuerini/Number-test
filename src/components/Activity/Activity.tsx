@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { fmtTime } from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
 import { useGameStore } from '../../store/gameStore';
-import { ENABLED_LINES, type LineId } from '../Reino/lines';
-import type { Line } from '../Reino/engine';
+import { ENABLED_LINES, type LineId } from '../../game/lines';
+import type { Line } from '../../game/engine';
 // Reusa o esqueleto visual das listas de produção (scroll, fades)
 import gstyles from '../../styles/productionList.module.css';
 import styles from './Activity.module.css';

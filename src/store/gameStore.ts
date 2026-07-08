@@ -21,14 +21,14 @@ import {
   type Line,
   type LineSave,
   type Mode,
-} from '../components/Reino/engine';
-import { ENABLED_LINES, lineDefOf, type LineId } from '../components/Reino/lines';
+} from '../game/engine';
+import { ENABLED_LINES, lineDefOf, type LineId } from '../game/lines';
 import {
   emptyMandate,
   loadMandate,
   serializeMandate,
   type MandateState,
-} from '../components/Reino/mandate';
+} from '../game/mandate';
 import {
   emptyMandateExchange,
   loadMandateExchange,
@@ -36,7 +36,7 @@ import {
   tryExchangeMandate,
   type MandateExchangeSave,
   type MandateExchangeState,
-} from '../components/Reino/mandateExchange';
+} from '../game/mandateExchange';
 import {
   loadUpgrades,
   serializeUpgrades,
@@ -45,7 +45,7 @@ import {
   type UpgradeKind,
   type UpgradeState,
   type UpgradeStateSave,
-} from '../components/Reino/upgrades';
+} from '../game/upgrades';
 
 export type Lines = Partial<Record<LineId, Line>>;
 

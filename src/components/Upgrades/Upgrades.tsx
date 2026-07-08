@@ -9,13 +9,13 @@ import {
   costOf,
   cycleSecondsOf,
   prodPerCycleOf,
-} from '../Reino/engine';
-import { ENABLED_LINES, lineDefOf, type LineId } from '../Reino/lines';
+} from '../../game/engine';
+import { ENABLED_LINES, lineDefOf, type LineId } from '../../game/lines';
 import {
   exchangeCost,
   exchangeLevel,
   unlockThreshold,
-} from '../Reino/mandateExchange';
+} from '../../game/mandateExchange';
 import {
   UPGRADE_KINDS,
   BONUS_AMOUNT_BASE_PCT,
@@ -28,8 +28,9 @@ import {
   unlockedGenIndices,
   type GenRef,
   type UpgradeKind,
-} from '../Reino/upgrades';
+} from '../../game/upgrades';
 import HoldActionButton from '../HoldActionButton';
+import { LiveBaseValue } from '../Reino/LiveValues';
 import styles from './Upgrades.module.css';
 import pl from '../../styles/productionList.module.css';
 
@@ -326,9 +327,16 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
                 <span className={styles.stockLabel}>
                   {t(`reino.base.${def.id}` as TKey)}
                 </span>
-                <span className={styles.stockAmount}>
-                  {fmtCost(lines[def.id]!.base)}
-                </span>
+                {/* Odômetro ao vivo (60fps), como o card do Reino. */}
+                <LiveBaseValue
+                  className={styles.stockAmount}
+                  line={lines[def.id]}
+                  lineId={def.id}
+                  eco={def.eco}
+                  upgrades={upgrades}
+                  anchorStartedAt={lines.comida?.startedAt}
+                  anchorSteps={lines.comida?.steps ?? 0}
+                />
               </div>
             ))}
           </div>

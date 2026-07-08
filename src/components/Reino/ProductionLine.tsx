@@ -16,22 +16,24 @@ import rn from './Reino.module.css';
 import {
   SIM_STEP_S,
   cycleSecondsOf,
-  cycleStepsOf,
   genPurchaseCost,
   prodPerCycleOf,
-  type Gen,
   type Line,
   type LineEconomy,
-} from './engine';
-import type { LineId } from './lines';
+} from '../../game/engine';
+import type { LineId } from '../../game/lines';
 import {
   bonusAmountFraction,
   bonusChance,
   cycleSecondsWithUpgrades,
-  cycleSpeedFactor,
   productionFactor,
   type UpgradeState,
-} from './upgrades';
+} from '../../game/upgrades';
+import {
+  buildLiveSnap,
+  replayDelivered,
+  type LiveSnap,
+} from './liveReplay';
 
 interface ProductionLineProps {
   line: Line;
@@ -54,9 +56,6 @@ interface ProductionLineProps {
     entre navegadores (o mobile cai para flex-column e ignora isto). */
 const NAMED_ROW_COLS = '150px 80px 150px 130px 100px 100px 120px';
 
-/** Ciclo efetivo abaixo disto = produção contínua: a barra fica cheia e
-    parada em vez de varrer várias vezes por segundo (vira um estrobo). */
-const STEADY_CYCLE_S = 1;
 
 export default function ProductionLine({
   line,
@@ -136,9 +135,6 @@ export default function ProductionLine({
   const cycleSecondsNeed = (i: number): number =>
     cycleSecondsWithUpgrades(cycleSecondsOf(i, eco), upgrades, lineId, i);
 
-  const prodPerCycleDisplay = (gen: Gen, i: number) =>
-    gen.amount.mul(prodPerCycleOf(i, eco)).mul(productionFactor(upgrades, lineId, i));
-
   // ===== Animação das barras de ciclo (60fps, fora do React) =====
   // O React só renderiza quando a simulação avança (4x/s). Entre passos, um
   // rAF local escreve transform:scaleX direto nos elementos (compositor —
@@ -146,33 +142,41 @@ export default function ProductionLine({
   // fica num ref para o loop ler sem depender de closure.
   const barRefs = useRef<(HTMLDivElement | null)[]>([]);
   const remRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const animRef = useRef({
-    gens: line.gens,
-    needs: [] as number[],
-    speeds: [] as number[],
-    steady: [] as boolean[],
-    started: line.started,
-    anchorStartedAt,
-    anchorSteps,
-  });
+  const amtRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const prodRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const fillRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  interface LineAnim extends LiveSnap {
+    base: Decimal;
+    /** Custo de desbloqueio dos geradores AINDA bloqueados. */
+    costs: (Decimal | null)[];
+    /** Entrega por ciclo POR UNIDADE (entrega × fator) — × quantidade ao
+        vivo dá a coluna "produz". */
+    unitOuts: Decimal[];
+    perCycleSuffix: string;
+  }
+  const animRef = useRef<LineAnim | null>(null);
   animRef.current = {
-    gens: line.gens,
     // O motor acumula a VELOCIDADE por passo contra a duração-base: a barra
     // espelha isso (cycleStep em passos-base; o partial avança × velocidade).
-    needs: line.gens.map((_, i) => cycleStepsOf(i, eco)),
-    speeds: line.gens.map((_, i) =>
-      cycleSpeedFactor(upgrades, lineId, i, cycleSecondsOf(i, eco))
+    ...buildLiveSnap(line, lineId, eco, upgrades, anchorStartedAt, anchorSteps),
+    base: line.base,
+    costs: line.gens.map((gen, i) =>
+      gen.bought === 0 ? genPurchaseCost(i, 0, eco, lineId, upgrades) : null
     ),
-    steady: line.gens.map((_, i) => cycleSecondsNeed(i) < STEADY_CYCLE_S),
-    started: line.started,
-    anchorStartedAt,
-    anchorSteps,
+    unitOuts: line.gens.map((_, i) =>
+      prodPerCycleOf(i, eco).mul(productionFactor(upgrades, lineId, i))
+    ),
+    perCycleSuffix: t('cyc.perCycleSuffix'),
   };
 
   useEffect(() => {
     let rafId: number;
     const tick = () => {
       const a = animRef.current;
+      if (!a) {
+        rafId = requestAnimationFrame(tick);
+        return;
+      }
       // Sem teto no partial: o commit do React chega 1–3 frames DEPOIS do
       // relógio cruzar a fronteira do passo; travar em SIM_STEP_S fazia a
       // barra congelar e pular 4x/s. Deixar correr é contínuo — quando o
@@ -186,10 +190,17 @@ export default function ProductionLine({
             )
           : 0;
       const t = partial / SIM_STEP_S;
+      const replaySteps = Math.min(Math.floor(t), 256);
+      // Recurso base ao vivo (committed + entregas do g1 desde o commit) —
+      // calculado UMA vez por frame, só se algum botão de desbloqueio existe.
+      let liveBase: Decimal | null = null;
       for (let i = 0; i < a.gens.length; i++) {
         const barEl = barRefs.current[i];
         const remEl = remRefs.current[i];
-        if (!barEl && !remEl) continue;
+        const amtEl = amtRefs.current[i];
+        const prodEl = prodRefs.current[i];
+        const fillEl = fillRefs.current[i];
+        if (!barEl && !remEl && !amtEl && !prodEl && !fillEl) continue;
         const gen = a.gens[i];
         // A barra completa NO PASSO em que o motor entrega — não no
         // cruzamento contínuo da meta, que cai no meio do passo (o resto é
@@ -229,6 +240,32 @@ export default function ProductionLine({
         // Desliza o inner: -100% = vazio, 0 = cheio (recorte no wrapper).
         if (barEl) barEl.style.transform = `translateX(${(p - 1) * 100}%)`;
         if (remEl) remEl.textContent = fmtCountdown(remainingS);
+
+        // Quantidade ao vivo: o gerador i é alimentado pelo i+1 — soma as
+        // entregas do de cima desde o commit. A coluna "produz" acompanha
+        // (quantidade ao vivo × entrega por unidade).
+        if (amtEl || prodEl) {
+          const amount = gen.amount.add(replayDelivered(a, i + 1, replaySteps, t));
+          if (amtEl) {
+            const text = fmt(amount);
+            if (amtEl.textContent !== text) amtEl.textContent = text;
+          }
+          if (prodEl) {
+            const text = `+${fmt(amount.mul(a.unitOuts[i]))} ${a.perCycleSuffix}`;
+            if (prodEl.textContent !== text) prodEl.textContent = text;
+          }
+        }
+
+        // Preenchimento ao vivo do botão de desbloqueio: recurso base ao
+        // vivo ÷ custo, a 60fps — a barra enche contínua em vez de pular em
+        // degraus de 0,25s a cada commit.
+        if (fillEl && a.costs[i]) {
+          if (!liveBase) {
+            liveBase = a.base.add(replayDelivered(a, 0, replaySteps, t));
+          }
+          const progress = Math.min(liveBase.div(a.costs[i]!).toNumber(), 1);
+          fillEl.style.width = `${progress * 100}%`;
+        }
       }
       rafId = requestAnimationFrame(tick);
     };
@@ -276,9 +313,13 @@ export default function ProductionLine({
                   disabled={!canUnlock}
                   onAction={() => onBuy(i)}
                 >
+                  {/* width escrito pelo rAF local (60fps, base ao vivo) —
+                      sem style no JSX para o React nunca disputar o nó. */}
                   <span
                     className={styles.progressFill}
-                    style={{ width: `${progress * 100}%` }}
+                    ref={(el) => {
+                      fillRefs.current[i] = el;
+                    }}
                     aria-hidden="true"
                   />
                   <span className={styles.progressLabel}>
@@ -299,17 +340,28 @@ export default function ProductionLine({
                 <div className={styles.statsRow}>
                   <div className={styles.stat}>
                     <span className={styles.statLabel}>{t('gen.owns')}</span>
-                    <span className={styles.statValue}>{fmt(gen.amount)}</span>
+                    {/* Texto escrito pelo rAF local (60fps) — sem conteúdo
+                        no JSX para o React nunca disputar o nó. */}
+                    <span
+                      className={styles.statValue}
+                      ref={(el) => {
+                        amtRefs.current[i] = el;
+                      }}
+                    />
                   </div>
 
                   <div className={styles.stat}>
                     <span className={styles.statLabel}>
                       {t('gen.produces', { target })}
                     </span>
-                    <span className={styles.statValue}>
-                      +{fmt(prodPerCycleDisplay(gen, i))}{' '}
-                      {t('cyc.perCycleSuffix')}
-                    </span>
+                    {/* Texto escrito pelo rAF local (60fps) — sem conteúdo
+                        no JSX para o React nunca disputar o nó. */}
+                    <span
+                      className={styles.statValue}
+                      ref={(el) => {
+                        prodRefs.current[i] = el;
+                      }}
+                    />
                   </div>
 
                   <div className={styles.stat}>

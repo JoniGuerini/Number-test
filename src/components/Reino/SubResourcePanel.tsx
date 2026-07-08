@@ -5,8 +5,8 @@ import { memo } from 'react';
 import { fmt } from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
 import styles from './Reino.module.css';
-import type { LineId } from './lines';
-import { subResourcesOf } from './subresources';
+import type { LineId } from '../../game/lines';
+import { subResourcesOf } from '../../game/subresources';
 
 interface SubResourcePanelProps {
   lineId: LineId;
