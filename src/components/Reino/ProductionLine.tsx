@@ -127,7 +127,7 @@ export default function ProductionLine({
     updateEdges();
     window.addEventListener('resize', updateEdges);
     return () => window.removeEventListener('resize', updateEdges);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [genCount]);
 
   const isAuto = line.mode === 'auto';
@@ -154,8 +154,7 @@ export default function ProductionLine({
     unitOuts: Decimal[];
     perCycleSuffix: string;
   }
-  const animRef = useRef<LineAnim | null>(null);
-  animRef.current = {
+  const anim: LineAnim = {
     // O motor acumula a VELOCIDADE por passo contra a duração-base: a barra
     // espelha isso (cycleStep em passos-base; o partial avança × velocidade).
     ...buildLiveSnap(line, lineId, eco, upgrades, anchorStartedAt, anchorSteps),
@@ -168,6 +167,11 @@ export default function ProductionLine({
     ),
     perCycleSuffix: t('cyc.perCycleSuffix'),
   };
+  const animRef = useRef<LineAnim | null>(null);
+  // Espelha o snapshot mais recente no commit (não no render — regra dos refs)
+  useEffect(() => {
+    animRef.current = anim;
+  });
 
   useEffect(() => {
     let rafId: number;
@@ -213,7 +217,7 @@ export default function ProductionLine({
         // exatamente quando o número sobe. Contínuo através dos commits.
         // O contador regressivo usa a MESMA janela, a 60fps, com décimos.
         let p = 0;
-        let remainingS = 0;
+        let remainingS: number;
         if (gen.amount.gt(0)) {
           const n = a.needs[i];
           const v = a.speeds[i];

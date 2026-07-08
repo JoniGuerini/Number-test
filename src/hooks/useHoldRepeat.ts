@@ -7,7 +7,10 @@ const REPEAT_MS = 80;
     Callback may return `false` to stop early (ex.: sem saldo). */
 export function useHoldRepeat(onAction: () => boolean | void, disabled = false) {
   const actionRef = useRef(onAction);
-  actionRef.current = onAction;
+  // Espelha o callback mais recente no commit (não no render — regra dos refs)
+  useEffect(() => {
+    actionRef.current = onAction;
+  });
   const timersRef = useRef<{ delay?: number; interval?: number }>({});
 
   const stop = useCallback(() => {

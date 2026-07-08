@@ -17,7 +17,7 @@ import {
   productionFactor,
   type UpgradeState,
 } from '../../game/upgrades';
-import { buildLiveSnap, liveWindow, replayValue, type LiveSnap } from './liveReplay';
+import { buildLiveSnap, liveWindow, replayValue } from './liveReplay';
 
 interface LiveProps {
   className: string;
@@ -34,7 +34,10 @@ interface LiveProps {
 function useLiveText(compute: () => string | null) {
   const elRef = useRef<HTMLSpanElement>(null);
   const computeRef = useRef(compute);
-  computeRef.current = compute;
+  // Espelha o valor mais recente no commit (não no render — regra dos refs)
+  useEffect(() => {
+    computeRef.current = compute;
+  });
 
   useEffect(() => {
     let rafId: number;
@@ -64,13 +67,16 @@ export function LiveBaseValue({
   anchorStartedAt,
   anchorSteps,
 }: LiveProps) {
-  const snapRef = useRef<{ snap: LiveSnap; base: Decimal } | null>(null);
-  snapRef.current = line
+  const snap = line
     ? {
         snap: buildLiveSnap(line, lineId, eco, upgrades, anchorStartedAt, anchorSteps),
         base: line.base,
       }
     : null;
+  const snapRef = useRef(snap);
+  useEffect(() => {
+    snapRef.current = snap;
+  });
 
   const elRef = useLiveText(() => {
     const s = snapRef.current;
@@ -93,12 +99,7 @@ export function LiveBaseRate({
   anchorStartedAt,
   anchorSteps,
 }: LiveProps) {
-  const snapRef = useRef<{
-    snap: LiveSnap;
-    g0Amount: Decimal;
-    unitRate: Decimal;
-  } | null>(null);
-  snapRef.current = line
+  const snap = line
     ? {
         snap: buildLiveSnap(line, lineId, eco, upgrades, anchorStartedAt, anchorSteps),
         g0Amount: line.gens[0]?.amount ?? new Decimal(0),
@@ -109,6 +110,10 @@ export function LiveBaseRate({
           ),
       }
     : null;
+  const snapRef = useRef(snap);
+  useEffect(() => {
+    snapRef.current = snap;
+  });
 
   const elRef = useLiveText(() => {
     const s = snapRef.current;

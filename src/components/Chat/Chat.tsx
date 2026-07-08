@@ -210,11 +210,15 @@ export default function Chat() {
 
   // Abrir uma DM marca as mensagens dela como lidas. As menções em canais NÃO
   // são zeradas ao abrir: só quando você interage com o card (ver ou fechar).
-  useEffect(() => {
-    if (active.type !== 'dm') return;
-    const u = active.user;
-    setUnread((prev) => (prev[u] ? { ...prev, [u]: 0 } : prev));
-  }, [active]);
+  // Ajuste DURANTE o render (padrão "derived state"), não em effect.
+  const [prevActive, setPrevActive] = useState(active);
+  if (active !== prevActive) {
+    setPrevActive(active);
+    if (active.type === 'dm') {
+      const u = active.user;
+      setUnread((prev) => (prev[u] ? { ...prev, [u]: 0 } : prev));
+    }
+  }
 
   // ===== Rolagem =====
   // Colado no fim por padrão: mensagens recentes visíveis; ao rolar pra cima,
@@ -425,7 +429,9 @@ export default function Chat() {
 
   // Menção pendente do canal ativo (id da mensagem para o card levar).
   const activeJump = active.type === 'channel' ? pendingJump[active.id] : null;
-  activeJumpRef.current = activeJump;
+  useEffect(() => {
+    activeJumpRef.current = activeJump;
+  });
 
   // Recalcula bordas/visibilidade quando a conversa, as mensagens ou a menção
   // pendente mudam (após o layout já ter posicionado a rolagem).

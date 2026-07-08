@@ -128,13 +128,16 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   // Ao deslogar (inclusive pelo "Sair da conta" dentro do Config): fecha o
   // modal e volta a página para o Reino, para que o próximo login caia direto
-  // na tela do Reino em vez de restaurar a última aba visitada.
-  useEffect(() => {
+  // na tela do Reino em vez de restaurar a última aba visitada. Reset DURANTE
+  // o render (padrão "derived state"), não em effect — sem render extra.
+  const [prevUser, setPrevUser] = useState(user);
+  if (user !== prevUser) {
+    setPrevUser(user);
     if (!user) {
       setSettingsOpen(false);
       setPage('reino');
     }
-  }, [user]);
+  }
   useEffect(() => {
     if (!settingsOpen) return;
     const onKey = (e: KeyboardEvent) => {
