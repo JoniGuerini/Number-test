@@ -11,7 +11,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Decimal from 'break_eternity.js';
-import { fmt, fmtRate, fmtTime } from '../../lib/format';
+import { fmt, fmtLive, fmtRate, fmtTime } from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
 import { loadSave, saveKeyFor, writeSave } from '../../lib/storage';
 import ProductionLine from './ProductionLine';
@@ -24,6 +24,7 @@ import {
   advanceKingdom,
   buyGen,
   cycleSecondsOf,
+  cycleStepsOf,
   loadLine,
   prodPerCycleOf,
   serializeLine,
@@ -50,7 +51,13 @@ import {
 } from './mandateExchange';
 import {
   REINO_SAVE_EVENT,
+  applyBonusOutput,
+  bonusAmountFraction,
+  bonusChance,
+  bonusRoll,
+  bonusTriggers,
   cycleSecondsWithUpgrades,
+  cycleSpeedFactor,
   loadUpgrades,
   productionFactor,
   serializeUpgrades,
@@ -126,6 +133,94 @@ function serializeReino(
     ...serializeMandate(mandate),
     mandateExchange: serializeMandateExchange(mandateExchange),
   };
+}
+
+/** Odômetro do recurso base a 60fps: entre commits do React (4x/s), REPRODUZ
+    as entregas do gerador 1 com as mesmas contas do motor (velocidade
+    acumulada, resto carregado, bônus determinístico) e escreve o valor direto
+    no nó de texto — o número gira a cada entrega real, sem re-render e sem
+    inventar valor. Aproximação única: o amount do g1 fica no committed (a
+    alimentação do g2 dentro da janela é ignorada — corrige no commit). */
+function LiveBaseValue({
+  className,
+  line,
+  lineId,
+  eco,
+  upgrades,
+  anchorStartedAt,
+  anchorSteps,
+}: {
+  className: string;
+  line: Line | undefined;
+  lineId: LineId;
+  eco: LineEconomy;
+  upgrades: UpgradeState;
+  anchorStartedAt: number | undefined;
+  anchorSteps: number;
+}) {
+  const elRef = useRef<HTMLSpanElement>(null);
+  const snap = useRef({ line, lineId, eco, upgrades, anchorStartedAt, anchorSteps });
+  snap.current = { line, lineId, eco, upgrades, anchorStartedAt, anchorSteps };
+
+  useEffect(() => {
+    let rafId: number;
+    const tick = () => {
+      const el = elRef.current;
+      const s = snap.current;
+      if (el && s.line) {
+        let value = s.line.base;
+        const g0 = s.line.gens[0];
+        if (
+          s.line.started &&
+          s.anchorStartedAt !== undefined &&
+          g0 &&
+          g0.amount.gt(0)
+        ) {
+          const n = cycleStepsOf(0, s.eco);
+          const v = cycleSpeedFactor(
+            s.upgrades,
+            s.lineId,
+            0,
+            cycleSecondsOf(0, s.eco)
+          );
+          const t =
+            (Date.now() - s.anchorStartedAt) / 1000 / SIM_STEP_S -
+            s.anchorSteps;
+          const replay = Math.min(Math.floor(t), 256);
+          const per = g0.amount
+            .mul(prodPerCycleOf(0, s.eco))
+            .mul(productionFactor(s.upgrades, s.lineId, 0));
+          const chance = bonusChance(s.upgrades, s.lineId, 0);
+          const frac = bonusAmountFraction(s.upgrades, s.lineId, 0);
+          let cc = g0.cycleStep;
+          for (let j = 1; j <= replay; j++) {
+            cc += v;
+            if (cc >= n) {
+              const cycles = Math.floor(cc / n);
+              cc -= cycles * n;
+              let out = per.mul(cycles);
+              if (
+                chance > 0 &&
+                bonusTriggers(
+                  chance,
+                  bonusRoll(s.anchorSteps + j - 1, s.lineId, 0)
+                )
+              ) {
+                out = applyBonusOutput(out, frac);
+              }
+              value = value.add(out);
+            }
+          }
+        }
+        el.textContent = fmtLive(value);
+      }
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, []);
+
+  return <span className={className} ref={elRef} />;
 }
 
 function lineResourceRate(
@@ -381,7 +476,15 @@ export default function Reino() {
             {t(`reino.base.${def.id}` as TKey)}
           </span>
           <div className={styles.resourceRow}>
-            <span className={styles.resourceValue}>{fmt(line?.base ?? 0)}</span>
+            <LiveBaseValue
+              className={styles.resourceValue}
+              line={line}
+              lineId={def.id}
+              eco={def.eco}
+              upgrades={upgrades}
+              anchorStartedAt={lines.comida?.startedAt}
+              anchorSteps={anchorSteps}
+            />
             <span className={styles.resourceRate}>+{fmtRate(resourceRate)} / s</span>
           </div>
         </div>

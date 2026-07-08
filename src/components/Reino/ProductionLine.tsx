@@ -7,7 +7,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import HoldActionButton from '../HoldActionButton';
 import Decimal from 'break_eternity.js';
-import { fmt, fmtCost, fmtTime } from '../../lib/format';
+import { fmt, fmtCost, fmtCountdown, fmtSecondsShort } from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
 import { getVideoPrefs, subscribeVideoPrefs } from '../../lib/prefs';
 import styles from '../../styles/productionList.module.css';
@@ -25,8 +25,10 @@ import {
 } from './engine';
 import type { LineId } from './lines';
 import {
+  bonusAmountFraction,
+  bonusChance,
   cycleSecondsWithUpgrades,
-  cycleStepsWithUpgrades,
+  cycleSpeedFactor,
   productionFactor,
   type UpgradeState,
 } from './upgrades';
@@ -47,10 +49,14 @@ interface ProductionLineProps {
   onToggleAuto: () => void;
 }
 
-/** Colunas do card do gerador nomeado: nome largo + 3 stats + botão.
+/** Colunas do card do gerador nomeado: nome largo + 5 stats + botão.
     Inline porque precisa vencer o grid padrão de `.row` de forma confiável
     entre navegadores (o mobile cai para flex-column e ignora isto). */
-const NAMED_ROW_COLS = '150px 110px 170px 150px 120px';
+const NAMED_ROW_COLS = '150px 80px 150px 130px 100px 100px 120px';
+
+/** Ciclo efetivo abaixo disto = produção contínua: a barra fica cheia e
+    parada em vez de varrer várias vezes por segundo (vira um estrobo). */
+const STEADY_CYCLE_S = 1;
 
 export default function ProductionLine({
   line,
@@ -127,9 +133,6 @@ export default function ProductionLine({
 
   const isAuto = line.mode === 'auto';
 
-  const cycleStepsNeed = (i: number): number =>
-    cycleStepsWithUpgrades(cycleStepsOf(i, eco), upgrades, lineId, i);
-
   const cycleSecondsNeed = (i: number): number =>
     cycleSecondsWithUpgrades(cycleSecondsOf(i, eco), upgrades, lineId, i);
 
@@ -142,23 +145,31 @@ export default function ProductionLine({
   // sem layout, sem paint em árvore, sem re-render). O estado mais recente
   // fica num ref para o loop ler sem depender de closure.
   const barRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const remRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const animRef = useRef({
     gens: line.gens,
     needs: [] as number[],
+    speeds: [] as number[],
+    steady: [] as boolean[],
     started: line.started,
     anchorStartedAt,
     anchorSteps,
   });
   animRef.current = {
     gens: line.gens,
-    needs: line.gens.map((_, i) => cycleStepsNeed(i)),
+    // O motor acumula a VELOCIDADE por passo contra a duração-base: a barra
+    // espelha isso (cycleStep em passos-base; o partial avança × velocidade).
+    needs: line.gens.map((_, i) => cycleStepsOf(i, eco)),
+    speeds: line.gens.map((_, i) =>
+      cycleSpeedFactor(upgrades, lineId, i, cycleSecondsOf(i, eco))
+    ),
+    steady: line.gens.map((_, i) => cycleSecondsNeed(i) < STEADY_CYCLE_S),
     started: line.started,
     anchorStartedAt,
     anchorSteps,
   };
 
   useEffect(() => {
-    if (!showCycleBars) return;
     let rafId: number;
     const tick = () => {
       const a = animRef.current;
@@ -174,21 +185,56 @@ export default function ProductionLine({
               0
             )
           : 0;
+      const t = partial / SIM_STEP_S;
       for (let i = 0; i < a.gens.length; i++) {
-        const el = barRefs.current[i];
-        if (!el) continue;
+        const barEl = barRefs.current[i];
+        const remEl = remRefs.current[i];
+        if (!barEl && !remEl) continue;
         const gen = a.gens[i];
-        const p = gen.amount.lte(0)
-          ? 0
-          : Math.min((gen.cycleStep + partial / SIM_STEP_S) / a.needs[i], 1);
+        // A barra completa NO PASSO em que o motor entrega — não no
+        // cruzamento contínuo da meta, que cai no meio do passo (o resto é
+        // carregado ao ciclo seguinte). O motor só credita o recurso na
+        // fronteira do passo; completar antes deixava um vácuo visível entre
+        // "barra cheia" e o número subir. Determinismo a favor: os passos
+        // desde o commit são REPRODUZIDOS aqui com as mesmas contas do motor
+        // (são pouquíssimos), achando a entrega anterior e a próxima; a barra
+        // corre linear dentro dessa janela inteira de passos e chega a 100%
+        // exatamente quando o número sobe. Contínuo através dos commits.
+        // O contador regressivo usa a MESMA janela, a 60fps, com décimos.
+        let p = 0;
+        let remainingS = 0;
+        if (gen.amount.gt(0)) {
+          const n = a.needs[i];
+          const v = a.speeds[i];
+          // Última entrega antes do commit: pós-entrega o resto é < v e o
+          // motor só soma v por passo, então floor(c/v) = passos decorridos.
+          let cc = gen.cycleStep;
+          let tPrev = -Math.floor(cc / v);
+          const replay = Math.min(Math.floor(t), 256);
+          for (let s = 1; s <= replay; s++) {
+            cc += v;
+            if (cc >= n) {
+              cc -= Math.floor(cc / n) * n;
+              tPrev = s;
+            }
+          }
+          const tNext = replay + Math.max(Math.ceil((n - cc) / v), 1);
+          p = a.steady[i]
+            ? 1
+            : Math.min(Math.max((t - tPrev) / (tNext - tPrev), 0), 1);
+          remainingS = Math.max((tNext - t) * SIM_STEP_S, 0);
+        } else {
+          remainingS = (a.needs[i] / a.speeds[i]) * SIM_STEP_S;
+        }
         // Desliza o inner: -100% = vazio, 0 = cheio (recorte no wrapper).
-        el.style.transform = `translateX(${(p - 1) * 100}%)`;
+        if (barEl) barEl.style.transform = `translateX(${(p - 1) * 100}%)`;
+        if (remEl) remEl.textContent = fmtCountdown(remainingS);
       }
       rafId = requestAnimationFrame(tick);
     };
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [showCycleBars]);
+  }, []);
 
   // A tela de escolha de modo vive no Reino (o início é global ao save);
   // aqui a linha já chega iniciada. As infos do save (início/tempo/produzido)
@@ -242,11 +288,6 @@ export default function ProductionLine({
               );
             }
 
-            const remaining = Math.max(
-              cycleSecondsNeed(i) - gen.cycleStep * SIM_STEP_S,
-              0
-            );
-
             return (
               <div
                 key={i}
@@ -274,11 +315,34 @@ export default function ProductionLine({
                   <div className={styles.stat}>
                     <span className={styles.statLabel}>
                       {t('cyc.cycleEvery', {
-                        time: fmtTime(cycleSecondsNeed(i)),
+                        time: fmtSecondsShort(cycleSecondsNeed(i)),
                       })}
                     </span>
+                    {/* Texto escrito pelo rAF local (60fps) — sem conteúdo
+                        no JSX para o React nunca disputar o nó. */}
+                    <span
+                      className={styles.statValue}
+                      ref={(el) => {
+                        remRefs.current[i] = el;
+                      }}
+                    />
+                  </div>
+
+                  <div className={styles.stat}>
+                    <span className={styles.statLabel}>
+                      {t('gen.bonusChance')}
+                    </span>
                     <span className={styles.statValue}>
-                      {fmtTime(Math.ceil(remaining))}
+                      {Math.round(bonusChance(upgrades, lineId, i) * 100)}%
+                    </span>
+                  </div>
+
+                  <div className={styles.stat}>
+                    <span className={styles.statLabel}>
+                      {t('gen.bonusAmount')}
+                    </span>
+                    <span className={styles.statValue}>
+                      +{Math.round(bonusAmountFraction(upgrades, lineId, i) * 100)}%
                     </span>
                   </div>
                 </div>

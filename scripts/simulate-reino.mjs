@@ -47,9 +47,12 @@ const upgradeLevel = (upgrades, lineId, genIndex, kind) => {
   return { g, gn };
 };
 
-const cycleStepsWithUpgrades = (baseSteps, upgrades, lineId, genIndex) => {
+const MIN_CYCLE_S = 0.1;
+const CYCLE_DECAY = 0.9;
+
+const cycleSpeedFactor = (upgrades, lineId, genIndex, baseSeconds) => {
   const { g, gn } = upgradeLevel(upgrades, lineId, genIndex, 'cycle');
-  return baseSteps / ((1 + g * 0.1) * (1 + gn * 0.1));
+  return Math.min(Math.pow(1 / CYCLE_DECAY, g + gn), baseSeconds / MIN_CYCLE_S);
 };
 
 const productionFactor = (upgrades, lineId, genIndex) => {
@@ -107,14 +110,20 @@ function simulate(eco, horizonS, lineId = eco.id, upgrades = emptyUpgrades()) {
     const earnedAt = s + 1;
     if (gens[0].bought > 0) uptime += SIM_STEP_S;
 
+    // Ciclo acumula a VELOCIDADE por passo contra a duração-base, com resto
+    // carregado entre ciclos — espelho do stepProduction do engine.
     for (let i = gens.length - 1; i >= 0; i--) {
       const gen = gens[i];
       if (gen.amount.lte(0)) continue;
-      gen.cycleStep += 1;
-      const need = cycleStepsWithUpgrades(cycleStepsOf(i), upgrades, lineId, i);
+      gen.cycleStep += cycleSpeedFactor(upgrades, lineId, i, cycleSecondsOf(i, eco));
+      const need = cycleStepsOf(i);
       if (gen.cycleStep >= need) {
-        gen.cycleStep = 0;
-        let out = gen.amount.mul(prodPerCycleOf(i, eco)).mul(productionFactor(upgrades, lineId, i));
+        const cycles = Math.floor(gen.cycleStep / need);
+        gen.cycleStep -= cycles * need;
+        let out = gen.amount
+          .mul(prodPerCycleOf(i, eco))
+          .mul(productionFactor(upgrades, lineId, i))
+          .mul(cycles);
         const chance = bonusChance(upgrades, lineId, i);
         if (chance > 0 && bonusTriggers(chance, bonusRoll(s, lineId, i))) {
           const frac = bonusAmountFraction(upgrades, lineId, i);

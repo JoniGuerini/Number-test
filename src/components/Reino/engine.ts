@@ -15,7 +15,7 @@ import {
   bonusChance,
   bonusRoll,
   bonusTriggers,
-  cycleStepsWithUpgrades,
+  cycleSpeedFactor,
   discountedGenCost,
   emptyUpgrades,
   productionFactor,
@@ -198,7 +198,13 @@ interface WorkLine {
   uptime: number;
 }
 
-/** Um passo de produção de UMA linha (ciclos + entrega). Muta o WorkLine. */
+/** Um passo de produção de UMA linha (ciclos + entrega). Muta o WorkLine.
+    O cycleStep acumula a VELOCIDADE do ciclo por passo (1×, 1.21×, …) contra
+    a duração-base em passos, carregando o resto entre ciclos. Antes ele subia
+    +1 contra uma meta fracionária (base ÷ fator) e só entregava ao cruzar o
+    próximo passo inteiro: o excedente era descartado (todo ciclo pagava até
+    ~1 passo de pedágio) e a barra da UI batia em 100% e pausava esperando a
+    entrega. Acumular também permite >1 ciclo por passo em níveis altos. */
 function stepProduction(w: WorkLine, s: number, upgrades: UpgradeState): void {
   if (w.gens[0].bought > 0) w.uptime += SIM_STEP_S;
 
@@ -208,13 +214,20 @@ function stepProduction(w: WorkLine, s: number, upgrades: UpgradeState): void {
     const gen = w.gens[i];
     if (gen.amount.lte(0)) continue;
 
-    gen.cycleStep += 1;
-    const need = cycleStepsWithUpgrades(cycleStepsOf(i, w.eco), upgrades, w.id, i);
+    gen.cycleStep += cycleSpeedFactor(
+      upgrades,
+      w.id,
+      i,
+      cycleSecondsOf(i, w.eco)
+    );
+    const need = cycleStepsOf(i, w.eco);
     if (gen.cycleStep >= need) {
-      gen.cycleStep = 0;
+      const cycles = Math.floor(gen.cycleStep / need);
+      gen.cycleStep -= cycles * need;
       let out = gen.amount
         .mul(prodPerCycleOf(i, w.eco))
-        .mul(productionFactor(upgrades, w.id, i));
+        .mul(productionFactor(upgrades, w.id, i))
+        .mul(cycles);
       const chance = bonusChance(upgrades, w.id, i);
       if (
         chance > 0 &&

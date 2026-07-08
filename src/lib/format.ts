@@ -92,6 +92,51 @@ export function fmtRate(n: Decimal | number): string {
   return fmt(d);
 }
 
+/** Odômetro "ao vivo" do recurso base: mais casas no corpo (13.145M) para o
+    número girar visivelmente a cada entrega mesmo em magnitudes altas — com o
+    fmt curto (13.1M) os incrementos pequenos não mexiam em dígito nenhum. */
+export function fmtLive(n: Decimal | number): string {
+  const d = n instanceof Decimal ? n : new Decimal(n);
+  if (d.sign < 0) return '-' + fmtLive(d.neg());
+  if (d.lt(1000)) return truncTo(d.toNumber(), 1);
+
+  const exp = d.log10().toNumber();
+  if (!Number.isFinite(exp) || exp >= 1e15) return d.toString();
+
+  const tier = Math.floor(exp / 3);
+  const scaled = d.div(Decimal.pow(10, tier * 3)).toNumber();
+  const body = truncTo(scaled, scaled >= 100 ? 1 : scaled >= 10 ? 2 : 3);
+  const suffix =
+    tier < SUFFIXES.length ? SUFFIXES[tier] : letterSuffix(tier - SUFFIXES.length);
+  return body + suffix;
+}
+
+/** Duração curta com até 2 casas quando fracionária ("0.51s", "0.6s", "12s")
+    — ciclos acelerados por melhorias ficam sub-segundo e com 1 casa só,
+    0.51s → 0.49s viravam ambos "0.5s" (a melhoria parecia não fazer nada).
+    Casas finais em zero somem (0.60 → "0.6s", 2.00 → "2s"). Acima de 60s
+    delega ao fmtTime. */
+export function fmtSecondsShort(seconds: number): string {
+  const s = Math.max(0, seconds);
+  if (s < 60) {
+    const r = Math.round(s * 100) / 100;
+    if (Number.isInteger(r)) return `${r.toFixed(0)}s`;
+    const oneDecimal = Math.round(r * 10) / 10;
+    return oneDecimal === r ? `${r.toFixed(1)}s` : `${r.toFixed(2)}s`;
+  }
+  return fmtTime(s);
+}
+
+/** Contagem regressiva do ciclo no card do gerador: SEMPRE 2 casas fixas
+    ("0.50s", "11.07s") — o número gira a 60fps e, sem casas fixas, a largura
+    pulava quando o zero final era cortado. Trunca (semântica de cronômetro:
+    "0.00s" só no zero real). Acima de 60s delega ao fmtTime. */
+export function fmtCountdown(seconds: number): string {
+  const s = Math.max(0, seconds);
+  if (s < 60) return `${truncTo(s, 2)}s`;
+  return fmtTime(s);
+}
+
 /** Tempo decorrido em segundos → "45s" / "2m 05s" / "1h 12m" / "3d 07h" /
     "2y 41d" (e "1.0My" para durações absurdas, caso das estimativas fundas
     da simulação). Arredonda pra BAIXO (semântica de cronômetro): "5s" só

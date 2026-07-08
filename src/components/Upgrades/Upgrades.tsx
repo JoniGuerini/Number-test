@@ -2,11 +2,19 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Decimal from 'break_eternity.js';
-import { fmt, fmtCost, fmtWhole } from '../../lib/format';
+import { fmt, fmtCost, fmtSecondsShort, fmtWhole } from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
 import { loadSave, saveKeyFor, writeSave } from '../../lib/storage';
-import { loadLine, serializeLine, type Line, type LineSave } from '../Reino/engine';
-import { ENABLED_LINES, type LineId } from '../Reino/lines';
+import {
+  costOf,
+  cycleSecondsOf,
+  loadLine,
+  prodPerCycleOf,
+  serializeLine,
+  type Line,
+  type LineSave,
+} from '../Reino/engine';
+import { ENABLED_LINES, lineDefOf, type LineId } from '../Reino/lines';
 import {
   exchangeCost,
   exchangeLevel,
@@ -21,9 +29,9 @@ import {
   UPGRADE_KINDS,
   REINO_SAVE_EVENT,
   BONUS_AMOUNT_BASE_PCT,
-  BONUS_AMOUNT_PCT,
-  BONUS_CHANCE_PCT,
-  EFFECT_PCT,
+  CYCLE_DECAY,
+  cycleFactorFor,
+  isCycleMaxed,
   canAffordUpgrade,
   getLevel,
   purchaseCost,
@@ -125,17 +133,75 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
     return t(`reino.line.${v}` as TKey);
   };
 
-  const effectLabel = (kind: UpgradeKind, level: number): string => {
-    if (kind === 'cycle')
-      return t('upg.effectCycle', { n: level * EFFECT_PCT });
-    if (kind === 'production')
-      return t('upg.effectProduction', { n: level * EFFECT_PCT });
-    if (kind === 'cost')
-      return t('upg.effectCost', { n: level * EFFECT_PCT });
+  /** Efeito em VALORES REAIS: o de agora → o do próximo nível. Cards de
+      gerador mostram ciclo/entrega/preço concretos; os globais mostram o
+      fator próprio (o valor final depende de cada gerador). */
+  const effectLabel = (target: 'global' | GenRef, kind: UpgradeKind): string => {
+    const g = getLevel(upgrades, 'global', kind);
+    if (target === 'global') {
+      if (kind === 'cycle')
+        return t('upg.valG.cycle', {
+          from: Math.pow(1 / CYCLE_DECAY, g).toFixed(2),
+          to: Math.pow(1 / CYCLE_DECAY, g + 1).toFixed(2),
+        });
+      if (kind === 'production')
+        return t('upg.valG.production', {
+          from: (1 + g * 0.1).toFixed(1),
+          to: (1 + (g + 1) * 0.1).toFixed(1),
+        });
+      if (kind === 'cost')
+        return t('upg.valG.cost', {
+          from: (1 + g * 0.1).toFixed(1),
+          to: (1 + (g + 1) * 0.1).toFixed(1),
+        });
+      if (kind === 'bonus')
+        return t('upg.val.bonus', { from: g, to: g + 1 });
+      return t('upg.val.bonusAmount', {
+        from: BONUS_AMOUNT_BASE_PCT + g,
+        to: BONUS_AMOUNT_BASE_PCT + g + 1,
+      });
+    }
+
+    const { lineId, index } = target;
+    const gn = getLevel(upgrades, target, kind);
+    const eco = lineDefOf(lineId).eco;
+    const gen = lines[lineId]?.gens[index];
+
+    if (kind === 'cycle') {
+      const baseS = cycleSecondsOf(index, eco);
+      const from = baseS / cycleFactorFor(g + gn, baseS);
+      if (isCycleMaxed(upgrades, lineId, index, baseS)) {
+        return t('upg.val.cycleMax', { from: fmtSecondsShort(from) });
+      }
+      return t('upg.val.cycle', {
+        from: fmtSecondsShort(from),
+        to: fmtSecondsShort(baseS / cycleFactorFor(g + gn + 1, baseS)),
+      });
+    }
+    if (kind === 'production') {
+      const per = (gen?.amount ?? new Decimal(0)).mul(prodPerCycleOf(index, eco));
+      const factor = (lvl: number) => (1 + g * 0.1) * (1 + lvl * 0.1);
+      return t('upg.val.production', {
+        from: fmt(per.mul(factor(gn))),
+        to: fmt(per.mul(factor(gn + 1))),
+      });
+    }
+    if (kind === 'cost') {
+      const base = costOf(index, gen?.bought ?? 0, eco);
+      const factor = (lvl: number) => (1 + g * 0.1) * (1 + lvl * 0.1);
+      return t('upg.val.cost', {
+        from: fmtCost(base.div(factor(gn))),
+        to: fmtCost(base.div(factor(gn + 1))),
+      });
+    }
     if (kind === 'bonus')
-      return t('upg.effectBonus', { n: level * BONUS_CHANCE_PCT });
-    return t('upg.effectBonusAmount', {
-      n: BONUS_AMOUNT_BASE_PCT + level * BONUS_AMOUNT_PCT,
+      return t('upg.val.bonus', {
+        from: Math.min(100, g + gn),
+        to: Math.min(100, g + gn + 1),
+      });
+    return t('upg.val.bonusAmount', {
+      from: BONUS_AMOUNT_BASE_PCT + g + gn,
+      to: BONUS_AMOUNT_BASE_PCT + g + gn + 1,
     });
   };
 
@@ -208,8 +274,16 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
         const gen = { lineId: view, index } satisfies GenRef;
         const level = getLevel(upgrades, gen, kind);
         const cost = purchaseCost(gen, level);
-        const canAfford = canAffordUpgrade(lines, gen, level);
-        return { kind, level, line: view, cost, canAfford };
+        const maxed =
+          kind === 'cycle' &&
+          isCycleMaxed(
+            upgrades,
+            view,
+            index,
+            cycleSecondsOf(index, lineDefOf(view).eco)
+          );
+        const canAfford = !maxed && canAffordUpgrade(lines, gen, level);
+        return { kind, level, line: view, cost, canAfford, maxed };
       }),
     }));
   }, [view, lines, upgrades]);
@@ -239,14 +313,15 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
     level: number,
     line: LineId | null,
     cost: Decimal,
-    canAfford: boolean
+    canAfford: boolean,
+    maxed = false
   ) => (
     <article key={kind} className={styles.card}>
       <h3 className={styles.cardTitle}>{t(`upg.${kind}.name` as TKey)}</h3>
       <p className={styles.cardHint}>{t(`upg.${kind}.hint` as TKey)}</p>
       <div className={styles.cardMeta}>
         <span className={styles.metaLevel}>{t('upg.level', { n: level })}</span>
-        <span className={styles.metaEffect}>{effectLabel(kind, level)}</span>
+        <span className={styles.metaEffect}>{effectLabel(target, kind)}</span>
       </div>
       <HoldActionButton
         type="button"
@@ -254,12 +329,14 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
         disabled={!canAfford}
         onAction={() => buy(target, kind)}
       >
-        {target === 'global'
-          ? t('upg.buyCostAll', { cost: fmt(cost) })
-          : t('upg.buyCost', {
-              cost: fmt(cost),
-              resource: t(`reino.base.${line}` as TKey),
-            })}
+        {maxed
+          ? t('upg.maxed')
+          : target === 'global'
+            ? t('upg.buyCostAll', { cost: fmt(cost) })
+            : t('upg.buyCost', {
+                cost: fmt(cost),
+                resource: t(`reino.base.${line}` as TKey),
+              })}
       </HoldActionButton>
     </article>
   );
@@ -394,8 +471,8 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
                   {t(`reino.gen.${gen.lineId}.${gen.index + 1}` as TKey)}
                 </h2>
                 <div className={styles.cardRow}>
-                  {cards.map(({ kind, level, line, cost, canAfford }) =>
-                    renderCard(gen, kind, level, line, cost, canAfford)
+                  {cards.map(({ kind, level, line, cost, canAfford, maxed }) =>
+                    renderCard(gen, kind, level, line, cost, canAfford, maxed)
                   )}
                 </div>
               </section>
