@@ -114,31 +114,42 @@ export function getDateLocale(): string {
   return DATE_LOCALE[locale];
 }
 
+/** Dev-only: chaves dinâmicas (`\`reino.gen.${id}.${n}\` as TKey`) burlam o
+    compilador — um typo renderizaria "undefined" em silêncio. Avisa UMA vez
+    por chave que não existe no dicionário. */
+const warnedKeys = new Set<string>();
+function resolve(dict: Record<TKey, string>, key: TKey): string {
+  const s = dict[key];
+  if (s === undefined) {
+    if (import.meta.env.DEV && !warnedKeys.has(key)) {
+      warnedKeys.add(key);
+      console.warn(`i18n: chave "${key}" não existe no dicionário`);
+    }
+    return key;
+  }
+  return s;
+}
+
+function fill(s: string, params?: Record<string, string | number>): string {
+  if (!params) return s;
+  for (const [k, v] of Object.entries(params)) {
+    s = s.replace(`{${k}}`, String(v));
+  }
+  return s;
+}
+
 /** Pure translation (no reactivity) — for use outside components. */
 export function translate(
   key: TKey,
   params?: Record<string, string | number>
 ): string {
-  let s = DICTS[locale][key];
-  if (params) {
-    for (const [k, v] of Object.entries(params)) {
-      s = s.replace(`{${k}}`, String(v));
-    }
-  }
-  return s;
+  return fill(resolve(DICTS[locale], key), params);
 }
 
 /** Reactive hook: components re-render when the language changes. */
 export function useI18n() {
   const current = useSyncExternalStore(subscribeLocale, getLocale);
-  const t = (key: TKey, params?: Record<string, string | number>): string => {
-    let s = DICTS[current][key];
-    if (params) {
-      for (const [k, v] of Object.entries(params)) {
-        s = s.replace(`{${k}}`, String(v));
-      }
-    }
-    return s;
-  };
+  const t = (key: TKey, params?: Record<string, string | number>): string =>
+    fill(resolve(DICTS[current], key), params);
   return { t, locale: current };
 }
