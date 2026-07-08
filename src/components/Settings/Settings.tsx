@@ -1,5 +1,7 @@
-import { useState, useSyncExternalStore } from 'react';
-import Decimal from 'break_eternity.js';
+/** Config (modal): shell com a sidebar de abas + rodapé de restaurar padrão.
+    O conteúdo de cada aba vive em ./tabs/ — um componente por aba. */
+
+import { useState } from 'react';
 import {
   Languages,
   Monitor,
@@ -9,97 +11,23 @@ import {
   Volume2,
   type LucideIcon,
 } from 'lucide-react';
-// Bandeiras em SVG (emoji de bandeira varia por SO — no Windows viram letras)
-import { BR, ES, US } from 'country-flag-icons/react/3x2';
 import type { GameTab } from '../../App';
-import { signOut, useAuth } from '../../lib/auth';
-import { fmt, fmtTime } from '../../lib/format';
-import { ENABLED_LINES } from '../../game/lines';
-import {
-  getDateLocale,
-  LOCALES,
-  resetLocale,
-  setLocale,
-  useI18n,
-  type TKey,
-} from '../../lib/locale';
-import {
-  getVideoPrefs,
-  resetVideoPrefs,
-  setVideoPref,
-  subscribeVideoPrefs,
-  THEMES,
-  type VideoPrefs,
-} from '../../lib/prefs';
-import {
-  getSoundVolume,
-  isSoundOn,
-  playPress,
-  resetSound,
-  setSoundOn,
-  setSoundVolume,
-} from '../../lib/sound';
-import {
-  loadSave,
-  nextSlotName,
-  saveKeyForSlot,
-  type SlotMeta,
-} from '../../lib/storage';
-import {
-  LB_GEN_CAP,
-  LB_LINE,
-  YOU_ENTRY,
-  YOU_GEN_LEVEL,
-  YOU_SEASON_JOINED,
-} from '../Leaderboard/mockData';
+import { useI18n } from '../../lib/locale';
+import { resetLocale } from '../../lib/locale';
+import { resetVideoPrefs } from '../../lib/prefs';
+import { resetSound } from '../../lib/sound';
+import type { SlotMeta } from '../../lib/storage';
+import ProfileTab from './tabs/ProfileTab';
+import SavesTab from './tabs/SavesTab';
+import ThemesTab from './tabs/ThemesTab';
+import SoundTab from './tabs/SoundTab';
+import VideoTab from './tabs/VideoTab';
+import LanguageTab from './tabs/LanguageTab';
 import styles from './Settings.module.css';
-
-const GAMES: GameTab[] = ['reino'];
-
-/** Campos que sinalizam progresso iniciado no save. */
-interface SaveProbe {
-  /** Reino: uma linha por chave; conta se qualquer linha foi iniciada. */
-  lines?: Record<
-    string,
-    | {
-        started?: boolean;
-        startedAt?: number;
-        uptime?: number;
-        totalProduced?: string;
-      }
-    | undefined
-  >;
-}
-
-/** Há progresso para zerar? (jogo de fato iniciado, não só o save gravado
-    automaticamente). No Reino, conta por qualquer linha iniciada. */
-function hasProgress(slotId: string, game: GameTab): boolean {
-  const s = loadSave<SaveProbe>(saveKeyForSlot(slotId, game));
-  if (!s) return false;
-  return Object.values(s.lines ?? {}).some((l) => l?.started === true);
-}
-
-const VIDEO_TOGGLES: {
-  key: Exclude<keyof VideoPrefs, 'theme'>;
-  label: TKey;
-}[] = [
-  { key: 'showFps', label: 'video.fps' },
-  { key: 'showFrameTime', label: 'video.frameTime' },
-  { key: 'showBattery', label: 'video.battery' },
-  { key: 'showMemory', label: 'video.memory' },
-  { key: 'showDomNodes', label: 'video.domNodes' },
-];
 
 type ConfigTab = 'perfil' | 'saves' | 'temas' | 'som' | 'video' | 'idioma';
 
 const TABS: ConfigTab[] = ['perfil', 'saves', 'temas', 'som', 'video', 'idioma'];
-
-/* Bandeira de cada idioma (país de referência do dialeto usado). */
-const LOCALE_FLAGS: Record<string, typeof BR> = {
-  pt: BR,
-  en: US,
-  es: ES,
-};
 
 /* Ícones das abas (Lucide) — neutros, herdam a cor do rótulo. */
 const TAB_ICONS: Record<ConfigTab, LucideIcon> = {
@@ -111,54 +39,6 @@ const TAB_ICONS: Record<ConfigTab, LucideIcon> = {
   idioma: Languages,
 };
 
-/** Card de tema pintado com as cores dele mesmo, com mini-mockup dentro. */
-function ThemeCard({
-  theme,
-  active = false,
-  onSelect,
-}: {
-  theme: (typeof THEMES)[number];
-  active?: boolean;
-  onSelect?: () => void;
-}) {
-  const { t } = useI18n();
-  const [bg, paper, accentColor, ink] = theme.preview;
-  return (
-    <button
-      className={`${styles.themeCard} ${active ? styles.themeCardActive : ''}`}
-      style={{ background: bg, ['--theme-accent' as string]: accentColor }}
-      onClick={onSelect}
-      disabled={active}
-    >
-      {/* Mini-mockup: um card do tema com texto e barra de acento */}
-      <span
-        className={styles.themeMock}
-        style={{ background: paper }}
-        aria-hidden="true"
-      >
-        <span className={styles.themeMockTitle} style={{ background: accentColor }} />
-        <span
-          className={styles.themeMockLine}
-          style={{ background: ink, opacity: 0.55 }}
-        />
-        <span className={styles.themeMockBar} style={{ background: accentColor }} />
-      </span>
-
-      <span className={styles.themeName} style={{ color: ink }}>
-        {t(`theme.${theme.id}`)}
-      </span>
-    </button>
-  );
-}
-
-const fmtSlotDate = (ms: number, dateLocale: string): string =>
-  new Date(ms).toLocaleString(dateLocale, {
-    day: '2-digit',
-    month: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-
 interface SettingsProps {
   onReset: (slotId: string, game: GameTab) => void;
   slots: SlotMeta[];
@@ -169,57 +49,21 @@ interface SettingsProps {
   onRenameSlot: (id: string, name: string) => void;
 }
 
-export default function Settings({
-  onReset,
-  slots,
-  activeSlotId,
-  onCreateSlot,
-  onSwitchSlot,
-  onDeleteSlot,
-  onRenameSlot,
-}: SettingsProps) {
-  const { t, locale } = useI18n();
-  const authUser = useAuth();
+export default function Settings(props: SettingsProps) {
+  const { t } = useI18n();
   const [tab, setTab] = useState<ConfigTab>('perfil');
-  // Slot com as opções (carregar / renomear / zerar) abertas abaixo dele
-  const [expandedSlotId, setExpandedSlotId] = useState<string | null>(null);
-  // Confirmação em duas etapas do resetar jogo salvo (o botão grande vira
-  // o par Resetar/Cancelar); zera ao expandir/recolher outro slot
-  const [confirmResetGame, setConfirmResetGame] = useState<GameTab | null>(null);
-  // Rascunho do nome no painel expandido (renomear)
-  const [renameDraft, setRenameDraft] = useState('');
-  // Criação de save: input com nome pré-preenchido antes de confirmar
-  const [creating, setCreating] = useState(false);
-  const [createName, setCreateName] = useState('');
-  const [volume, setVolume] = useState(getSoundVolume());
-  const [soundOn, setSoundOnState] = useState(isSoundOn());
   // Confirmação em duas etapas do botão de restaurar configs
   const [confirmReset, setConfirmReset] = useState(false);
-
-  const toggleSound = () => {
-    setSoundOn(!soundOn);
-    setSoundOnState(!soundOn);
-  };
+  // Remonta a aba de Som após o reset (o estado local dela relê o padrão)
+  const [resetEpoch, setResetEpoch] = useState(0);
 
   // Restaura temas, som, vídeo e idioma ao padrão (não toca nos jogos salvos).
   const resetAllConfig = () => {
     resetVideoPrefs();
     resetSound();
-    setVolume(getSoundVolume());
-    setSoundOnState(isSoundOn());
     resetLocale();
+    setResetEpoch((e) => e + 1);
     setConfirmReset(false);
-  };
-
-  const confirmCreate = () => {
-    onCreateSlot(createName);
-    setCreating(false);
-  };
-  const videoPrefs = useSyncExternalStore(subscribeVideoPrefs, getVideoPrefs);
-
-  const changeVolume = (value: number) => {
-    setSoundVolume(value);
-    setVolume(value);
   };
 
   return (
@@ -241,495 +85,37 @@ export default function Settings({
       </nav>
 
       <div className={styles.main}>
-      <div className={styles.body}>
-        {tab === 'perfil' && authUser && (
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>{t('tab.perfil')}</h2>
-            <p className={styles.sectionHint}>{t('profile.hint')}</p>
+        <div className={styles.body}>
+          {tab === 'perfil' && <ProfileTab />}
+          {tab === 'saves' && <SavesTab {...props} />}
+          {tab === 'temas' && <ThemesTab />}
+          {tab === 'som' && <SoundTab key={resetEpoch} />}
+          {tab === 'video' && <VideoTab />}
+          {tab === 'idioma' && <LanguageTab />}
+        </div>
 
-            <div className={styles.profileHead}>
-              <div className={styles.profileId}>
-                <span className={styles.profileName} data-rank={YOU_ENTRY.rank}>
-                  {authUser.name}
-                </span>
-                <span className={styles.profileVia}>{authUser.email}</span>
-              </div>
-            </div>
-
-            <span className={styles.subLabel}>{t('profile.kingdom')}</span>
-            <div className={styles.statGrid}>
-              {(
-                [
-                  [t('chat.profile.ranking'), `#${YOU_ENTRY.pos.toLocaleString(getDateLocale())}`],
-                  [t('chat.profile.prosperity'), YOU_ENTRY.prosperity.toLocaleString(getDateLocale())],
-                  [t('chat.profile.wheat'), YOU_ENTRY.bases.comida],
-                  [t('chat.profile.topGen'), t(`reino.gen.${LB_LINE}.${YOU_GEN_LEVEL}` as TKey)],
-                  [t('chat.profile.generators'), `${YOU_GEN_LEVEL}/${LB_GEN_CAP}`],
-                  [t('chat.profile.clan'), YOU_ENTRY.clan ?? t('chat.profile.noClan')],
-                  [t('chat.profile.since'), t('chat.profile.season', { n: YOU_SEASON_JOINED })],
-                ] as [string, string][]
-              ).map(([label, value]) => (
-                <div className={styles.statCard} key={label}>
-                  <span className={styles.statCardLabel}>{label}</span>
-                  <span className={styles.statCardValue}>{value}</span>
-                </div>
-              ))}
-            </div>
-
-            <button
-              className={`btn-secondary ${styles.signoutBtn}`}
-              onClick={signOut}
-            >
-              {t('auth.signout')}
-            </button>
-          </section>
-        )}
-
-        {tab === 'saves' && (
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>{t('saves.title')}</h2>
-            <p className={styles.sectionHint}>{t('saves.hint')}</p>
-            <div className={styles.sectionBody}>
-              {slots.map((slot) => {
-                const active = slot.id === activeSlotId;
-                const expanded = slot.id === expandedSlotId;
-                // Nenhum dos 3 modos iniciado: save vazio (sem data pra mostrar)
-                const empty = !GAMES.some((g) => hasProgress(slot.id, g));
-                return (
-                  <div key={slot.id} className={styles.slotBlock}>
-                    <div className={styles.slotRow}>
-                      <button
-                        className={`${styles.option} ${active ? styles.active : ''}`}
-                        onClick={() => {
-                          setConfirmResetGame(null);
-                          if (expanded) {
-                            setExpandedSlotId(null);
-                          } else {
-                            setExpandedSlotId(slot.id);
-                            setRenameDraft(slot.name);
-                          }
-                        }}
-                      >
-                        <span>
-                          {slot.name}
-                          <span className={styles.slotDate}>
-                            {' · '}
-                            {empty
-                              ? t('saves.noData')
-                              : fmtSlotDate(slot.lastPlayedAt, getDateLocale())}
-                          </span>
-                        </span>
-                        <span className={styles.badge}>
-                          {active && t('saves.active')}
-                          <svg
-                            className={`${styles.caret} ${expanded ? styles.caretUp : ''}`}
-                            width="9"
-                            height="6"
-                            viewBox="0 0 9 6"
-                            aria-hidden="true"
-                          >
-                            <path
-                              d="M1 1.5 L4.5 4.5 L8 1.5"
-                              stroke="currentColor"
-                              strokeWidth="1.4"
-                              fill="none"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </span>
-                      </button>
-                      {/* The active save can't be deleted, so its button
-                          doesn't render — the card takes the full row */}
-                      {!active && (
-                        <button
-                          className={`${styles.slotDelete} ${styles.slotDeleteOn}`}
-                          onClick={() => onDeleteSlot(slot.id)}
-                          aria-label={t('saves.deleteAria', { name: slot.name })}
-                        >
-                          {/* SVG instead of the ✕ character: the glyph size
-                              varied between macOS and Windows (fallback font) */}
-                          <svg
-                            width="8"
-                            height="8"
-                            viewBox="0 0 10 10"
-                            aria-hidden="true"
-                          >
-                            <path
-                              d="M1 1 L9 9 M9 1 L1 9"
-                              stroke="currentColor"
-                              strokeWidth="1.6"
-                              strokeLinecap="round"
-                            />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-
-                    {expanded && (
-                      <div className={styles.slotOptions}>
-                        <div className={styles.nameRow}>
-                          <input
-                            className={styles.nameInput}
-                            value={renameDraft}
-                            maxLength={40}
-                            onChange={(e) => setRenameDraft(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter')
-                                onRenameSlot(slot.id, renameDraft);
-                            }}
-                            aria-label={t('saves.nameAria', { name: slot.name })}
-                          />
-                          <button
-                            className="btn-secondary"
-                            disabled={
-                              !renameDraft.trim() ||
-                              renameDraft.trim() === slot.name
-                            }
-                            onClick={() => onRenameSlot(slot.id, renameDraft)}
-                          >
-                            {t('saves.rename')}
-                          </button>
-                        </div>
-                        {(() => {
-                          // Raio-X do save: início, tempo decorrido e o total
-                          // produzido por linha (dados que moravam na tela de
-                          // Produção). Snapshot do localStorage — o save do
-                          // slot ativo persiste a cada 1s.
-                          const probe = loadSave<SaveProbe>(
-                            saveKeyForSlot(slot.id, 'reino')
-                          );
-                          const anchor = probe?.lines?.comida;
-                          if (!anchor?.started || anchor.startedAt === undefined)
-                            return null;
-                          return (
-                            <div className={styles.saveStats}>
-                              <div className={styles.statGrid}>
-                                <div className={styles.statCard}>
-                                  <span className={styles.statCardLabel}>
-                                    {t('common.startLabel')}
-                                  </span>
-                                  <span className={styles.statCardValue}>
-                                    {fmtSlotDate(anchor.startedAt, getDateLocale())}
-                                  </span>
-                                </div>
-                                <div className={styles.statCard}>
-                                  <span className={styles.statCardLabel}>
-                                    {t('common.time')}
-                                  </span>
-                                  <span className={styles.statCardValue}>
-                                    {fmtTime(anchor.uptime ?? 0)}
-                                  </span>
-                                </div>
-                              </div>
-                              <span className={styles.subLabel}>
-                                {t('common.produced')}
-                              </span>
-                              <div className={styles.lineStatsGrid}>
-                                {ENABLED_LINES.map((d) => (
-                                  <div className={styles.statCard} key={d.id}>
-                                    <span className={styles.statCardLabel}>
-                                      {t(`reino.line.${d.id}` as TKey)}
-                                    </span>
-                                    <span className={styles.statCardValue}>
-                                      {fmt(
-                                        new Decimal(
-                                          probe?.lines?.[d.id]?.totalProduced ?? 0
-                                        )
-                                      )}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        })()}
-                        {!active && (
-                          <button
-                            className={`btn-primary ${styles.loadBtn}`}
-                            onClick={() => {
-                              onSwitchSlot(slot.id);
-                              setExpandedSlotId(null);
-                            }}
-                          >
-                            {t('saves.load')}
-                          </button>
-                        )}
-                        <div className={styles.resetRow}>
-                          {GAMES.map((game) =>
-                            confirmResetGame === game ? (
-                              <div key={game} className={styles.resetPair}>
-                                <button
-                                  className={styles.dangerBtn}
-                                  onClick={() => {
-                                    onReset(slot.id, game);
-                                    setConfirmResetGame(null);
-                                  }}
-                                >
-                                  {t('saves.resetConfirm')}
-                                </button>
-                                <button
-                                  className="btn-secondary"
-                                  onClick={() => setConfirmResetGame(null)}
-                                >
-                                  {t('saves.cancel')}
-                                </button>
-                              </div>
-                            ) : (
-                              <button
-                                key={game}
-                                className={styles.dangerBtn}
-                                disabled={!hasProgress(slot.id, game)}
-                                onClick={() => setConfirmResetGame(game)}
-                              >
-                                {t('saves.reset')}
-                              </button>
-                            )
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-              {creating ? (
-                <div className={styles.nameRow}>
-                  <input
-                    className={styles.nameInput}
-                    value={createName}
-                    maxLength={40}
-                    autoFocus
-                    onChange={(e) => setCreateName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') confirmCreate();
-                      if (e.key === 'Escape') setCreating(false);
-                    }}
-                    aria-label={t('saves.newNameAria')}
-                  />
-                  <button className="btn-primary" onClick={confirmCreate}>
-                    {t('saves.confirmCreate')}
-                  </button>
-                  <button
-                    className="btn-secondary"
-                    onClick={() => setCreating(false)}
-                  >
-                    {t('saves.cancel')}
-                  </button>
-                </div>
-              ) : (
-                <button
-                  className="btn-primary"
-                  onClick={() => {
-                    setCreateName(nextSlotName());
-                    setCreating(true);
-                  }}
-                >
-                  {t('saves.create')}
+        <div className={styles.footer}>
+          {confirmReset ? (
+            <div className={styles.resetConfirm}>
+              <span className={styles.resetWarn}>{t('config.resetWarn')}</span>
+              <div className={styles.resetActions}>
+                <button className="btn-primary" onClick={resetAllConfig}>
+                  {t('config.resetConfirm')}
                 </button>
-              )}
-            </div>
-          </section>
-        )}
-
-        {tab === 'som' && (
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>{t('sound.title')}</h2>
-            <p className={styles.sectionHint}>{t('sound.hint')}</p>
-            <div className={styles.sectionBody}>
-              <button
-                className={styles.option}
-                role="switch"
-                aria-checked={soundOn}
-                onClick={toggleSound}
-              >
-                <span>{t('sound.enabled')}</span>
-                <span
-                  className={`${styles.switch} ${soundOn ? styles.switchOn : ''}`}
-                  aria-hidden="true"
+                <button
+                  className="btn-secondary"
+                  onClick={() => setConfirmReset(false)}
                 >
-                  <span className={styles.switchThumb} />
-                </span>
-              </button>
-              <div className={styles.volumeRow}>
-                <div className={styles.sliderShell}>
-                  {/* Canaleta (baixo relevo) e preenchimento (alto relevo) */}
-                  <div className={styles.trackGroove} aria-hidden="true" />
-                  <div
-                    className={styles.trackFill}
-                    style={{ width: `${Math.round(volume * 100)}%` }}
-                    aria-hidden="true"
-                  />
-                  <input
-                    type="range"
-                    className={styles.slider}
-                    min={0}
-                    max={100}
-                    value={Math.round(volume * 100)}
-                    onChange={(e) => changeVolume(Number(e.target.value) / 100)}
-                    onPointerUp={() => playPress()}
-                    aria-label={t('sound.volumeAria')}
-                  />
-                </div>
-                <span className={styles.volumeValue}>
-                  {Math.round(volume * 100)}%
-                </span>
+                  {t('saves.cancel')}
+                </button>
               </div>
             </div>
-          </section>
-        )}
-
-        {tab === 'temas' && (
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>{t('themes.title')}</h2>
-            <p className={styles.sectionHint}>{t('themes.hint')}</p>
-
-            <span className={styles.subLabel}>{t('themes.active')}</span>
-            {(() => {
-              const active =
-                THEMES.find((th) => th.id === videoPrefs.theme) ?? THEMES[0];
-              return <ThemeCard theme={active} active />;
-            })()}
-
-            <span className={styles.subLabel}>{t('themes.available')}</span>
-            <div className={styles.themeGrid}>
-              {THEMES.filter((th) => th.id !== videoPrefs.theme).map((theme) => (
-                <ThemeCard
-                  key={theme.id}
-                  theme={theme}
-                  onSelect={() => setVideoPref('theme', theme.id)}
-                />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {tab === 'video' && (
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>{t('video.title')}</h2>
-            <p className={styles.sectionHint}>{t('video.hint')}</p>
-            <div className={styles.sectionBody}>
-              {/* Master switch: on when every card is on; toggles all at once */}
-              {(() => {
-                const allOn = VIDEO_TOGGLES.every((tg) => videoPrefs[tg.key]);
-                return (
-                  <button
-                    className={styles.option}
-                    role="switch"
-                    aria-checked={allOn}
-                    onClick={() =>
-                      VIDEO_TOGGLES.forEach((tg) =>
-                        setVideoPref(tg.key, !allOn)
-                      )
-                    }
-                  >
-                    <span>{t('video.all')}</span>
-                    <span
-                      className={`${styles.switch} ${allOn ? styles.switchOn : ''}`}
-                      aria-hidden="true"
-                    >
-                      <span className={styles.switchThumb} />
-                    </span>
-                  </button>
-                );
-              })()}
-              <span className={styles.subLabel}>{t('video.individual')}</span>
-              {VIDEO_TOGGLES.map((toggle) => {
-                const on = videoPrefs[toggle.key];
-                return (
-                  <button
-                    key={toggle.key}
-                    className={styles.option}
-                    role="switch"
-                    aria-checked={on}
-                    onClick={() => setVideoPref(toggle.key, !on)}
-                  >
-                    <span>{t(toggle.label)}</span>
-                    <span
-                      className={`${styles.switch} ${on ? styles.switchOn : ''}`}
-                      aria-hidden="true"
-                    >
-                      <span className={styles.switchThumb} />
-                    </span>
-                  </button>
-                );
-              })}
-
-              <span className={styles.subLabel}>{t('video.gameplay')}</span>
-              <button
-                className={styles.option}
-                role="switch"
-                aria-checked={videoPrefs.showCycleBars}
-                onClick={() =>
-                  setVideoPref('showCycleBars', !videoPrefs.showCycleBars)
-                }
-              >
-                <span>{t('video.cycleBars')}</span>
-                <span
-                  className={`${styles.switch} ${videoPrefs.showCycleBars ? styles.switchOn : ''}`}
-                  aria-hidden="true"
-                >
-                  <span className={styles.switchThumb} />
-                </span>
-              </button>
-            </div>
-          </section>
-        )}
-
-        {tab === 'idioma' && (
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>{t('lang.title')}</h2>
-            <p className={styles.sectionHint}>{t('lang.hint')}</p>
-            <div className={styles.sectionBody}>
-              {LOCALES.map((l) => {
-                const active = l.id === locale;
-                const Flag = LOCALE_FLAGS[l.id];
-                return (
-                  <button
-                    key={l.id}
-                    className={`${styles.option} ${active ? styles.active : ''}`}
-                    onClick={() => setLocale(l.id)}
-                  >
-                    <span className={styles.langName}>
-                      <Flag className={styles.flag} aria-hidden="true" />
-                      {l.name}
-                    </span>
-                    {active && (
-                      <span className={styles.badge}>{t('saves.active')}</span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-        )}
-
-      </div>
-
-      <div className={styles.footer}>
-        {confirmReset ? (
-          <div className={styles.resetConfirm}>
-            <span className={styles.resetWarn}>{t('config.resetWarn')}</span>
-            <div className={styles.resetActions}>
-              <button className="btn-primary" onClick={resetAllConfig}>
-                {t('config.resetConfirm')}
-              </button>
-              <button
-                className="btn-secondary"
-                onClick={() => setConfirmReset(false)}
-              >
-                {t('saves.cancel')}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button
-            className="btn-secondary"
-            onClick={() => setConfirmReset(true)}
-          >
-            {t('config.reset')}
-          </button>
-        )}
-      </div>
+          ) : (
+            <button className="btn-secondary" onClick={() => setConfirmReset(true)}>
+              {t('config.reset')}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
