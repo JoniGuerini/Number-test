@@ -173,8 +173,19 @@ export function loadSave<T>(key: string): T | null {
   }
 }
 
+/** Avisa uma vez só — o persist roda 1x/s; quota cheia/modo privado viraria
+    uma exceção (ou um log) por segundo. */
+let warnedWriteFail = false;
+
 export function writeSave(key: string, data: unknown): void {
-  localStorage.setItem(key, JSON.stringify(data));
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (err) {
+    if (!warnedWriteFail) {
+      warnedWriteFail = true;
+      console.warn('Não foi possível gravar o save (quota/modo privado?)', err);
+    }
+  }
 }
 
 export function clearSave(key: string): void {

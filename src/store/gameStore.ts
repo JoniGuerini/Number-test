@@ -143,9 +143,25 @@ interface GameStore extends LoadedGame {
   exchangeMandate: (lineId: LineId) => boolean;
 }
 
+/** Persist pós-compra com folga (coalescido): o hold-repeat compra a cada
+    80ms — gravar o save inteiro a cada compra era ~12 serializações/s. No
+    máximo 1 gravação por janela; o persist lê o estado NA HORA de gravar,
+    então a última compra da rajada sempre entra. Durabilidade de fundo segue
+    com o intervalo de 1s + beforeunload do runtime. */
+const PERSIST_COALESCE_MS = 200;
+let persistTimer: ReturnType<typeof setTimeout> | null = null;
+
 export const useGameStore = create<GameStore>()((set, get) => {
   const saveKey = saveKeyFor('reino');
   const loaded = loadReino(saveKey);
+
+  const persistSoon = (): void => {
+    if (persistTimer !== null) return;
+    persistTimer = setTimeout(() => {
+      persistTimer = null;
+      get().persist();
+    }, PERSIST_COALESCE_MS);
+  };
 
   return {
     ...loaded,
@@ -245,7 +261,7 @@ export const useGameStore = create<GameStore>()((set, get) => {
           lines: { ...s.lines, [lineId]: result.line },
           mandate: result.mandate,
         });
-        get().persist();
+        persistSoon();
       }
       return success;
     },
@@ -255,7 +271,7 @@ export const useGameStore = create<GameStore>()((set, get) => {
       const result = tryBuyUpgrade(s.lines, s.upgrades, target, kind);
       if (!result) return false;
       set({ lines: result.lines as Lines, upgrades: result.upgrades });
-      get().persist();
+      persistSoon();
       return true;
     },
 
@@ -265,7 +281,7 @@ export const useGameStore = create<GameStore>()((set, get) => {
       const result = tryExchangeMandate(s.lines, s.mandateExchange, lineId, steps);
       if (!result) return false;
       set({ lines: result.lines as Lines, mandateExchange: result.exchange });
-      get().persist();
+      persistSoon();
       return true;
     },
   };
