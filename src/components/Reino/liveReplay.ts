@@ -100,20 +100,23 @@ export function liveWindow(snap: LiveSnap): { t: number; replaySteps: number } {
   return { t, replaySteps: Math.min(Math.floor(t), 256) };
 }
 
-/** Soma que o gerador `u` entregou desde o commit: passos inteiros
-    decorridos e, se o gerador é rápido (steady), também os ciclos
+/** Valor `from` + o que o gerador `u` entregou desde o commit: passos
+    inteiros decorridos e, se o gerador é rápido (steady), também os ciclos
     completados DENTRO do passo corrente — para o número girar no ritmo real
-    e não no teto de 0,25s do passo. Na fronteira do passo a conta fecha
-    exata com a do motor. */
-export function replayDelivered(
+    e não no teto de 0,25s do passo. Cada entrega é somada DIRETO ao valor
+    corrente, na mesma ordem do motor (adição de Decimal não é associativa
+    no último dígito — acumular num subtotal divergia por 1 ulp). Na
+    fronteira do passo a conta fecha exata, bit a bit, com a do motor. */
+export function replayValue(
   a: LiveSnap,
   u: number,
   replaySteps: number,
-  t: number
+  t: number,
+  from: Decimal
 ): Decimal {
-  let sum = new Decimal(0);
+  let value = from;
   const up = a.gens[u];
-  if (!up || up.amount.lte(0)) return sum;
+  if (!up || up.amount.lte(0)) return value;
 
   const n = a.needs[u];
   const v = a.speeds[u];
@@ -133,7 +136,7 @@ export function replayDelivered(
       ) {
         out = applyBonusOutput(out, a.fracs[u]);
       }
-      sum = sum.add(out);
+      value = value.add(out);
     }
   }
   if (a.steady[u]) {
@@ -150,8 +153,8 @@ export function replayDelivered(
       ) {
         out = applyBonusOutput(out, a.fracs[u]);
       }
-      sum = sum.add(out);
+      value = value.add(out);
     }
   }
-  return sum;
+  return value;
 }

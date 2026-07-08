@@ -1,0 +1,226 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`determinismo do motor > golden master: 6h de jogo em modo automático, bit a bit 1`] = `
+{
+  "lines": {
+    "comida": {
+      "base": "456687709852880.1",
+      "gens": [
+        {
+          "amount": "795468429394.2356",
+          "bought": 4,
+          "cycleStep": 0,
+          "unlockedAt": 0,
+        },
+        {
+          "amount": "2787078473.771681",
+          "bought": 40,
+          "cycleStep": 1.7777777777578874,
+          "unlockedAt": 4,
+        },
+        {
+          "amount": "20431434.20609749",
+          "bought": 44,
+          "cycleStep": 41.77777777791745,
+          "unlockedAt": 76,
+        },
+        {
+          "amount": "324152.0237382554",
+          "bought": 46,
+          "cycleStep": 194.6666666668857,
+          "unlockedAt": 317,
+        },
+        {
+          "amount": "10671.924006400006",
+          "bought": 49,
+          "cycleStep": 273.11111110994756,
+          "unlockedAt": 979.75,
+        },
+        {
+          "amount": "811.752",
+          "bought": 51,
+          "cycleStep": 1040.222222220588,
+          "unlockedAt": 2556.75,
+        },
+        {
+          "amount": "127.2",
+          "bought": 54,
+          "cycleStep": 104.88888889666426,
+          "unlockedAt": 5829,
+        },
+        {
+          "amount": "43",
+          "bought": 43,
+          "cycleStep": 5172.444444446868,
+          "unlockedAt": 12562,
+        },
+        {
+          "amount": "0",
+          "bought": 0,
+          "cycleStep": 0,
+          "unlockedAt": undefined,
+        },
+      ],
+      "mode": "auto",
+      "started": true,
+      "startedAt": 0,
+      "steps": 86400,
+      "totalProduced": "1.139882840327077e16",
+      "uptime": 21599,
+    },
+    "exploracao": {
+      "base": "8593605.45259616",
+      "gens": [
+        {
+          "amount": "397282.31228031917",
+          "bought": 52,
+          "cycleStep": 23.999999999978762,
+          "unlockedAt": 0,
+        },
+        {
+          "amount": "3074.6664",
+          "bought": 57,
+          "cycleStep": 55.55555555575479,
+          "unlockedAt": 482.5,
+        },
+        {
+          "amount": "67.68",
+          "bought": 60,
+          "cycleStep": 438.8888888877846,
+          "unlockedAt": 4500.25,
+        },
+        {
+          "amount": "5",
+          "bought": 5,
+          "cycleStep": 407.7777777784052,
+          "unlockedAt": 19627.25,
+        },
+        {
+          "amount": "0",
+          "bought": 0,
+          "cycleStep": 0,
+          "unlockedAt": undefined,
+        },
+      ],
+      "mode": "auto",
+      "started": true,
+      "startedAt": 0,
+      "steps": 86400,
+      "totalProduced": "158830800.9545809",
+      "uptime": 21519,
+    },
+    "militar": {
+      "base": "139213.06625992444",
+      "gens": [
+        {
+          "amount": "10860.648496000007",
+          "bought": 61,
+          "cycleStep": 61.333333333456466,
+          "unlockedAt": 0,
+        },
+        {
+          "amount": "127.35999999999999",
+          "bought": 64,
+          "cycleStep": 253.3333333328031,
+          "unlockedAt": 1584,
+        },
+        {
+          "amount": "11",
+          "bought": 11,
+          "cycleStep": 2237.1111111111786,
+          "unlockedAt": 15307.25,
+        },
+        {
+          "amount": "0",
+          "bought": 0,
+          "cycleStep": 0,
+          "unlockedAt": undefined,
+        },
+      ],
+      "mode": "auto",
+      "started": true,
+      "startedAt": 0,
+      "steps": 86400,
+      "totalProduced": "3899554.555854991",
+      "uptime": 21513,
+    },
+    "mineracao": {
+      "base": "4108254373.76587",
+      "gens": [
+        {
+          "amount": "62635858.75548136",
+          "bought": 15,
+          "cycleStep": 8.966383850727283,
+          "unlockedAt": 0,
+        },
+        {
+          "amount": "334021.66792552674",
+          "bought": 49,
+          "cycleStep": 46.222222222345394,
+          "unlockedAt": 68,
+        },
+        {
+          "amount": "5127.88996096",
+          "bought": 52,
+          "cycleStep": 244.44444444465893,
+          "unlockedAt": 1089,
+        },
+        {
+          "amount": "250.79040000000003",
+          "bought": 54,
+          "cycleStep": 614.4444444431853,
+          "unlockedAt": 4173.75,
+        },
+        {
+          "amount": "34",
+          "bought": 34,
+          "cycleStep": 952.2222222255285,
+          "unlockedAt": 12161.75,
+        },
+        {
+          "amount": "0",
+          "bought": 0,
+          "cycleStep": 0,
+          "unlockedAt": undefined,
+        },
+      ],
+      "mode": "auto",
+      "started": true,
+      "startedAt": 0,
+      "steps": 86400,
+      "totalProduced": "48364350893.919235",
+      "uptime": 21592,
+    },
+    "remedios": {
+      "base": "10123.254034888832",
+      "gens": [
+        {
+          "amount": "1987.1743999999997",
+          "bought": 68,
+          "cycleStep": 94.22222222240897,
+          "unlockedAt": 0,
+        },
+        {
+          "amount": "43",
+          "bought": 43,
+          "cycleStep": 478.2222222210508,
+          "unlockedAt": 4464,
+        },
+        {
+          "amount": "0",
+          "bought": 0,
+          "cycleStep": 0,
+          "unlockedAt": undefined,
+        },
+      ],
+      "mode": "auto",
+      "started": true,
+      "startedAt": 0,
+      "steps": 86400,
+      "totalProduced": "372025.60995263956",
+      "uptime": 21506,
+    },
+  },
+  "mandateSpent": 2360,
+}
+`;

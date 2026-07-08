@@ -17,7 +17,7 @@ import {
   productionFactor,
   type UpgradeState,
 } from '../../game/upgrades';
-import { buildLiveSnap, liveWindow, replayDelivered, type LiveSnap } from './liveReplay';
+import { buildLiveSnap, liveWindow, replayValue, type LiveSnap } from './liveReplay';
 
 interface LiveProps {
   className: string;
@@ -76,7 +76,7 @@ export function LiveBaseValue({
     const s = snapRef.current;
     if (!s) return null;
     const { t, replaySteps } = liveWindow(s.snap);
-    return fmtLive(s.base.add(replayDelivered(s.snap, 0, replaySteps, t)));
+    return fmtLive(replayValue(s.snap, 0, replaySteps, t, s.base));
   });
 
   return <span className={className} ref={elRef} />;
@@ -114,7 +114,7 @@ export function LiveBaseRate({
     const s = snapRef.current;
     if (!s) return null;
     const { t, replaySteps } = liveWindow(s.snap);
-    const amount = s.g0Amount.add(replayDelivered(s.snap, 1, replaySteps, t));
+    const amount = replayValue(s.snap, 1, replaySteps, t, s.g0Amount);
     return `+${fmtRate(amount.mul(s.unitRate))} / s`;
   });
 

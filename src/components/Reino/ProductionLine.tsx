@@ -31,7 +31,7 @@ import {
 } from '../../game/upgrades';
 import {
   buildLiveSnap,
-  replayDelivered,
+  replayValue,
   type LiveSnap,
 } from './liveReplay';
 
@@ -245,7 +245,7 @@ export default function ProductionLine({
         // entregas do de cima desde o commit. A coluna "produz" acompanha
         // (quantidade ao vivo × entrega por unidade).
         if (amtEl || prodEl) {
-          const amount = gen.amount.add(replayDelivered(a, i + 1, replaySteps, t));
+          const amount = replayValue(a, i + 1, replaySteps, t, gen.amount);
           if (amtEl) {
             const text = fmt(amount);
             if (amtEl.textContent !== text) amtEl.textContent = text;
@@ -261,7 +261,7 @@ export default function ProductionLine({
         // degraus de 0,25s a cada commit.
         if (fillEl && a.costs[i]) {
           if (!liveBase) {
-            liveBase = a.base.add(replayDelivered(a, 0, replaySteps, t));
+            liveBase = replayValue(a, 0, replaySteps, t, a.base);
           }
           const progress = Math.min(liveBase.div(a.costs[i]!).toNumber(), 1);
           fillEl.style.width = `${progress * 100}%`;
