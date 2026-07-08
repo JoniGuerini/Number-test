@@ -22,6 +22,7 @@ import { useAuth } from './lib/auth';
 import { useWakeLock } from './hooks/useWakeLock';
 import { useI18n } from './lib/locale';
 import { playPress, playRelease } from './lib/sound';
+import { startGameRuntime, useGameStore } from './store/gameStore';
 import {
   clearSave,
   createSlot,
@@ -67,31 +68,43 @@ export default function App() {
   // Gate de autenticação (mock): sem usuário, mostra o login antes do jogo.
   const user = useAuth();
 
+  // Runtime do jogo (tick da simulação + persistência) — vive na gameStore,
+  // fora do React; roda independente de qual página está visível.
+  useEffect(() => startGameRuntime(), []);
+
   // Feedback sonoro global: um som ao pressionar qualquer botão habilitado e
   // outro (variação mais leve) ao soltar — sensação de tecla física.
+  // CAPTURE, não bubble: o React processa o clique (compra etc.) de forma
+  // síncrona antes de o evento chegar ao document, e a compra bem-sucedida
+  // costuma DESABILITAR o botão (preço dobra > saldo) — no bubble, o clique
+  // que funcionou era avaliado contra o DOM pós-compra e ficava mudo.
   useEffect(() => {
-    let pressed = false;
+    // Um registro por pointerId: dois dedos no touch não engolem o soltar.
+    const down = new Set<number>();
 
     const onPointerDown = (e: PointerEvent) => {
       const btn = (e.target as HTMLElement | null)?.closest?.('button');
       if (btn && !btn.disabled && !btn.hasAttribute('data-nosound')) {
-        pressed = true;
+        down.add(e.pointerId);
         playPress();
       }
     };
     // O soltar toca mesmo se o dedo/cursor saiu do botão (como tecla real)
-    const onPointerUp = () => {
-      if (pressed) {
-        pressed = false;
-        playRelease();
-      }
+    const onPointerUp = (e: PointerEvent) => {
+      if (down.delete(e.pointerId)) playRelease();
+    };
+    // Gesto cancelado (virou scroll etc.): esquece o toque sem som de soltar
+    const onPointerCancel = (e: PointerEvent) => {
+      down.delete(e.pointerId);
     };
 
-    document.addEventListener('pointerdown', onPointerDown);
-    document.addEventListener('pointerup', onPointerUp);
+    document.addEventListener('pointerdown', onPointerDown, true);
+    document.addEventListener('pointerup', onPointerUp, true);
+    document.addEventListener('pointercancel', onPointerCancel, true);
     return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-      document.removeEventListener('pointerup', onPointerUp);
+      document.removeEventListener('pointerdown', onPointerDown, true);
+      document.removeEventListener('pointerup', onPointerUp, true);
+      document.removeEventListener('pointercancel', onPointerCancel, true);
     };
   }, []);
 
@@ -139,10 +152,12 @@ export default function App() {
   const [slots, setSlots] = useState(listSlots);
   const [activeSlotId, setActiveSlotId] = useState(getActiveSlotId);
 
-  // Zera um modo de um slot específico; se for o ativo, remonta o jogo.
+  // Zera um modo de um slot específico; se for o ativo, recarrega a store
+  // (senão o estado vivo regravaria o save apagado) e remonta o jogo.
   const resetGame = (slotId: string, game: GameTab) => {
     clearSave(saveKeyForSlot(slotId, game));
     if (slotId === activeSlotId) {
+      useGameStore.getState().hydrate();
       setResetKeys((keys) => ({ ...keys, [game]: keys[game] + 1 }));
     }
   };
@@ -167,7 +182,11 @@ export default function App() {
 
   const handleSwitchSlot = (id: string) => {
     if (id === activeSlotId) return;
+    // Grava o progresso no slot atual ANTES de trocar (a persistência
+    // periódica pode estar até 1s atrasada), depois carrega o slot novo.
+    useGameStore.getState().persist();
     switchSlot(id);
+    useGameStore.getState().hydrate();
     refreshSlots();
     setSlotEpoch((e) => e + 1);
   };

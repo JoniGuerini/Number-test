@@ -1,33 +1,23 @@
-/** Melhorias / pesquisas do Reino — UI conectada ao save e ao motor. */
+/** Melhorias / pesquisas do Reino — UI conectada à gameStore e ao motor. */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Decimal from 'break_eternity.js';
 import { fmt, fmtCost, fmtSecondsShort, fmtWhole } from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
-import { loadSave, saveKeyFor, writeSave } from '../../lib/storage';
+import { useGameStore } from '../../store/gameStore';
 import {
   costOf,
   cycleSecondsOf,
-  loadLine,
   prodPerCycleOf,
-  serializeLine,
-  type Line,
-  type LineSave,
 } from '../Reino/engine';
 import { ENABLED_LINES, lineDefOf, type LineId } from '../Reino/lines';
 import {
   exchangeCost,
   exchangeLevel,
-  loadMandateExchange,
-  serializeMandateExchange,
-  tryExchangeMandate,
   unlockThreshold,
-  type MandateExchangeSave,
-  type MandateExchangeState,
 } from '../Reino/mandateExchange';
 import {
   UPGRADE_KINDS,
-  REINO_SAVE_EVENT,
   BONUS_AMOUNT_BASE_PCT,
   CYCLE_DECAY,
   cycleFactorFor,
@@ -35,72 +25,15 @@ import {
   canAffordUpgrade,
   getLevel,
   purchaseCost,
-  loadUpgrades,
-  notifyReinoSave,
-  serializeUpgrades,
-  tryBuyUpgrade,
   unlockedGenIndices,
   type GenRef,
   type UpgradeKind,
-  type UpgradeState,
-  type UpgradeStateSave,
 } from '../Reino/upgrades';
 import HoldActionButton from '../HoldActionButton';
 import styles from './Upgrades.module.css';
 import pl from '../../styles/productionList.module.css';
 
-interface ReinoSave {
-  lines?: Partial<Record<LineId, LineSave>>;
-  upgrades?: UpgradeStateSave;
-  mandateSpent?: number;
-  mandate?: number;
-  mandateFrac?: number;
-  mandateExchange?: MandateExchangeSave;
-}
-
 type View = 'global' | 'mandate' | LineId;
-
-type Lines = Partial<Record<LineId, Line>>;
-
-function loadSnapshot(key: string): {
-  lines: Lines;
-  upgrades: UpgradeState;
-  mandateExchange: MandateExchangeState;
-  started: boolean;
-} {
-  const s = loadSave<ReinoSave>(key);
-  const lines: Lines = {};
-  for (const def of ENABLED_LINES) {
-    lines[def.id] = loadLine(s?.lines?.[def.id]);
-  }
-  const started = lines.comida?.started ?? false;
-  return {
-    lines,
-    upgrades: loadUpgrades(s?.upgrades),
-    mandateExchange: loadMandateExchange(s?.mandateExchange),
-    started,
-  };
-}
-
-function writeSnapshot(
-  key: string,
-  lines: Lines,
-  upgrades: UpgradeState,
-  mandateExchange: MandateExchangeState
-): void {
-  const prev = loadSave<ReinoSave>(key);
-  const out: Partial<Record<LineId, LineSave>> = {};
-  for (const def of ENABLED_LINES) {
-    const l = lines[def.id];
-    if (l) out[def.id] = serializeLine(l);
-  }
-  writeSave(key, {
-    lines: out,
-    upgrades: serializeUpgrades(upgrades),
-    mandateSpent: prev?.mandateSpent,
-    mandateExchange: serializeMandateExchange(mandateExchange),
-  });
-}
 
 interface UpgradesProps {
   onNavigate: (page: 'reino') => void;
@@ -108,24 +41,11 @@ interface UpgradesProps {
 
 export default function Upgrades({ onNavigate }: UpgradesProps) {
   const { t } = useI18n();
-  const [saveKey] = useState(() => saveKeyFor('reino'));
   const [view, setView] = useState<View>('global');
-  const [snapshot, setSnapshot] = useState(() => loadSnapshot(saveKey));
-
-  const refresh = useCallback(() => {
-    setSnapshot(loadSnapshot(saveKey));
-  }, [saveKey]);
-
-  useEffect(() => {
-    const id = setInterval(refresh, 1000);
-    window.addEventListener(REINO_SAVE_EVENT, refresh);
-    return () => {
-      clearInterval(id);
-      window.removeEventListener(REINO_SAVE_EVENT, refresh);
-    };
-  }, [refresh]);
-
-  const { lines, upgrades, mandateExchange, started } = snapshot;
+  const lines = useGameStore((s) => s.lines);
+  const upgrades = useGameStore((s) => s.upgrades);
+  const mandateExchange = useGameStore((s) => s.mandateExchange);
+  const started = lines.comida?.started ?? false;
 
   const viewLabel = (v: View): string => {
     if (v === 'global') return t('upg.scope.global');
@@ -205,39 +125,11 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
     });
   };
 
-  const buy = (target: 'global' | GenRef, kind: UpgradeKind): boolean => {
-    const snap = loadSnapshot(saveKey);
-    const result = tryBuyUpgrade(snap.lines, snap.upgrades, target, kind);
-    if (!result) return false;
-    writeSnapshot(saveKey, result.lines, result.upgrades, snap.mandateExchange);
-    notifyReinoSave();
-    setSnapshot({
-      ...snap,
-      lines: result.lines,
-      upgrades: result.upgrades,
-    });
-    return true;
-  };
+  const buy = (target: 'global' | GenRef, kind: UpgradeKind): boolean =>
+    useGameStore.getState().buyUpgrade(target, kind);
 
-  const exchange = (lineId: LineId): boolean => {
-    const snap = loadSnapshot(saveKey);
-    const steps = snap.lines.comida?.steps ?? 0;
-    const result = tryExchangeMandate(
-      snap.lines,
-      snap.mandateExchange,
-      lineId,
-      steps
-    );
-    if (!result) return false;
-    writeSnapshot(saveKey, result.lines, snap.upgrades, result.exchange);
-    notifyReinoSave();
-    setSnapshot({
-      ...snap,
-      lines: result.lines,
-      mandateExchange: result.exchange,
-    });
-    return true;
-  };
+  const exchange = (lineId: LineId): boolean =>
+    useGameStore.getState().exchangeMandate(lineId);
 
   const scopeHint =
     view === 'global'

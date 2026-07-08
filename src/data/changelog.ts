@@ -32,6 +32,31 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.25.0',
+    date: '07/07/2026',
+    time: '23:44',
+    title: 'True tempo',
+    summary: 'Fast cycles now truly cuts 10% of the current cycle time per level, the kingdom\u2019s state lives in a single store, and the numbers you watch tick at 60fps.',
+    major: [
+      'Fast cycles reworked: each level now cuts 10% of the CURRENT cycle time (2s \u2192 1.8s \u2192 1.62s\u2026, compounding) instead of adding a flat speed bonus whose marginal gain shrank to almost nothing at high levels. Late levels now match the doubling price \u2014 exponential cost, exponential benefit.',
+      'Cycle times have a hard floor of 0.1s. When a generator reaches it, its Fast cycles research locks at max level: the button reads "Max level" and the effect shows "cycle 0.1s (minimum)".',
+      'The kingdom\u2019s live state moved into a single game store (Zustand): Production, Research and Activity all read the same in-memory state, and the save file went back to being just persistence. The simulation also runs on its own now \u2014 it keeps advancing no matter which screen is open.',
+    ],
+    minor: [
+      'The base resource counter is now a live odometer: it ticks at 60fps with extra precision (13.145M instead of a frozen 13.1M), replaying the engine\u2019s exact deliveries between simulation steps.',
+      'The cycle countdown on generator cards updates at 60fps with two fixed decimals ("0.50s"), truncated like a stopwatch.',
+      'Research and Activity now refresh with every simulation step (4\u00d7/s) instead of once per second \u2014 buying research reflects in the kingdom instantly, with no event glue in between.',
+    ],
+    qol: [
+      'Sub-second durations show up to two decimals ("0.53s") wherever cycle times are displayed, so each Fast cycles level visibly moves the number.',
+    ],
+    fixes: [
+      'Cycle bars no longer freeze at 100% waiting for the delivery: the engine now accumulates fractional cycle progress and carries the remainder over, so bars flow continuously and deliveries land exactly when the bar fills.',
+      'Button sounds no longer vanish when clicking rapidly: the sound of a successful purchase was being evaluated AFTER React disabled the button it had just bought with (bubble-phase listener), so the click that worked stayed mute. The sound now fires on the capture phase, and multi-touch taps each track their own pointer.',
+      'Button sounds also survive audio-context suspensions (tab hidden, output device change): the context is awaited on resume and recreated if it died.',
+    ],
+  },
+  {
     version: 'v0.24.2',
     date: '07/07/2026',
     time: '15:49',

@@ -1,22 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { fmtTime } from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
-import { loadSave, saveKeyFor } from '../../lib/storage';
+import { useGameStore } from '../../store/gameStore';
 import { ENABLED_LINES, type LineId } from '../Reino/lines';
+import type { Line } from '../Reino/engine';
 // Reusa o esqueleto visual das listas de produção (scroll, fades)
 import gstyles from '../../styles/productionList.module.css';
 import styles from './Activity.module.css';
-
-/** Campos de uma linha do Reino que interessam ao log. */
-interface LineSaveLite {
-  gens: { bought: number; unlockedAt?: number }[];
-  uptime: number;
-}
-
-/** Save do Reino: uma linha por chave. */
-interface ReinoSaveLite {
-  lines?: Partial<Record<string, LineSaveLite>>;
-}
 
 interface Entry {
   gen: number;
@@ -44,22 +34,16 @@ function entriesFromTimes(times: number[]): Entry[] {
   });
 }
 
-/** Constrói as entradas do log a partir de um save (gens + uptime). */
-function buildEntries(save: LineSaveLite | null | undefined): {
+/** Constrói as entradas do log a partir do estado vivo da linha. */
+function buildEntries(line: Line | undefined): {
   entries: Entry[];
   uptime: number;
 } {
-  if (!save) return { entries: [], uptime: 0 };
-  const times = save.gens
+  if (!line) return { entries: [], uptime: 0 };
+  const times = line.gens
     .map((g) => g.unlockedAt)
     .filter((u): u is number => u !== undefined);
-  return { entries: entriesFromTimes(times), uptime: save.uptime };
-}
-
-/** Lê o log de UMA linha do Reino (o save tem uma sub-chave por linha). */
-function readLog(key: string, line: LineId): { entries: Entry[]; uptime: number } {
-  const save = loadSave<ReinoSaveLite>(key);
-  return buildEntries(save?.lines?.[line]);
+  return { entries: entriesFromTimes(times), uptime: line.uptime };
 }
 
 interface ActivityProps {
@@ -71,21 +55,11 @@ interface ActivityProps {
     cada tempo explicado. */
 export default function Activity({ onNavigate }: ActivityProps) {
   const { t } = useI18n();
-  // Chave do save do slot ativo (trocar de slot remonta o componente)
-  const [key] = useState(() => saveKeyFor('reino'));
   const [line, setLine] = useState<LineId>(ENABLED_LINES[0]?.id ?? 'comida');
-  const [log, setLog] = useState(() => readLog(key, line));
+  const lineState = useGameStore((s) => s.lines[line]);
   const listRef = useRef<HTMLDivElement>(null);
 
-  // O save é gravado 1x/s; reler no mesmo ritmo mantém o log vivo. Trocar de
-  // aba relê na hora (o efeito re-executa com a nova linha).
-  useEffect(() => {
-    setLog(readLog(key, line));
-    const id = setInterval(() => setLog(readLog(key, line)), 1000);
-    return () => clearInterval(id);
-  }, [key, line]);
-
-  const { entries, uptime } = log;
+  const { entries, uptime } = buildEntries(lineState);
 
   // Mesma animação de scroll da lista de produção do Reino (alvo por frame)
   const scrollAnimRef = useRef(0);

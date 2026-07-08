@@ -64,9 +64,6 @@ const genBaseCost = (index: number): Decimal =>
     tier do gerador 1), debitado por igual de CADA recurso base. */
 export const GLOBAL_BASE_COST = 1_000;
 
-/** Sincroniza Reino ↔ Melhorias após gravar o save. */
-export const REINO_SAVE_EVENT = 'number-test:reino-updated';
-
 export interface UpgradeState {
   global: Record<UpgradeKind, number>;
   /** `${lineId}:${index}:${kind}` → nível */
@@ -318,8 +315,4 @@ export function tryBuyUpgrade(
   };
   nextUpgrades.gen[genKey(target.lineId, target.index, kind)] = level + 1;
   return { lines: nextLines, upgrades: nextUpgrades };
-}
-
-export function notifyReinoSave(): void {
-  window.dispatchEvent(new Event(REINO_SAVE_EVENT));
 }
