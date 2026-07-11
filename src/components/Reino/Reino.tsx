@@ -170,6 +170,7 @@ export default function Reino() {
           anchorStartedAt={lines.comida?.startedAt}
           anchorSteps={anchorSteps}
           onBuy={(i) => useGameStore.getState().buyGen(def.id, i)}
+          onBuyMax={(i) => useGameStore.getState().buyMaxGen(def.id, i)}
           onToggleAuto={() => {
             const s = useGameStore.getState();
             s.setModeAll(

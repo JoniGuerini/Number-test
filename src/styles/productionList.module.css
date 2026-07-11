@@ -303,6 +303,13 @@
   font-variant-numeric: tabular-nums;
 }
 
+.purchaseActions {
+  width: 260px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 /* ===== Mobile ===== */
 @media (max-width: 640px) {
   /* Hub de pills entra no fluxo da página, centralizado e com quebra */
@@ -353,5 +360,8 @@
   .row button {
     width: 100%;
     padding: 12px 0;
+  }
+  .purchaseActions {
+    width: 100%;
   }
 }

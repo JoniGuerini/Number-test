@@ -5,11 +5,11 @@
     Bônus usa rolagem determinística (hash de passos) — sem Math.random().
 
     Preços: escada única por gerador, IGUAL nas 5 linhas (cada uma paga no seu
-    recurso base) — 200 no gerador 1, ~8K no 2, ~400K no 3… seguindo a mesma
-    curva dos desbloqueios da Comida ×200, pra melhoria nunca virar troco em
-    nenhuma profundidade. Cada nível DOBRA o preço. */
+    recurso base), seguindo o custo-base universal do gerador ×200. Cada nível
+    DOBRA o preço. */
 
 import Decimal from 'break_eternity.js';
+import { generatorBaseCost } from './costs';
 import { ENABLED_LINES, lineDefOf, type LineId } from './lines';
 import type { Line } from './engine';
 
@@ -37,28 +37,11 @@ export const BONUS_AMOUNT_PCT = 1;
 /** Cada nível DOBRA o preço da melhoria. */
 export const LEVEL_GROWTH = 2;
 
-/** Preço-base da melhoria = custo de desbloqueio do gerador na curva da
-    Comida × este fator. Assim a escada acompanha a profundidade (200, 8K,
-    400K, 25M…) e vale IGUAL nas 5 linhas — cada uma paga no seu recurso. */
+/** Preço-base da melhoria = custo-base universal do gerador × este fator. */
 export const UPGRADE_COST_MULTIPLIER = 200;
-const COMIDA_ECO = lineDefOf('comida').eco;
-
-/** Arredonda para 2 algarismos significativos — a curva crua dá valores como
-    1995×200 = 399.000, que viravam "399K" no botão; assim viram 400K, 25M… */
-const roundToSig2 = (d: Decimal): Decimal => {
-  const mag = Math.floor(d.log10().toNumber()) - 1;
-  if (mag <= 0) return d.round();
-  const unit = Decimal.pow(10, mag);
-  return d.div(unit).round().mul(unit);
-};
 
 const genBaseCost = (index: number): Decimal =>
-  roundToSig2(
-    Decimal.pow(
-      10,
-      COMIDA_ECO.costSlope * index + COMIDA_ECO.costCurve * index * index
-    ).mul(UPGRADE_COST_MULTIPLIER)
-  );
+  generatorBaseCost(index).mul(UPGRADE_COST_MULTIPLIER);
 
 /** Global afeta todos os geradores de todas as linhas — preço premium (5× o
     tier do gerador 1), debitado por igual de CADA recurso base. */

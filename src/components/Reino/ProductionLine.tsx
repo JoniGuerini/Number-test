@@ -17,6 +17,7 @@ import {
   SIM_STEP_S,
   cycleSecondsOf,
   genPurchaseCost,
+  maxPurchaseQuote,
   prodPerCycleOf,
   type Line,
   type LineEconomy,
@@ -47,6 +48,7 @@ interface ProductionLineProps {
   anchorStartedAt: number | undefined;
   anchorSteps: number;
   onBuy: (i: number) => boolean;
+  onBuyMax: (i: number) => boolean;
   /** Alterna manual/automático do SAVE inteiro (o modo é global às linhas). */
   onToggleAuto: () => void;
 }
@@ -54,7 +56,7 @@ interface ProductionLineProps {
 /** Colunas do card do gerador nomeado: nome largo + 5 stats + botão.
     Inline porque precisa vencer o grid padrão de `.row` de forma confiável
     entre navegadores (o mobile cai para flex-column e ignora isto). */
-const NAMED_ROW_COLS = '150px 80px 150px 130px 100px 100px 120px';
+const NAMED_ROW_COLS = '150px 80px 150px 130px 100px 100px 260px';
 
 
 export default function ProductionLine({
@@ -67,6 +69,7 @@ export default function ProductionLine({
   anchorStartedAt,
   anchorSteps,
   onBuy,
+  onBuyMax,
   onToggleAuto,
 }: ProductionLineProps) {
   const { t } = useI18n();
@@ -333,6 +336,12 @@ export default function ProductionLine({
               );
             }
 
+            const maxQuote = maxPurchaseQuote(
+              line.base,
+              cost,
+              Math.floor(mandate / mandateCost)
+            );
+
             return (
               <div
                 key={i}
@@ -403,13 +412,26 @@ export default function ProductionLine({
                   </div>
                 </div>
 
-                <HoldActionButton
-                  className="btn-primary"
-                  disabled={!canBuyGen(cost)}
-                  onAction={() => onBuy(i)}
-                >
-                  {fmtCost(cost)}
-                </HoldActionButton>
+                <div className={styles.purchaseActions}>
+                  <HoldActionButton
+                    className="btn-primary"
+                    disabled={!canBuyGen(cost)}
+                    onAction={() => onBuy(i)}
+                  >
+                    {fmtCost(cost)}
+                  </HoldActionButton>
+                  <button
+                    className="btn-primary"
+                    disabled={maxQuote.count === 0}
+                    onClick={() => onBuyMax(i)}
+                    title={t('gen.buyMaxTitle', { count: maxQuote.count })}
+                    aria-label={t('gen.buyMaxTitle', { count: maxQuote.count })}
+                  >
+                    {fmtCost(
+                      maxQuote.count > 0 ? maxQuote.totalCost : cost
+                    )}
+                  </button>
+                </div>
 
                 {showCycleBars && (
                   <div className={cyc.cycleTrack} aria-hidden="true">

@@ -36,6 +36,7 @@ export const pt = {
   'gen.produces': 'produz {target}',
   'gen.bonusChance': 'chance bônus',
   'gen.bonusAmount': 'volume bônus',
+  'gen.buyMaxTitle': 'Comprar o máximo disponível: {count} unidades',
   'cyc.cycleEvery': 'ciclo {time}',
   'cyc.perCycleSuffix': '/ ciclo',
 

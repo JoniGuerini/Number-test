@@ -16,6 +16,7 @@ import {
   SIM_STEP_S,
   advanceKingdom,
   buyGen as engineBuyGen,
+  buyMaxGen as engineBuyMaxGen,
   loadLine,
   serializeLine,
   type Line,
@@ -139,6 +140,7 @@ interface GameStore extends LoadedGame {
   setModeAll: (mode: Mode) => void;
   startAll: () => void;
   buyGen: (lineId: LineId, index: number) => boolean;
+  buyMaxGen: (lineId: LineId, index: number) => boolean;
   buyUpgrade: (target: 'global' | GenRef, kind: UpgradeKind) => boolean;
   exchangeMandate: (lineId: LineId) => boolean;
 }
@@ -264,6 +266,30 @@ export const useGameStore = create<GameStore>()((set, get) => {
         persistSoon();
       }
       return success;
+    },
+
+    buyMaxGen: (lineId, index) => {
+      const s = get();
+      const def = lineDefOf(lineId);
+      const cur = s.lines[lineId];
+      if (!cur) return false;
+      const result = engineBuyMaxGen(
+        cur,
+        index,
+        def.genCount,
+        def.eco,
+        lineId,
+        s.upgrades,
+        s.mandate,
+        s.mandateExchange.purchases
+      );
+      if (result.quote.count === 0) return false;
+      set({
+        lines: { ...s.lines, [lineId]: result.line },
+        mandate: result.mandate,
+      });
+      persistSoon();
+      return true;
     },
 
     buyUpgrade: (target, kind) => {

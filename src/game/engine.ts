@@ -7,6 +7,7 @@
     requisito para ranking justo bit a bit. */
 
 import Decimal from 'break_eternity.js';
+import { generatorBaseCost } from './costs';
 import type { LineId } from './lines';
 import { mandateBalance, mandateCostOf, spendMandate, type MandatePurchaseLog, type MandateState } from './mandate';
 import {
@@ -25,9 +26,9 @@ import {
 export { SIM_STEP_S } from './sim';
 import { SIM_STEP_S } from './sim';
 
-/** Parâmetros econômicos de UMA cadeia. Cada linha de produção tem os seus:
-    ritmo de ciclo, entrega E curva de preços-base — só o encarecimento por
-    compra repetida (BUY_GROWTH) é compartilhado por todas.
+/** Parâmetros econômicos de UMA cadeia. Cada linha de produção tem os seus
+    ritmos de ciclo e entrega; a escada de preços-base e o encarecimento por
+    compra repetida (BUY_GROWTH) são compartilhados por todas.
     A produção é DESACOPLADA do tempo e cresce de forma ARITMÉTICA (+prodStep
     por nível); o ciclo cresce de forma GEOMÉTRICA (×cycleGrowth por nível), então
     a taxa por segundo despenca nos geradores mais fundos (ciclos longos, entrega
@@ -41,20 +42,13 @@ export interface LineEconomy {
   prodBase: number;
   /** Incremento aritmético de entrega a cada gerador. */
   prodStep: number;
-  /** Inclinação do expoente da curva de custo: 10^(slope·i + curve·i²).
-      Em i=0 dá 10^0 = 1, então o 1º gerador de TODA linha custa 1 e a cadeia
-      sempre arranca com a base inicial. */
-  costSlope: number;
-  /** Termo quadrático do expoente — o quão mais íngreme a escada fica no fundo. */
-  costCurve: number;
 }
 
 /** Teto de passos por frame no catch-up. */
 export const MAX_STEPS_PER_FRAME = 2_000;
 /** Encarecimento por unidade repetida do MESMO gerador: +10% por compra,
     fixo e universal (todas as linhas, todos os geradores). Empilhar continua
-    viável em qualquer profundidade; o peso das linhas fundas está nos
-    preços-base (costSlope/costCurve de cada linha). */
+    viável em qualquer profundidade. */
 export const BUY_GROWTH = 1.1;
 const START_BASE = new Decimal(1);
 
@@ -114,15 +108,15 @@ export const prodPerCycleOf = (i: number, eco: LineEconomy): Decimal =>
 export const ratePerSecOf = (i: number, eco: LineEconomy): Decimal =>
   prodPerCycleOf(i, eco).div(cycleSecondsOf(i, eco));
 
-/** Custo do gerador N (índice i) na próxima compra: custo-base da linha ×
-    1.10^comprados. O round() arredonda só o CUSTO-BASE (deixa 1, 40, 2000…
-    limpos e corrige o pow do break_eternity); o +10% é aplicado por cima SEM
-    arredondar, então as repetições ficam fracionárias (ex.: 1.10, 1.21) e o
-    aumento por compra aparece de verdade, inclusive nas casas decimais. */
-export const costOf = (i: number, bought: number, eco: LineEconomy): Decimal =>
-  Decimal.pow(10, eco.costSlope * i + eco.costCurve * i * i)
-    .round()
-    .mul(Decimal.pow(BUY_GROWTH, bought));
+/** Custo do gerador N na próxima compra: escada universal × 1.10^comprados.
+    O parâmetro de economia permanece na API porque os chamadores também o
+    usam para ciclo/produção, mas o preço é deliberadamente igual nas 5 linhas. */
+export const costOf = (
+  i: number,
+  bought: number,
+  _eco: LineEconomy
+): Decimal =>
+  generatorBaseCost(i).mul(Decimal.pow(BUY_GROWTH, bought));
 
 /** Custo efetivo da próxima compra do gerador i (com desconto de pesquisas). */
 export const genPurchaseCost = (
@@ -133,6 +127,56 @@ export const genPurchaseCost = (
   upgrades: UpgradeState = emptyUpgrades()
 ): Decimal =>
   discountedGenCost(costOf(i, bought, eco), upgrades, lineId, i);
+
+export interface MaxPurchaseQuote {
+  count: number;
+  totalCost: Decimal;
+}
+
+/** Soma geométrica das próximas `count` compras (+10% entre cada unidade). */
+const repeatedPurchaseTotal = (firstCost: Decimal, count: number): Decimal =>
+  count <= 0
+    ? new Decimal(0)
+    : firstCost
+        .mul(Decimal.pow(BUY_GROWTH, count).sub(1))
+        .div(BUY_GROWTH - 1);
+
+/**
+ * Maior lote que cabe simultaneamente no saldo-base e no Mandato disponível.
+ * A busca binária evita loops proporcionais à quantidade comprada e continua
+ * eficiente mesmo com milhares de unidades disponíveis.
+ */
+export function maxPurchaseQuote(
+  balance: Decimal,
+  firstCost: Decimal,
+  maxUnits: number
+): MaxPurchaseQuote {
+  const limit = Math.max(0, Math.floor(maxUnits));
+  if (limit === 0 || firstCost.lte(0) || balance.lt(firstCost)) {
+    return { count: 0, totalCost: new Decimal(0) };
+  }
+
+  let low = 1;
+  let high = 1;
+  while (
+    high < limit &&
+    repeatedPurchaseTotal(firstCost, high).lte(balance)
+  ) {
+    low = high;
+    high = Math.min(high * 2, limit);
+  }
+
+  if (repeatedPurchaseTotal(firstCost, high).lte(balance)) {
+    return { count: high, totalCost: repeatedPurchaseTotal(firstCost, high) };
+  }
+
+  while (low + 1 < high) {
+    const mid = Math.floor((low + high) / 2);
+    if (repeatedPurchaseTotal(firstCost, mid).lte(balance)) low = mid;
+    else high = mid;
+  }
+  return { count: low, totalCost: repeatedPurchaseTotal(firstCost, low) };
+}
 
 export const newGen = (): Gen => ({ amount: new Decimal(0), bought: 0, cycleStep: 0 });
 
@@ -361,5 +405,52 @@ export function buyGen(
   return {
     line: { ...line, base: line.base.sub(cost), gens },
     mandate: nextM,
+  };
+}
+
+/** Compra manual do maior lote possível do gerador i. Pura e atômica. */
+export function buyMaxGen(
+  line: Line,
+  i: number,
+  genCap: number,
+  eco: LineEconomy,
+  lineId: LineId,
+  upgrades: UpgradeState = emptyUpgrades(),
+  mandate: MandateState = { spent: 0 },
+  mandatePurchases: readonly MandatePurchaseLog[] = []
+): { line: Line; mandate: MandateState; quote: MaxPurchaseQuote } {
+  const firstCost = genPurchaseCost(
+    i,
+    line.gens[i].bought,
+    eco,
+    lineId,
+    upgrades
+  );
+  const mCost = mandateCostOf(lineId);
+  const availableMandate = mandateBalance(
+    line.steps,
+    mandate.spent,
+    mandatePurchases
+  );
+  const quote = maxPurchaseQuote(
+    line.base,
+    firstCost,
+    Math.floor(availableMandate / mCost)
+  );
+  if (quote.count === 0) return { line, mandate, quote };
+
+  const gens = line.gens.map((x) => ({ ...x }));
+  const wasLocked = gens[i].bought === 0;
+  gens[i].bought += quote.count;
+  gens[i].amount = gens[i].amount.add(quote.count);
+  if (wasLocked) {
+    gens[i].unlockedAt = line.uptime;
+    if (i === gens.length - 1 && gens.length < genCap) gens.push(newGen());
+  }
+
+  return {
+    line: { ...line, base: line.base.sub(quote.totalCost), gens },
+    mandate: { spent: mandate.spent + quote.count * mCost },
+    quote,
   };
 }

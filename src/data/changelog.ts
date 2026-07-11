@@ -32,6 +32,23 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.26.0',
+    date: '10/07/2026',
+    time: '21:03',
+    title: 'A steeper climb',
+    summary: 'Generator prices now follow a clean universal ladder, and every unlocked generator can buy the largest affordable batch in one click.',
+    major: [
+      'Generator unlock prices now use the same deliberate ladder across all five production lines: 1, 10, 100, 1K, then one full thousand-group per tier — 1M, 1B, 1T, 1Qa and onward through all 20 generators.',
+    ],
+    qol: [
+      'Every unlocked generator now has a second purchase button that buys the maximum batch affordable with both the current base resource and available Mandate. The button shows the exact total that will be spent; when no batch is affordable, it shows the price of one unit.',
+    ],
+    minor: [
+      'Individual research prices continue to track their generator tier at 200× its new universal base cost, preserving the intended relationship between progression and upgrades.',
+      'The maximum-purchase calculation uses an atomic geometric quote and binary search, so even very large batches remain fast and deterministic.',
+    ],
+  },
+  {
     version: 'v0.25.1',
     date: '08/07/2026',
     time: '01:15',

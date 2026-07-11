@@ -92,7 +92,7 @@ console.log(
 for (const def of ENABLED_LINES) {
   const eco = def.eco;
   console.log(
-    `\n### Linha: ${def.id}  (ciclo ${eco.cycleBaseS}s ×${eco.cycleGrowth}, prod ${eco.prodBase} +${eco.prodStep}, custo ${eco.costSlope}/${eco.costCurve})`
+    `\n### Linha: ${def.id}  (ciclo ${eco.cycleBaseS}s ×${eco.cycleGrowth}, prod ${eco.prodBase} +${eco.prodStep}, custo universal)`
   );
   const costs: string[] = [];
   for (let i = 0; i < def.genCount; i++) {

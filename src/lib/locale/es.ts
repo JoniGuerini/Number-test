@@ -32,6 +32,7 @@ export const es: Dict = {
   'gen.produces': 'produce {target}',
   'gen.bonusChance': 'prob. de bono',
   'gen.bonusAmount': 'volumen bono',
+  'gen.buyMaxTitle': 'Comprar el máximo disponible: {count} unidades',
   'cyc.cycleEvery': 'ciclo {time}',
   'cyc.perCycleSuffix': '/ ciclo',
 
