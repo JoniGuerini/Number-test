@@ -310,6 +310,10 @@
   gap: 8px;
 }
 
+.buyMaxWrap {
+  min-width: 0;
+}
+
 /* ===== Mobile ===== */
 @media (max-width: 640px) {
   /* Hub de pills entra no fluxo da página, centralizado e com quebra */
@@ -362,6 +366,9 @@
     padding: 12px 0;
   }
   .purchaseActions {
+    width: 100%;
+  }
+  .buyMaxWrap {
     width: 100%;
   }
 }

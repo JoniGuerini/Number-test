@@ -92,9 +92,10 @@ export function fmtRate(n: Decimal | number): string {
   return fmt(d);
 }
 
-/** Odômetro "ao vivo" do recurso base: mais casas no corpo (13.145M) para o
+/** Odômetro "ao vivo" do recurso base: mais casas no corpo (13.14M) para o
     número girar visivelmente a cada entrega mesmo em magnitudes altas — com o
-    fmt curto (13.1M) os incrementos pequenos não mexiam em dígito nenhum. */
+    fmt curto (13.1M) os incrementos pequenos não mexiam em dígito nenhum.
+    No máximo 2 casas; a terceira é truncada, nunca arredondada. */
 export function fmtLive(n: Decimal | number): string {
   const d = n instanceof Decimal ? n : new Decimal(n);
   if (d.sign < 0) return '-' + fmtLive(d.neg());
@@ -105,7 +106,7 @@ export function fmtLive(n: Decimal | number): string {
 
   const tier = Math.floor(exp / 3);
   const scaled = d.div(Decimal.pow(10, tier * 3)).toNumber();
-  const body = truncTo(scaled, scaled >= 100 ? 1 : scaled >= 10 ? 2 : 3);
+  const body = truncTo(scaled, scaled >= 100 ? 1 : 2);
   const suffix =
     tier < SUFFIXES.length ? SUFFIXES[tier] : letterSuffix(tier - SUFFIXES.length);
   return body + suffix;

@@ -32,6 +32,21 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.26.1',
+    date: '13/08/2026',
+    time: '13:10',
+    title: 'A cleaner production screen',
+    summary:
+      'Placeholder sub-resources are gone, live counters stay at two decimals, and buying the max now shows an in-game tooltip.',
+    qol: [
+      'Production lines no longer show the row of 10 placeholder sub-resource cards. Each line is just its base resource and generators again.',
+      'Hovering the maximum-purchase button now shows an in-game tooltip instead of the browser\u2019s native title chrome.',
+    ],
+    fixes: [
+      'Live resource counters no longer flash a third decimal (3.305K). They cap at two places and truncate rather than round, so 3.305K reads 3.30K.',
+    ],
+  },
+  {
     version: 'v0.26.0',
     date: '10/07/2026',
     time: '21:03',

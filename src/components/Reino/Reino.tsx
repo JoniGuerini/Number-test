@@ -14,7 +14,6 @@ import { fmt, fmtTime } from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
 import { useGameStore } from '../../store/gameStore';
 import ProductionLine from './ProductionLine';
-import SubResourcePanel from './SubResourcePanel';
 import { LiveBaseRate, LiveBaseValue } from './LiveValues';
 import styles from './Reino.module.css';
 import pl from '../../styles/productionList.module.css';
@@ -158,9 +157,7 @@ export default function Reino() {
       </div>
 
       {def.enabled && line ? (
-        <>
-          <SubResourcePanel lineId={def.id} />
-          <ProductionLine
+        <ProductionLine
           line={line}
           lineId={def.id}
           eco={def.eco}
@@ -178,7 +175,6 @@ export default function Reino() {
             );
           }}
         />
-        </>
       ) : (
         <div className={styles.placeholder}>
           <span>{t('reino.soon')}</span>

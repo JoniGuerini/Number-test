@@ -184,7 +184,6 @@ export const pt = {
   'reino.soon': 'Em breve',
   'reino.catchup.title': 'Atualizando o reino',
   'reino.catchup.hint': 'Processando {time} de progresso offline…',
-  'reino.sub.section': 'Sub-recursos',
 
   // Modo Reino: linha de Comida (recurso base + 12 geradores nomeados)
   'reino.base.comida': 'Trigo',
@@ -209,17 +208,6 @@ export const pt = {
   'reino.gen.comida.19': 'Império',
   'reino.gen.comida.20': 'Dinastia',
 
-  'reino.sub.comida.farinha': 'Farinha',
-  'reino.sub.comida.pao': 'Pão',
-  'reino.sub.comida.cerveja': 'Cerveja',
-  'reino.sub.comida.queijo': 'Queijo',
-  'reino.sub.comida.sal': 'Sal',
-  'reino.sub.comida.mel': 'Mel',
-  'reino.sub.comida.vinho': 'Vinho',
-  'reino.sub.comida.oleo': 'Óleo',
-  'reino.sub.comida.especiarias': 'Especiarias',
-  'reino.sub.comida.banquete': 'Banquete',
-
   'reino.base.mineracao': 'Carvão',
   'reino.gen.mineracao.1': 'Mineiro',
   'reino.gen.mineracao.2': 'Escavador',
@@ -241,17 +229,6 @@ export const pt = {
   'reino.gen.mineracao.18': 'Reino do Ferro',
   'reino.gen.mineracao.19': 'Império Mineral',
   'reino.gen.mineracao.20': 'Trono de Ferro',
-
-  'reino.sub.mineracao.ferro': 'Ferro',
-  'reino.sub.mineracao.cobre': 'Cobre',
-  'reino.sub.mineracao.estanho': 'Estanho',
-  'reino.sub.mineracao.bronze': 'Bronze',
-  'reino.sub.mineracao.prata': 'Prata',
-  'reino.sub.mineracao.ouro': 'Ouro',
-  'reino.sub.mineracao.aco': 'Aço',
-  'reino.sub.mineracao.gemas': 'Gemas',
-  'reino.sub.mineracao.cristal': 'Cristal',
-  'reino.sub.mineracao.pedra_estrela': 'Pedra-estrela',
 
   'reino.base.exploracao': 'Mapas',
   'reino.gen.exploracao.1': 'Batedor',
@@ -275,17 +252,6 @@ export const pt = {
   'reino.gen.exploracao.19': 'Império Marítimo',
   'reino.gen.exploracao.20': 'Terra Incógnita',
 
-  'reino.sub.exploracao.trilhas': 'Trilhas',
-  'reino.sub.exploracao.atalhos': 'Atalhos',
-  'reino.sub.exploracao.marco': 'Marco',
-  'reino.sub.exploracao.ruinas': 'Ruínas',
-  'reino.sub.exploracao.cavernas': 'Cavernas',
-  'reino.sub.exploracao.artefatos': 'Artefatos',
-  'reino.sub.exploracao.reliquias': 'Relíquias',
-  'reino.sub.exploracao.tesouros': 'Tesouros',
-  'reino.sub.exploracao.segredos': 'Segredos',
-  'reino.sub.exploracao.incognita': 'Terra incógnita',
-
   'reino.base.militar': 'Tropas',
   'reino.gen.militar.1': 'Recruta',
   'reino.gen.militar.2': 'Milícia',
@@ -308,17 +274,6 @@ export const pt = {
   'reino.gen.militar.19': 'Ordem Militar',
   'reino.gen.militar.20': 'Cruzada',
 
-  'reino.sub.militar.lanceiros': 'Lanceiros',
-  'reino.sub.militar.arqueiros': 'Arqueiros',
-  'reino.sub.militar.cavalaria': 'Cavalaria',
-  'reino.sub.militar.escudeiros': 'Escudeiros',
-  'reino.sub.militar.besteiros': 'Besteiros',
-  'reino.sub.militar.cavaleiros': 'Cavaleiros',
-  'reino.sub.militar.veteranos': 'Veteranos',
-  'reino.sub.militar.elite': 'Elite',
-  'reino.sub.militar.campeoes': 'Campeões',
-  'reino.sub.militar.legiao': 'Legião',
-
   'reino.base.remedios': 'Ervas',
   'reino.gen.remedios.1': 'Herborista',
   'reino.gen.remedios.2': 'Curandeiro',
@@ -340,17 +295,6 @@ export const pt = {
   'reino.gen.remedios.18': 'Elixir da Vida',
   'reino.gen.remedios.19': 'Fonte da Juventude',
   'reino.gen.remedios.20': 'Imortalidade',
-
-  'reino.sub.remedios.cataplasma': 'Cataplasma',
-  'reino.sub.remedios.tintura': 'Tintura',
-  'reino.sub.remedios.elixir': 'Elixir',
-  'reino.sub.remedios.antidoto': 'Antídoto',
-  'reino.sub.remedios.balsamo': 'Bálsamo',
-  'reino.sub.remedios.unguento': 'Unguento',
-  'reino.sub.remedios.essencia': 'Essência',
-  'reino.sub.remedios.panaceia': 'Panaceia',
-  'reino.sub.remedios.quintessencia': 'Quintessência',
-  'reino.sub.remedios.vida_longa': 'Vida longa',
 
   // Chat (multiplayer — protótipo/mock)
   'chat.preview': 'Prévia',

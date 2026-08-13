@@ -1,0 +1,29 @@
+.anchor {
+  display: flex;
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.tip {
+  position: fixed;
+  z-index: 80;
+  pointer-events: none;
+  max-width: min(280px, calc(100vw - 16px));
+  padding: 8px 12px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--card-edge-lg);
+  border-radius: 4px;
+  font: 500 11px/1.4 var(--mono);
+  letter-spacing: 0.03em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tip[data-place='above'] {
+  transform: translate(-100%, calc(-100% - 8px));
+}
+
+.tip[data-place='below'] {
+  transform: translate(-100%, 8px);
+}

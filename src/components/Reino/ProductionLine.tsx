@@ -6,6 +6,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import HoldActionButton from '../HoldActionButton';
+import Tooltip from '../Tooltip/Tooltip';
 import Decimal from 'break_eternity.js';
 import { fmt, fmtCost, fmtCountdown, fmtSecondsShort } from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
@@ -420,17 +421,21 @@ export default function ProductionLine({
                   >
                     {fmtCost(cost)}
                   </HoldActionButton>
-                  <button
-                    className="btn-primary"
-                    disabled={maxQuote.count === 0}
-                    onClick={() => onBuyMax(i)}
-                    title={t('gen.buyMaxTitle', { count: maxQuote.count })}
-                    aria-label={t('gen.buyMaxTitle', { count: maxQuote.count })}
+                  <Tooltip
+                    className={styles.buyMaxWrap}
+                    text={t('gen.buyMaxTitle', { count: maxQuote.count })}
                   >
-                    {fmtCost(
-                      maxQuote.count > 0 ? maxQuote.totalCost : cost
-                    )}
-                  </button>
+                    <button
+                      className="btn-primary"
+                      disabled={maxQuote.count === 0}
+                      onClick={() => onBuyMax(i)}
+                      aria-label={t('gen.buyMaxTitle', { count: maxQuote.count })}
+                    >
+                      {fmtCost(
+                        maxQuote.count > 0 ? maxQuote.totalCost : cost
+                      )}
+                    </button>
+                  </Tooltip>
                 </div>
 
                 {showCycleBars && (
