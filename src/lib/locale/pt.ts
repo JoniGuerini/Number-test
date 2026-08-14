@@ -76,7 +76,7 @@ export const pt = {
   'upg.valG.production': 'produção ×{from} → ×{to}',
   'upg.valG.cost': 'preço ÷{from} → ÷{to}',
   'upg.buyCost': '{cost} {resource}',
-  'upg.buyCostAll': '{cost} (todos os recursos)',
+  'upg.buyMaxTitle': 'Comprar o máximo disponível: {count} níveis',
   'upg.empty': 'Inicie o Reino para desbloquear as pesquisas.',
   'upg.cta': 'Ir ao Reino',
   'upg.noGens': 'Nenhum gerador desbloqueado nesta linha.',
@@ -94,6 +94,7 @@ export const pt = {
   'upg.mandate.effect': '+{n}/s de mandato',
   'upg.mandate.unlock': 'Requer {n} em estoque',
   'upg.mandate.exchange': 'Trocar {cost} {resource}',
+  'upg.mandate.exchangeMaxTitle': 'Trocar o máximo disponível: {count} vezes',
 
   // Cardzinhos de telemetria do topo
   'fps.max': 'máx',

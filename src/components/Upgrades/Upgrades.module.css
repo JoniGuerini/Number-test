@@ -156,14 +156,30 @@
   margin: 0;
 }
 
+.buyActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: auto;
+  width: 100%;
+}
+
 .buy {
   width: 100%;
-  margin-top: auto;
+  min-width: 0;
   font-size: 11px;
   letter-spacing: 0.02em;
   white-space: normal;
   line-height: 1.35;
-  padding: 10px 8px;
+  padding: 10px 6px;
+}
+
+.buyMaxWrap {
+  min-width: 0;
+  width: 100%;
+}
+.buyMaxWrap :global(button) {
+  width: 100%;
 }
 
 .exchangeBtn {
@@ -204,6 +220,21 @@
 .stockAmount {
   font: 600 13px var(--mono);
   color: var(--brass-deep);
+  font-variant-numeric: tabular-nums;
+}
+
+.stockRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.stockRate {
+  font: 500 10px var(--mono);
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  white-space: nowrap;
 }
 
 .empty,

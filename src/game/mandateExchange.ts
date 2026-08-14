@@ -99,6 +99,32 @@ export const totalMandatePerS = (state: MandateExchangeState): number =>
 
 export type LinesMap = Partial<Record<LineId, Line>>;
 
+export interface MaxExchangeQuote {
+  count: number;
+  totalCost: Decimal;
+}
+
+/** Maior número de trocas cujo gasto total cabe no saldo. O custo ×100 por
+    nível, então o lote é curto — soma direta, sem busca. */
+export function maxExchangeQuote(
+  balance: Decimal,
+  firstCost: Decimal
+): MaxExchangeQuote {
+  if (firstCost.lte(0) || balance.lt(firstCost)) {
+    return { count: 0, totalCost: new Decimal(0) };
+  }
+  let count = 0;
+  let total = new Decimal(0);
+  let next = firstCost;
+  const LIMIT = 64;
+  while (count < LIMIT && total.add(next).lte(balance)) {
+    total = total.add(next);
+    count++;
+    next = next.mul(EXCHANGE_GROWTH);
+  }
+  return { count, totalCost: total };
+}
+
 export const canExchangeMandate = (
   lines: LinesMap,
   state: MandateExchangeState,
@@ -134,5 +160,36 @@ export function tryExchangeMandate(
   return {
     lines: nextLines,
     exchange: { levels: nextLevels, purchases: nextPurchases },
+  };
+}
+
+export function tryExchangeMaxMandate(
+  lines: LinesMap,
+  state: MandateExchangeState,
+  lineId: LineId,
+  globalSteps: number
+): { lines: LinesMap; exchange: MandateExchangeState; quote: MaxExchangeQuote } | null {
+  const line = lines[lineId];
+  if (!line?.started) return null;
+  const level = exchangeLevel(state, lineId);
+  const quote = maxExchangeQuote(line.base, exchangeCost(lineId, level));
+  if (quote.count === 0) return null;
+
+  const nextLines: LinesMap = {
+    ...lines,
+    [lineId]: { ...line, base: line.base.sub(quote.totalCost) },
+  };
+  const nextLevels = { ...state.levels, [lineId]: level + quote.count };
+  const nextPurchases = [
+    ...state.purchases,
+    ...Array.from({ length: quote.count }, () => ({
+      step: globalSteps,
+      lineId,
+    })),
+  ];
+  return {
+    lines: nextLines,
+    exchange: { levels: nextLevels, purchases: nextPurchases },
+    quote,
   };
 }

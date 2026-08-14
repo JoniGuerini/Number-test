@@ -32,6 +32,19 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.26.3',
+    date: '14/08/2026',
+    time: '13:28',
+    title: 'Buy the lot',
+    summary:
+      'Research and Mandate can now buy every affordable level in one click, and the resource cards show how fast each line is growing.',
+    qol: [
+      'Every research card (global and per-generator) now has a second button that spends as many levels as the current stock allows. Hovering it shows how many levels will be bought. Global buttons show only the cost number.',
+      'Mandate exchange cards gained the same max button: one click trades every exchange the stock can pay (cost \u00d7100 per level).',
+      'The resource cards on the Research screen now show the live +X/s rate beside the stock, matching the Kingdom.',
+    ],
+  },
+  {
     version: 'v0.26.2',
     date: '14/08/2026',
     time: '12:36',

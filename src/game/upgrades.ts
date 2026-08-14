@@ -224,6 +224,84 @@ export const unlockedGenIndices = (line: Line | undefined): number[] => {
 
 export type LinesMap = Partial<Record<LineId, Line>>;
 
+export interface MaxUpgradeQuote {
+  count: number;
+  totalCost: Decimal;
+}
+
+/** Potência inteira por multiplicação — `Decimal.pow(2, n)` usa ln/exp e
+    deixa resíduo (7.999… em vez de 8). */
+const decimalPowInt = (base: Decimal, exp: number): Decimal => {
+  let result = new Decimal(1);
+  let b = new Decimal(base);
+  let e = Math.max(0, Math.floor(exp));
+  while (e > 0) {
+    if (e % 2 === 1) result = result.mul(b);
+    b = b.mul(b);
+    e = Math.floor(e / 2);
+  }
+  return result;
+};
+
+/** Soma geométrica das próximas `count` pesquisas (preço ×2 por nível). */
+const repeatedUpgradeTotal = (firstCost: Decimal, count: number): Decimal => {
+  if (count <= 0) return new Decimal(0);
+  const growth = new Decimal(LEVEL_GROWTH);
+  return firstCost
+    .mul(decimalPowInt(growth, count).sub(1))
+    .div(growth.sub(1));
+};
+
+/** Saldo que limita a compra: o menor recurso das cinco linhas (global)
+    ou o recurso da linha do gerador. */
+export function upgradeBudget(
+  lines: LinesMap,
+  target: 'global' | GenRef
+): Decimal {
+  if (target === 'global') {
+    let min: Decimal | null = null;
+    for (const def of ENABLED_LINES) {
+      const line = lines[def.id];
+      if (!line?.started) return new Decimal(0);
+      min = min === null || line.base.lt(min) ? line.base : min;
+    }
+    return min ?? new Decimal(0);
+  }
+  const line = lines[target.lineId];
+  if (!line?.started || !isGenUnlocked(line, target.index)) {
+    return new Decimal(0);
+  }
+  return line.base;
+}
+
+/** Maior número de níveis cujo gasto total cabe no saldo. Busca binária
+    — o preço dobra a cada nível, então o lote explode rápido. */
+export function maxUpgradeQuote(
+  balance: Decimal,
+  firstCost: Decimal
+): MaxUpgradeQuote {
+  if (firstCost.lte(0) || balance.lt(firstCost)) {
+    return { count: 0, totalCost: new Decimal(0) };
+  }
+
+  const LIMIT = 1_000_000;
+  let low = 1;
+  let high = 1;
+  while (high < LIMIT && repeatedUpgradeTotal(firstCost, high).lte(balance)) {
+    low = high;
+    high = Math.min(high * 2, LIMIT);
+  }
+  if (repeatedUpgradeTotal(firstCost, high).lte(balance)) {
+    return { count: high, totalCost: repeatedUpgradeTotal(firstCost, high) };
+  }
+  while (low + 1 < high) {
+    const mid = Math.floor((low + high) / 2);
+    if (repeatedUpgradeTotal(firstCost, mid).lte(balance)) low = mid;
+    else high = mid;
+  }
+  return { count: low, totalCost: repeatedUpgradeTotal(firstCost, low) };
+}
+
 export function canAffordUpgrade(
   lines: LinesMap,
   target: 'global' | GenRef,
@@ -272,4 +350,40 @@ export function tryBuyUpgrade(
   };
   nextUpgrades.gen[genKey(target.lineId, target.index, kind)] = level + 1;
   return { lines: nextLines, upgrades: nextUpgrades };
+}
+
+export function tryBuyMaxUpgrade(
+  lines: LinesMap,
+  upgrades: UpgradeState,
+  target: 'global' | GenRef,
+  kind: UpgradeKind
+): { lines: LinesMap; upgrades: UpgradeState; quote: MaxUpgradeQuote } | null {
+  const level = getLevel(upgrades, target, kind);
+  const firstCost = purchaseCost(target, level);
+  const quote = maxUpgradeQuote(upgradeBudget(lines, target), firstCost);
+  if (quote.count === 0) return null;
+
+  const nextUpgrades: UpgradeState = {
+    global: { ...upgrades.global },
+    gen: { ...upgrades.gen },
+  };
+
+  if (target === 'global') {
+    const nextLines: LinesMap = { ...lines };
+    for (const def of ENABLED_LINES) {
+      const line = lines[def.id]!;
+      nextLines[def.id] = { ...line, base: line.base.sub(quote.totalCost) };
+    }
+    nextUpgrades.global[kind] = level + quote.count;
+    return { lines: nextLines, upgrades: nextUpgrades, quote };
+  }
+
+  const line = lines[target.lineId]!;
+  const nextLines: LinesMap = {
+    ...lines,
+    [target.lineId]: { ...line, base: line.base.sub(quote.totalCost) },
+  };
+  nextUpgrades.gen[genKey(target.lineId, target.index, kind)] =
+    level + quote.count;
+  return { lines: nextLines, upgrades: nextUpgrades, quote };
 }

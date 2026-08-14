@@ -35,6 +35,7 @@ import {
   loadMandateExchange,
   serializeMandateExchange,
   tryExchangeMandate,
+  tryExchangeMaxMandate,
   type MandateExchangeSave,
   type MandateExchangeState,
 } from '../game/mandateExchange';
@@ -42,6 +43,7 @@ import {
   loadUpgrades,
   serializeUpgrades,
   tryBuyUpgrade,
+  tryBuyMaxUpgrade,
   type GenRef,
   type UpgradeKind,
   type UpgradeState,
@@ -142,7 +144,9 @@ interface GameStore extends LoadedGame {
   buyGen: (lineId: LineId, index: number) => boolean;
   buyMaxGen: (lineId: LineId, index: number) => boolean;
   buyUpgrade: (target: 'global' | GenRef, kind: UpgradeKind) => boolean;
+  buyMaxUpgrade: (target: 'global' | GenRef, kind: UpgradeKind) => boolean;
   exchangeMandate: (lineId: LineId) => boolean;
+  exchangeMaxMandate: (lineId: LineId) => boolean;
 }
 
 /** Persist pós-compra com folga (coalescido): o hold-repeat compra a cada
@@ -301,10 +305,34 @@ export const useGameStore = create<GameStore>()((set, get) => {
       return true;
     },
 
+    buyMaxUpgrade: (target, kind) => {
+      const s = get();
+      const result = tryBuyMaxUpgrade(s.lines, s.upgrades, target, kind);
+      if (!result) return false;
+      set({ lines: result.lines as Lines, upgrades: result.upgrades });
+      persistSoon();
+      return true;
+    },
+
     exchangeMandate: (lineId) => {
       const s = get();
       const steps = s.lines.comida?.steps ?? 0;
       const result = tryExchangeMandate(s.lines, s.mandateExchange, lineId, steps);
+      if (!result) return false;
+      set({ lines: result.lines as Lines, mandateExchange: result.exchange });
+      persistSoon();
+      return true;
+    },
+
+    exchangeMaxMandate: (lineId) => {
+      const s = get();
+      const steps = s.lines.comida?.steps ?? 0;
+      const result = tryExchangeMaxMandate(
+        s.lines,
+        s.mandateExchange,
+        lineId,
+        steps
+      );
       if (!result) return false;
       set({ lines: result.lines as Lines, mandateExchange: result.exchange });
       persistSoon();

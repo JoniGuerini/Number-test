@@ -70,7 +70,7 @@ export const en: Dict = {
   'upg.valG.production': 'output ×{from} → ×{to}',
   'upg.valG.cost': 'price ÷{from} → ÷{to}',
   'upg.buyCost': '{cost} {resource}',
-  'upg.buyCostAll': '{cost} (all resources)',
+  'upg.buyMaxTitle': 'Buy the maximum available: {count} levels',
   'upg.empty': 'Start the Kingdom to unlock research.',
   'upg.cta': 'Go to Kingdom',
   'upg.noGens': 'No generators unlocked on this line yet.',
@@ -88,6 +88,7 @@ export const en: Dict = {
   'upg.mandate.effect': '+{n}/s mandate',
   'upg.mandate.unlock': 'Requires {n} in stock',
   'upg.mandate.exchange': 'Trade {cost} {resource}',
+  'upg.mandate.exchangeMaxTitle': 'Trade the maximum available: {count} times',
 
   'fps.max': 'max',
   'fps.newVersion': 'New version pending',

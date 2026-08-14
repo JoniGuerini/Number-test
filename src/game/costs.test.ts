@@ -8,7 +8,12 @@ import {
   newLine,
 } from './engine';
 import { ENABLED_LINES, lineDefOf } from './lines';
-import { emptyUpgrades, purchaseCost } from './upgrades';
+import { emptyUpgrades, maxUpgradeQuote, purchaseCost, tryBuyMaxUpgrade } from './upgrades';
+import {
+  emptyMandateExchange,
+  maxExchangeQuote,
+  tryExchangeMaxMandate,
+} from './mandateExchange';
 
 const EXPECTED_EXPONENTS = [
   0, 1, 2, 3, 6, 9, 12, 15, 18, 21,
@@ -97,5 +102,80 @@ describe('compra máxima', () => {
       new Decimal(100).sub(result.quote.totalCost).toString()
     );
     expect(result.mandate.spent).toBe(3);
+  });
+});
+
+describe('compra máxima de melhorias', () => {
+  it('soma a série geométrica ×2 até caber no saldo', () => {
+    // Nível 0 custa 1000; 1000×(2^n−1) ≤ 7000 → n=3 (1000+2000+4000=7000).
+    const quote = maxUpgradeQuote(new Decimal(7000), new Decimal(1000));
+    expect(quote.count).toBe(3);
+    expect(quote.totalCost.toString()).toBe('7000');
+    expect(
+      maxUpgradeQuote(new Decimal(6999), new Decimal(1000)).count
+    ).toBe(2);
+  });
+
+  it('compra atomicamente nas cinco linhas (global) e no gerador', () => {
+    const lines: Partial<Record<string, ReturnType<typeof newLine>>> = {};
+    for (const def of ENABLED_LINES) {
+      const line = newLine();
+      line.started = true;
+      line.base = new Decimal(7000);
+      line.gens[0].bought = 1;
+      line.gens[0].amount = new Decimal(1);
+      lines[def.id] = line;
+    }
+
+    const global = tryBuyMaxUpgrade(
+      lines,
+      emptyUpgrades(),
+      'global',
+      'production'
+    );
+    expect(global?.quote.count).toBe(3);
+    expect(global?.upgrades.global.production).toBe(3);
+    for (const def of ENABLED_LINES) {
+      expect(global?.lines[def.id]?.base.toString()).toBe('0');
+    }
+
+    const gen = tryBuyMaxUpgrade(
+      { comida: { ...lines.comida!, base: new Decimal(7000) } },
+      emptyUpgrades(),
+      { lineId: 'comida', index: 0 },
+      'cycle'
+    );
+    // gerador 1: base 200 × (2^n−1) ≤ 7000 → n=5 (200+400+800+1600+3200=6200)
+    expect(gen?.quote.count).toBe(5);
+    expect(gen?.upgrades.gen['comida:0:cycle']).toBe(5);
+    expect(gen?.lines.comida?.base.toString()).toBe('800');
+  });
+});
+
+describe('troca máxima de mandato', () => {
+  it('soma 500 ×100^n até caber no saldo', () => {
+    // 500 + 50_000 = 50_500; a próxima (5M) não cabe em 55_500.
+    const quote = maxExchangeQuote(new Decimal(55_500), new Decimal(500));
+    expect(quote.count).toBe(2);
+    expect(quote.totalCost.toString()).toBe('50500');
+  });
+
+  it('troca atomicamente e registra cada compra no mesmo passo', () => {
+    const line = newLine();
+    line.started = true;
+    line.base = new Decimal(55_500);
+    const result = tryExchangeMaxMandate(
+      { comida: line },
+      emptyMandateExchange(),
+      'comida',
+      12
+    );
+    expect(result?.quote.count).toBe(2);
+    expect(result?.exchange.levels.comida).toBe(2);
+    expect(result?.exchange.purchases).toEqual([
+      { step: 12, lineId: 'comida' },
+      { step: 12, lineId: 'comida' },
+    ]);
+    expect(result?.lines.comida?.base.toString()).toBe('5000');
   });
 });

@@ -70,7 +70,7 @@ export const es: Dict = {
   'upg.valG.production': 'producción ×{from} → ×{to}',
   'upg.valG.cost': 'precio ÷{from} → ÷{to}',
   'upg.buyCost': '{cost} {resource}',
-  'upg.buyCostAll': '{cost} (todos los recursos)',
+  'upg.buyMaxTitle': 'Comprar el máximo disponible: {count} niveles',
   'upg.empty': 'Inicia el Reino para desbloquear las investigaciones.',
   'upg.cta': 'Ir al Reino',
   'upg.noGens': 'Ningún generador desbloqueado en esta línea.',
@@ -88,6 +88,7 @@ export const es: Dict = {
   'upg.mandate.effect': '+{n}/s de mandato',
   'upg.mandate.unlock': 'Requiere {n} en reserva',
   'upg.mandate.exchange': 'Intercambiar {cost} {resource}',
+  'upg.mandate.exchangeMaxTitle': 'Intercambiar el máximo disponible: {count} veces',
 
   'fps.max': 'máx',
   'fps.newVersion': 'Nueva versión pendiente',
