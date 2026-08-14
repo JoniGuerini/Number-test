@@ -21,7 +21,6 @@ import {
   BONUS_AMOUNT_BASE_PCT,
   CYCLE_DECAY,
   cycleFactorFor,
-  isCycleMaxed,
   canAffordUpgrade,
   getLevel,
   purchaseCost,
@@ -90,13 +89,10 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
 
     if (kind === 'cycle') {
       const baseS = cycleSecondsOf(index, eco);
-      const from = baseS / cycleFactorFor(g + gn, baseS);
-      if (isCycleMaxed(upgrades, lineId, index, baseS)) {
-        return t('upg.val.cycleMax', { from: fmtSecondsShort(from) });
-      }
+      const from = baseS / cycleFactorFor(g + gn);
       return t('upg.val.cycle', {
         from: fmtSecondsShort(from),
-        to: fmtSecondsShort(baseS / cycleFactorFor(g + gn + 1, baseS)),
+        to: fmtSecondsShort(baseS / cycleFactorFor(g + gn + 1)),
       });
     }
     if (kind === 'production') {
@@ -167,16 +163,8 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
         const gen = { lineId: view, index } satisfies GenRef;
         const level = getLevel(upgrades, gen, kind);
         const cost = purchaseCost(gen, level);
-        const maxed =
-          kind === 'cycle' &&
-          isCycleMaxed(
-            upgrades,
-            view,
-            index,
-            cycleSecondsOf(index, lineDefOf(view).eco)
-          );
-        const canAfford = !maxed && canAffordUpgrade(lines, gen, level);
-        return { kind, level, line: view, cost, canAfford, maxed };
+        const canAfford = canAffordUpgrade(lines, gen, level);
+        return { kind, level, line: view, cost, canAfford };
       }),
     }));
   }, [view, lines, upgrades]);
@@ -206,8 +194,7 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
     level: number,
     line: LineId | null,
     cost: Decimal,
-    canAfford: boolean,
-    maxed = false
+    canAfford: boolean
   ) => (
     <article key={kind} className={styles.card}>
       <h3 className={styles.cardTitle}>{t(`upg.${kind}.name` as TKey)}</h3>
@@ -222,14 +209,12 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
         disabled={!canAfford}
         onAction={() => buy(target, kind)}
       >
-        {maxed
-          ? t('upg.maxed')
-          : target === 'global'
-            ? t('upg.buyCostAll', { cost: fmt(cost) })
-            : t('upg.buyCost', {
-                cost: fmt(cost),
-                resource: t(`reino.base.${line}` as TKey),
-              })}
+        {target === 'global'
+          ? t('upg.buyCostAll', { cost: fmt(cost) })
+          : t('upg.buyCost', {
+              cost: fmt(cost),
+              resource: t(`reino.base.${line}` as TKey),
+            })}
       </HoldActionButton>
     </article>
   );
@@ -371,8 +356,8 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
                   {t(`reino.gen.${gen.lineId}.${gen.index + 1}` as TKey)}
                 </h2>
                 <div className={styles.cardRow}>
-                  {cards.map(({ kind, level, line, cost, canAfford, maxed }) =>
-                    renderCard(gen, kind, level, line, cost, canAfford, maxed)
+                  {cards.map(({ kind, level, line, cost, canAfford }) =>
+                    renderCard(gen, kind, level, line, cost, canAfford)
                   )}
                 </div>
               </section>

@@ -258,12 +258,7 @@ function stepProduction(w: WorkLine, s: number, upgrades: UpgradeState): void {
     const gen = w.gens[i];
     if (gen.amount.lte(0)) continue;
 
-    gen.cycleStep += cycleSpeedFactor(
-      upgrades,
-      w.id,
-      i,
-      cycleSecondsOf(i, w.eco)
-    );
+    gen.cycleStep += cycleSpeedFactor(upgrades, w.id, i);
     const need = cycleStepsOf(i, w.eco);
     if (gen.cycleStep >= need) {
       const cycles = Math.floor(gen.cycleStep / need);

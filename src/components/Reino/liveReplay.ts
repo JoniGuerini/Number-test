@@ -67,7 +67,7 @@ export function buildLiveSnap(
     gens: line.gens,
     needs: line.gens.map((_, i) => cycleStepsOf(i, eco)),
     speeds: line.gens.map((_, i) =>
-      cycleSpeedFactor(upgrades, lineId, i, cycleSecondsOf(i, eco))
+      cycleSpeedFactor(upgrades, lineId, i)
     ),
     steady: line.gens.map(
       (_, i) =>

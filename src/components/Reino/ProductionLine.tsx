@@ -343,6 +343,10 @@ export default function ProductionLine({
               Math.floor(mandate / mandateCost)
             );
 
+            const cycleS = cycleSecondsNeed(i);
+            // Abaixo disto o countdown só pisca — o rótulo fixo basta.
+            const hideCountdown = cycleS <= 0.1;
+
             return (
               <div
                 key={i}
@@ -381,17 +385,19 @@ export default function ProductionLine({
                   <div className={styles.stat}>
                     <span className={styles.statLabel}>
                       {t('cyc.cycleEvery', {
-                        time: fmtSecondsShort(cycleSecondsNeed(i)),
+                        time: fmtSecondsShort(cycleS),
                       })}
                     </span>
-                    {/* Texto escrito pelo rAF local (60fps) — sem conteúdo
-                        no JSX para o React nunca disputar o nó. */}
-                    <span
-                      className={styles.statValue}
-                      ref={(el) => {
-                        remRefs.current[i] = el;
-                      }}
-                    />
+                    {/* Ciclos ≤ 0.1s: o rótulo fixo basta, o countdown
+                        só piscava. */}
+                    {!hideCountdown && (
+                      <span
+                        className={styles.statValue}
+                        ref={(el) => {
+                          remRefs.current[i] = el;
+                        }}
+                      />
+                    )}
                   </div>
 
                   <div className={styles.stat}>

@@ -41,9 +41,8 @@ function startedLines(mode: 'manual' | 'auto'): Lines {
   return lines;
 }
 
-/** Melhorias com níveis variados — cobre ciclo composto no piso de 0,1s
-    (várias entregas por passo), produção, bônus (chance 50% dispara muito)
-    e desconto de preço. */
+/** Melhorias com níveis variados — cobre ciclo composto (várias entregas
+    por passo), produção, bônus (chance 50% dispara muito) e desconto. */
 function testUpgrades(): UpgradeState {
   return {
     global: { cycle: 1, production: 2, bonus: 3, bonusAmount: 1, cost: 1 },
@@ -140,7 +139,7 @@ describe('determinismo do motor', () => {
 describe('equivalência da réplica ao vivo (liveReplay)', () => {
   /** Linha só com o gerador 1 (nada o alimenta): a réplica do recurso base
       tem que ser EXATA em qualquer fronteira de passo — inclusive com o
-      ciclo no piso de 0,1s (2,5 ciclos por passo) e bônus frequente. */
+      ciclo rápido (várias entregas por passo) e bônus frequente. */
   it('recurso base: réplica == motor em toda fronteira de passo', () => {
     const def = lineDefOf('comida');
     const upgrades = testUpgrades();

@@ -32,6 +32,18 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.26.2',
+    date: '14/08/2026',
+    time: '12:36',
+    title: 'Uncapped fast cycles',
+    summary:
+      'Fast cycles no longer stops at 0.1s \u2014 it keeps compounding, like Yield.',
+    qol: [
+      'Fast cycles research is no longer capped: each level still cuts 10% of the current cycle time, with no floor and no \u201cMax level\u201d lock.',
+      'When a generator\u2019s cycle is 0.1s or faster, the countdown in that column hides and only the fixed cycle length remains.',
+    ],
+  },
+  {
     version: 'v0.26.1',
     date: '13/08/2026',
     time: '13:10',

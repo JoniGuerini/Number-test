@@ -1,6 +1,5 @@
 /** Melhorias / pesquisas do Reino. Ciclo: −10% do tempo ATUAL por nível
-    (composto ×0.9, piso 0,1s — no piso a melhoria do gerador trava no máximo).
-    Produção: +10% por nível (sem teto).
+    (composto ×0.9, sem piso). Produção: +10% por nível (sem teto).
     Bônus: chance +1%/nível; volume base 10% +1%/nível (global + gen acumulam).
     Bônus usa rolagem determinística (hash de passos) — sem Math.random().
 
@@ -10,7 +9,7 @@
 
 import Decimal from 'break_eternity.js';
 import { generatorBaseCost } from './costs';
-import { ENABLED_LINES, lineDefOf, type LineId } from './lines';
+import { ENABLED_LINES, type LineId } from './lines';
 import type { Line } from './engine';
 
 export type UpgradeKind =
@@ -111,42 +110,23 @@ export const getLevel = (
 
 export const totalEffectPct = (level: number): number => level * EFFECT_PCT;
 
-/** Piso do ciclo efetivo: por mais melhorias que acumulem, nenhum ciclo fica
-    mais rápido que isto. */
-export const MIN_CYCLE_S = 0.1;
-
 /** Cada nível de Ciclos rápidos corta 10% do tempo ATUAL: 2s → 1,8s → 1,62s…
-    (tempo × 0.9 por nível, composto). */
+    (tempo × 0.9 por nível, composto). Sem piso — igual ao Rendimento. */
 export const CYCLE_DECAY = 0.9;
 
 /** Fator de velocidade para `levels` níveis somados (global + gen):
-    (1/0.9)^níveis, limitado para o ciclo efetivo nunca cair abaixo de
-    MIN_CYCLE_S. */
-export const cycleFactorFor = (levels: number, baseSeconds: number): number =>
-  Math.min(Math.pow(1 / CYCLE_DECAY, levels), baseSeconds / MIN_CYCLE_S);
+    (1/0.9)^níveis. */
+export const cycleFactorFor = (levels: number): number =>
+  Math.pow(1 / CYCLE_DECAY, levels);
 
 export const cycleSpeedFactor = (
   upgrades: UpgradeState,
   lineId: LineId,
-  genIndex: number,
-  baseSeconds: number
+  genIndex: number
 ): number => {
   const g = getLevel(upgrades, 'global', 'cycle');
   const gn = getLevel(upgrades, { lineId, index: genIndex }, 'cycle');
-  return cycleFactorFor(g + gn, baseSeconds);
-};
-
-/** O ciclo do gerador já está no piso de 0,1s? Aí a melhoria de ciclo DESTE
-    gerador atinge o nível máximo e não pode mais ser comprada. */
-export const isCycleMaxed = (
-  upgrades: UpgradeState,
-  lineId: LineId,
-  genIndex: number,
-  baseSeconds: number
-): boolean => {
-  const g = getLevel(upgrades, 'global', 'cycle');
-  const gn = getLevel(upgrades, { lineId, index: genIndex }, 'cycle');
-  return Math.pow(1 / CYCLE_DECAY, g + gn) >= baseSeconds / MIN_CYCLE_S;
+  return cycleFactorFor(g + gn);
 };
 
 /** Duração de ciclo exibida — espelha o motor (que acumula cycleSpeedFactor
@@ -157,7 +137,7 @@ export const cycleSecondsWithUpgrades = (
   lineId: LineId,
   genIndex: number
 ): number =>
-  baseSeconds / cycleSpeedFactor(upgrades, lineId, genIndex, baseSeconds);
+  baseSeconds / cycleSpeedFactor(upgrades, lineId, genIndex);
 
 /** Produção: multiplica entrega por (1 + 10%·nível). */
 export const productionFactor = (
@@ -266,12 +246,6 @@ export function tryBuyUpgrade(
   target: 'global' | GenRef,
   kind: UpgradeKind
 ): { lines: LinesMap; upgrades: UpgradeState } | null {
-  if (kind === 'cycle' && target !== 'global') {
-    const baseS =
-      lineDefOf(target.lineId).eco.cycleBaseS *
-      Math.pow(lineDefOf(target.lineId).eco.cycleGrowth, target.index);
-    if (isCycleMaxed(upgrades, target.lineId, target.index, baseS)) return null;
-  }
   const level = getLevel(upgrades, target, kind);
   const cost = purchaseCost(target, level);
   if (!canAffordUpgrade(lines, target, level)) return null;
