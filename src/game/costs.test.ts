@@ -8,7 +8,7 @@ import {
   newLine,
 } from './engine';
 import { ENABLED_LINES, lineDefOf } from './lines';
-import { emptyUpgrades, maxUpgradeQuote, purchaseCost, tryBuyMaxUpgrade } from './upgrades';
+import { emptyUpgrades, maxUpgradeQuote, purchaseCost, tryBuyMaxUpgrade, tryBuyUpgrade } from './upgrades';
 import {
   emptyMandateExchange,
   maxExchangeQuote,
@@ -149,6 +149,37 @@ describe('compra máxima de melhorias', () => {
     expect(gen?.quote.count).toBe(5);
     expect(gen?.upgrades.gen['comida:0:cycle']).toBe(5);
     expect(gen?.lines.comida?.base.toString()).toBe('800');
+  });
+});
+
+describe('teto da chance bônus', () => {
+  it('recusa compra além de 100% (global) e corta o lote no restante', () => {
+    const lines: Partial<Record<string, ReturnType<typeof newLine>>> = {};
+    for (const def of ENABLED_LINES) {
+      const line = newLine();
+      line.started = true;
+      line.base = new Decimal('1e40');
+      line.gens[0].bought = 1;
+      line.gens[0].amount = new Decimal(1);
+      lines[def.id] = line;
+    }
+
+    const atCap = {
+      ...emptyUpgrades(),
+      global: { ...emptyUpgrades().global, bonus: 100 },
+    };
+    expect(tryBuyUpgrade(lines, atCap, 'global', 'bonus')).toBeNull();
+    expect(
+      tryBuyUpgrade(lines, atCap, { lineId: 'comida', index: 0 }, 'bonus')
+    ).toBeNull();
+
+    const nearCap = {
+      ...emptyUpgrades(),
+      global: { ...emptyUpgrades().global, bonus: 97 },
+    };
+    const lot = tryBuyMaxUpgrade(lines, nearCap, 'global', 'bonus');
+    expect(lot?.quote.count).toBe(3);
+    expect(lot?.upgrades.global.bonus).toBe(100);
   });
 });
 

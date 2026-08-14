@@ -1,6 +1,6 @@
 /** Melhorias / pesquisas do Reino — UI conectada à gameStore e ao motor. */
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, Fragment } from 'react';
 import Decimal from 'break_eternity.js';
 import { fmt, fmtCost, fmtSecondsShort, fmtWhole } from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
@@ -25,8 +25,10 @@ import {
   cycleFactorFor,
   canAffordUpgrade,
   getLevel,
+  isUpgradeMaxed,
   maxUpgradeQuote,
   purchaseCost,
+  remainingUpgradeLevels,
   unlockedGenIndices,
   upgradeBudget,
   type GenRef,
@@ -36,6 +38,7 @@ import {
 import HoldActionButton from '../HoldActionButton';
 import Tooltip from '../Tooltip/Tooltip';
 import { LiveBaseRate, LiveBaseValue } from '../Reino/LiveValues';
+import { VirtualItem, VirtualList } from '../VirtualList/VirtualList';
 import styles from './Upgrades.module.css';
 import pl from '../../styles/productionList.module.css';
 
@@ -80,8 +83,11 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
           from: (1 + g * 0.1).toFixed(1),
           to: (1 + (g + 1) * 0.1).toFixed(1),
         });
-      if (kind === 'bonus')
+      if (kind === 'bonus') {
+        if (isUpgradeMaxed(upgrades, target, 'bonus'))
+          return t('upg.val.bonusMax');
         return t('upg.val.bonus', { from: g, to: g + 1 });
+      }
       return t('upg.val.bonusAmount', {
         from: BONUS_AMOUNT_BASE_PCT + g,
         to: BONUS_AMOUNT_BASE_PCT + g + 1,
@@ -117,11 +123,14 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
         to: fmtCost(base.div(factor(gn + 1))),
       });
     }
-    if (kind === 'bonus')
+    if (kind === 'bonus') {
+      if (isUpgradeMaxed(upgrades, target, 'bonus'))
+        return t('upg.val.bonusMax');
       return t('upg.val.bonus', {
         from: Math.min(100, g + gn),
         to: Math.min(100, g + gn + 1),
       });
+    }
     return t('upg.val.bonusAmount', {
       from: BONUS_AMOUNT_BASE_PCT + g + gn,
       to: BONUS_AMOUNT_BASE_PCT + g + gn + 1,
@@ -161,8 +170,14 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
         const level = getLevel(upgrades, 'global', kind);
         const cost = purchaseCost('global', level);
         const canAfford = canAffordUpgrade(lines, 'global', level);
-        const maxQuote = maxUpgradeQuote(upgradeBudget(lines, 'global'), cost);
-        return { kind, level, cost, canAfford, maxQuote };
+        const remaining = remainingUpgradeLevels(upgrades, 'global', kind);
+        const maxQuote = maxUpgradeQuote(
+          upgradeBudget(lines, 'global'),
+          cost,
+          remaining ?? 1_000_000
+        );
+        const maxed = isUpgradeMaxed(upgrades, 'global', kind);
+        return { kind, level, cost, canAfford: !maxed && canAfford, maxQuote, maxed };
       }),
     [upgrades, lines]
   );
@@ -177,8 +192,22 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
         const level = getLevel(upgrades, gen, kind);
         const cost = purchaseCost(gen, level);
         const canAfford = canAffordUpgrade(lines, gen, level);
-        const maxQuote = maxUpgradeQuote(upgradeBudget(lines, gen), cost);
-        return { kind, level, line: view, cost, canAfford, maxQuote };
+        const remaining = remainingUpgradeLevels(upgrades, gen, kind);
+        const maxQuote = maxUpgradeQuote(
+          upgradeBudget(lines, gen),
+          cost,
+          remaining ?? 1_000_000
+        );
+        const maxed = isUpgradeMaxed(upgrades, gen, kind);
+        return {
+          kind,
+          level,
+          line: view,
+          cost,
+          canAfford: !maxed && canAfford,
+          maxQuote,
+          maxed,
+        };
       }),
     }));
   }, [view, lines, upgrades]);
@@ -210,7 +239,8 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
     line: LineId | null,
     cost: Decimal,
     canAfford: boolean,
-    maxQuote: MaxUpgradeQuote
+    maxQuote: MaxUpgradeQuote,
+    maxed: boolean
   ) => {
     const amount = fmt(maxQuote.count > 0 ? maxQuote.totalCost : cost);
     const maxLabel =
@@ -223,38 +253,46 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
     const maxTitle = t('upg.buyMaxTitle', { count: maxQuote.count });
 
     return (
-    <article key={kind} className={styles.card}>
+    <article className={styles.card}>
       <h3 className={styles.cardTitle}>{t(`upg.${kind}.name` as TKey)}</h3>
       <p className={styles.cardHint}>{t(`upg.${kind}.hint` as TKey)}</p>
       <div className={styles.cardMeta}>
         <span className={styles.metaLevel}>{t('upg.level', { n: level })}</span>
         <span className={styles.metaEffect}>{effectLabel(target, kind)}</span>
       </div>
-      <div className={styles.buyActions}>
-        <HoldActionButton
-          type="button"
-          className={`btn-primary ${styles.buy}`}
-          disabled={!canAfford}
-          onAction={() => buy(target, kind)}
-        >
-          {target === 'global'
-            ? fmt(cost)
-            : t('upg.buyCost', {
-                cost: fmt(cost),
-                resource: t(`reino.base.${line}` as TKey),
-              })}
-        </HoldActionButton>
-        <Tooltip className={styles.buyMaxWrap} text={maxTitle}>
-          <button
-            type="button"
-            className={`btn-primary ${styles.buy}`}
-            disabled={maxQuote.count === 0}
-            onClick={() => buyMax(target, kind)}
-            aria-label={maxTitle}
-          >
-            {maxLabel}
+      <div className={`${styles.buyActions} ${maxed ? styles.buyActionsMaxed : ''}`}>
+        {maxed ? (
+          <button type="button" className={`btn-primary ${styles.buy}`} disabled>
+            {t('upg.maxLevel')}
           </button>
-        </Tooltip>
+        ) : (
+          <>
+            <HoldActionButton
+              type="button"
+              className={`btn-primary ${styles.buy}`}
+              disabled={!canAfford}
+              onAction={() => buy(target, kind)}
+            >
+              {target === 'global'
+                ? fmt(cost)
+                : t('upg.buyCost', {
+                    cost: fmt(cost),
+                    resource: t(`reino.base.${line}` as TKey),
+                  })}
+            </HoldActionButton>
+            <Tooltip className={styles.buyMaxWrap} text={maxTitle}>
+              <button
+                type="button"
+                className={`btn-primary ${styles.buy}`}
+                disabled={maxQuote.count === 0}
+                onClick={() => buyMax(target, kind)}
+                aria-label={maxTitle}
+              >
+                {maxLabel}
+              </button>
+            </Tooltip>
+          </>
+        )}
       </div>
     </article>
     );
@@ -275,7 +313,7 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
     });
 
     return (
-    <article key={lineId} className={styles.card}>
+    <article className={styles.card}>
       <h3 className={styles.cardTitle}>{resource}</h3>
       <p className={styles.cardHint}>{t('upg.mandate.cardHint')}</p>
       <div className={styles.cardMeta}>
@@ -409,45 +447,98 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
             ? t('upg.section.mandate')
             : t('upg.section.upgrades')}
         </h2>
-        <div className={styles.list}>
+        <VirtualList className={styles.list}>
           {view === 'global' ? (
             <div className={styles.cardRow}>
-              {globalCards.map(({ kind, level, cost, canAfford, maxQuote }) =>
-                renderCard('global', kind, level, null, cost, canAfford, maxQuote)
+              {globalCards.map(
+                ({ kind, level, cost, canAfford, maxQuote, maxed }) => (
+                  <Fragment key={kind}>
+                    {renderCard(
+                      'global',
+                      kind,
+                      level,
+                      null,
+                      cost,
+                      canAfford,
+                      maxQuote,
+                      maxed
+                    )}
+                  </Fragment>
+                )
               )}
             </div>
           ) : view === 'mandate' ? (
             <div className={styles.cardRow}>
               {mandateCards.map(
-                ({ lineId, level, cost, unlock, progress, canAfford, maxQuote }) =>
-                  renderMandateCard(
-                    lineId,
-                    level,
-                    cost,
-                    unlock,
-                    progress,
-                    canAfford,
-                    maxQuote
-                  )
+                ({
+                  lineId,
+                  level,
+                  cost,
+                  unlock,
+                  progress,
+                  canAfford,
+                  maxQuote,
+                }) => (
+                  <Fragment key={lineId}>
+                    {renderMandateCard(
+                      lineId,
+                      level,
+                      cost,
+                      unlock,
+                      progress,
+                      canAfford,
+                      maxQuote
+                    )}
+                  </Fragment>
+                )
               )}
             </div>
           ) : genSections.length === 0 ? (
             <p className={styles.emptyLine}>{t('upg.noGens')}</p>
           ) : (
             genSections.map(({ gen, cards }) => (
-              <section key={gen.index} className={styles.genGroup}>
-                <h2 className={styles.genName}>
-                  {t(`reino.gen.${gen.lineId}.${gen.index + 1}` as TKey)}
-                </h2>
-                <div className={styles.cardRow}>
-                  {cards.map(({ kind, level, line, cost, canAfford, maxQuote }) =>
-                    renderCard(gen, kind, level, line, cost, canAfford, maxQuote)
-                  )}
-                </div>
-              </section>
+              <VirtualItem
+                key={gen.index}
+                estimateHeight={240}
+                className={styles.genGroup}
+              >
+                {() => (
+                  <>
+                    <h2 className={styles.genName}>
+                      {t(`reino.gen.${gen.lineId}.${gen.index + 1}` as TKey)}
+                    </h2>
+                    <div className={styles.cardRow}>
+                      {cards.map(
+                        ({
+                          kind,
+                          level,
+                          line,
+                          cost,
+                          canAfford,
+                          maxQuote,
+                          maxed,
+                        }) => (
+                          <Fragment key={kind}>
+                            {renderCard(
+                              gen,
+                              kind,
+                              level,
+                              line,
+                              cost,
+                              canAfford,
+                              maxQuote,
+                              maxed
+                            )}
+                          </Fragment>
+                        )
+                      )}
+                    </div>
+                  </>
+                )}
+              </VirtualItem>
             ))
           )}
-        </div>
+        </VirtualList>
       </section>
     </div>
   );

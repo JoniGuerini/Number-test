@@ -220,6 +220,7 @@ export const useGameStore = create<GameStore>()((set, get) => {
         // Preserva a identidade quando o gasto não mudou (evita re-render à toa)
         mandate:
           result.mandate.spent !== s.mandate.spent ? result.mandate : s.mandate,
+        upgrades: result.upgrades,
         catchUp:
           catchUp && remaining > 0
             ? { total: catchUp.total, done: catchUp.total - remaining }

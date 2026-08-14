@@ -114,6 +114,7 @@
 
 .card {
   min-width: 0;
+  height: 100%;
   background: var(--paper);
   border-radius: 6px;
   box-shadow: var(--card-edge);
@@ -162,6 +163,10 @@
   gap: 6px;
   margin-top: auto;
   width: 100%;
+}
+
+.buyActionsMaxed {
+  grid-template-columns: 1fr;
 }
 
 .buy {

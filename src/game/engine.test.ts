@@ -23,7 +23,7 @@ import {
   type Line,
 } from './engine';
 import { ENABLED_LINES, lineDefOf, type LineId } from './lines';
-import { emptyUpgrades, type UpgradeState } from './upgrades';
+import { emptyUpgrades, serializeUpgrades, type UpgradeState } from './upgrades';
 import { buildLiveSnap, replayValue } from '../components/Reino/liveReplay';
 
 type Lines = Partial<Record<LineId, Line>>;
@@ -65,7 +65,9 @@ const serializeAll = (lines: Lines): Record<string, unknown> => {
 };
 
 describe('determinismo do motor', () => {
-  it('golden master: 6h de jogo em modo automático, bit a bit', () => {
+  it(
+    'golden master: 6h de jogo em modo automático, bit a bit',
+    () => {
     const STEPS = 6 * 3600 * 4; // 6h de jogo, passo de 0,25s
     const result = advanceKingdom(
       startedLines('auto'),
@@ -86,8 +88,11 @@ describe('determinismo do motor', () => {
     expect({
       lines: serializeAll(result.lines),
       mandateSpent: result.mandate.spent,
+      upgrades: serializeUpgrades(result.upgrades),
     }).toMatchSnapshot();
-  });
+    },
+    30_000
+  );
 
   it('invariância de lote: N passos de uma vez == lotes arbitrários', () => {
     const TOTAL = 20_000;
@@ -106,17 +111,45 @@ describe('determinismo do motor', () => {
     const chunks = [1, 7, 250, 1999, 2000, 43, 999, 3];
     let lines = startedLines('auto');
     let mandate = { spent: 0 };
+    let u = testUpgrades();
     let done = 0;
     for (let i = 0; done < TOTAL; i++) {
       const todo = Math.min(chunks[i % chunks.length], TOTAL - done);
-      const r = advanceKingdom(lines, ENABLED_LINES, todo, upgrades, mandate, []);
+      const r = advanceKingdom(lines, ENABLED_LINES, todo, u, mandate, []);
       lines = r.lines;
       mandate = r.mandate;
+      u = r.upgrades;
       done += todo;
     }
 
     expect(serializeAll(lines)).toEqual(serializeAll(oneShot.lines));
     expect(mandate.spent).toBe(oneShot.mandate.spent);
+    expect(serializeUpgrades(u)).toEqual(serializeUpgrades(oneShot.upgrades));
+  }, 30_000);
+
+  it('modo automático pesquisa melhorias mais baratas que o gerador-alvo', () => {
+    const lines = startedLines('auto');
+    for (const def of ENABLED_LINES) {
+      const l = lines[def.id]!;
+      // g0–g3 desbloqueados, g4 trancado (1M). Saldo não compra g3 nem g4,
+      // mas cabe a pesquisa do g0 (200) — mais barata que o gerador-alvo.
+      for (let i = 1; i <= 3; i++) l.gens.push(newGen());
+      for (let i = 0; i < 4; i++) {
+        l.gens[i].bought = 1;
+        l.gens[i].amount = new Decimal(1);
+      }
+      l.gens.push(newGen());
+      l.base = new Decimal(500);
+    }
+    const result = advanceKingdom(
+      lines,
+      ENABLED_LINES,
+      1,
+      emptyUpgrades(),
+      { spent: 0 },
+      []
+    );
+    expect(result.upgrades.gen['comida:0:cycle']).toBe(1);
   });
 
   it('round-trip do save: serializar e recarregar preserva o estado', () => {

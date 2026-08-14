@@ -27,7 +27,7 @@ export const pt = {
   'mode.manual': 'Manual',
   'mode.auto': 'Automático',
   'mode.hintAuto':
-    'O jogo compra sozinho o gerador de maior nível que couber no saldo: desbloqueia o próximo ou empilha o mais alto já desbloqueado.',
+    'O jogo compra sozinho o gerador de maior nível que couber no saldo e pesquisa melhorias com o que sobrar.',
   'mode.hintManual': 'Você faz todas as compras manualmente.',
 
   // Linha de produção (geradores e ciclos do Reino)
@@ -71,12 +71,14 @@ export const pt = {
   'upg.val.production': '+{from} → +{to} / ciclo',
   'upg.val.cost': 'preço {from} → {to}',
   'upg.val.bonus': 'chance {from}% → {to}%',
+  'upg.val.bonusMax': 'chance 100%',
   'upg.val.bonusAmount': 'volume {from}% → {to}%',
   'upg.valG.cycle': 'velocidade ×{from} → ×{to}',
   'upg.valG.production': 'produção ×{from} → ×{to}',
   'upg.valG.cost': 'preço ÷{from} → ÷{to}',
   'upg.buyCost': '{cost} {resource}',
   'upg.buyMaxTitle': 'Comprar o máximo disponível: {count} níveis',
+  'upg.maxLevel': 'Nível máximo',
   'upg.empty': 'Inicie o Reino para desbloquear as pesquisas.',
   'upg.cta': 'Ir ao Reino',
   'upg.noGens': 'Nenhum gerador desbloqueado nesta linha.',
@@ -85,7 +87,7 @@ export const pt = {
   'upg.production.name': 'Rendimento',
   'upg.production.hint': 'Aumenta a produção em 10% por nível.',
   'upg.bonus.name': 'Chance bônus',
-  'upg.bonus.hint': 'Aumenta a chance de recurso bônus em 1% por nível.',
+  'upg.bonus.hint': 'Aumenta a chance de recurso bônus em 1% por nível, até 100%.',
   'upg.bonusAmount.name': 'Volume bônus',
   'upg.bonusAmount.hint': 'Recurso bônus começa em 10%; +1% por nível.',
   'upg.cost.name': 'Preço baixo',

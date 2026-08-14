@@ -1,6 +1,6 @@
 /** Melhorias / pesquisas do Reino. Ciclo: −10% do tempo ATUAL por nível
     (composto ×0.9, sem piso). Produção: +10% por nível (sem teto).
-    Bônus: chance +1%/nível; volume base 10% +1%/nível (global + gen acumulam).
+    Bônus: chance +1%/nível até 100% (global + gen); volume base 10% +1%/nível.
     Bônus usa rolagem determinística (hash de passos) — sem Math.random().
 
     Preços: escada única por gerador, IGUAL nas 5 linhas (cada uma paga no seu
@@ -35,6 +35,13 @@ export const BONUS_AMOUNT_BASE_PCT = 10;
 export const BONUS_AMOUNT_PCT = 1;
 /** Cada nível DOBRA o preço da melhoria. */
 export const LEVEL_GROWTH = 2;
+/** Teto da pesquisa automática por tipo e alvo (global ou gerador).
+    Sem isso o automático, na espera de mandato, empilha Ciclos rápidos
+    até a economia ir a Infinity. Compra manual continua sem teto
+    (exceto chance bônus em 100%). */
+export const AUTO_UPGRADE_LEVEL_CAP = 40;
+/** Chance bônus: +1% por nível, teto 100% (níveis além disso não fazem nada). */
+export const BONUS_CHANCE_CAP = 100;
 
 /** Preço-base da melhoria = custo-base universal do gerador × este fator. */
 export const UPGRADE_COST_MULTIPLIER = 200;
@@ -168,6 +175,58 @@ export const discountedGenCost = (
   genIndex: number
 ): Decimal => baseCost.div(costDiscountFactor(upgrades, lineId, genIndex));
 
+/** Níveis ainda compráveis desta pesquisa. `null` = sem teto. Chance bônus
+    para em 100% somando global + gerador. */
+export const remainingUpgradeLevels = (
+  upgrades: UpgradeState,
+  target: 'global' | GenRef,
+  kind: UpgradeKind
+): number | null => {
+  if (kind !== 'bonus') return null;
+  const cap =
+    target === 'global'
+      ? BONUS_CHANCE_CAP
+      : Math.max(0, BONUS_CHANCE_CAP - getLevel(upgrades, 'global', 'bonus'));
+  return Math.max(0, cap - getLevel(upgrades, target, kind));
+};
+
+export const isUpgradeMaxed = (
+  upgrades: UpgradeState,
+  target: 'global' | GenRef,
+  kind: UpgradeKind
+): boolean => remainingUpgradeLevels(upgrades, target, kind) === 0;
+
+/** Pesquisa mais barata ainda disponível (menor nível; empate na ordem de
+    UPGRADE_KINDS). Usado pelo modo automático. */
+export const pickCheapestUpgrade = (
+  upgrades: UpgradeState,
+  target: 'global' | GenRef,
+  maxLevel = Infinity
+): UpgradeKind | null => {
+  let best: UpgradeKind | null = null;
+  let bestLevel = Infinity;
+  for (const kind of UPGRADE_KINDS) {
+    if (isUpgradeMaxed(upgrades, target, kind)) continue;
+    const level = getLevel(upgrades, target, kind);
+    if (level >= maxLevel) continue;
+    if (level < bestLevel) {
+      bestLevel = level;
+      best = kind;
+    }
+  }
+  return best;
+};
+
+export const applyUpgradeLevel = (
+  upgrades: UpgradeState,
+  target: 'global' | GenRef,
+  kind: UpgradeKind,
+  level: number
+): void => {
+  if (target === 'global') upgrades.global[kind] = level;
+  else upgrades.gen[genKey(target.lineId, target.index, kind)] = level;
+};
+
 /** Chance de bônus 0…1 (cap em 1). +1% por nível (global + gen). */
 export const bonusChance = (
   upgrades: UpgradeState,
@@ -278,13 +337,14 @@ export function upgradeBudget(
     — o preço dobra a cada nível, então o lote explode rápido. */
 export function maxUpgradeQuote(
   balance: Decimal,
-  firstCost: Decimal
+  firstCost: Decimal,
+  maxCount = 1_000_000
 ): MaxUpgradeQuote {
-  if (firstCost.lte(0) || balance.lt(firstCost)) {
+  const LIMIT = Math.max(0, Math.floor(maxCount));
+  if (LIMIT <= 0 || firstCost.lte(0) || balance.lt(firstCost)) {
     return { count: 0, totalCost: new Decimal(0) };
   }
 
-  const LIMIT = 1_000_000;
   let low = 1;
   let high = 1;
   while (high < LIMIT && repeatedUpgradeTotal(firstCost, high).lte(balance)) {
@@ -324,6 +384,7 @@ export function tryBuyUpgrade(
   target: 'global' | GenRef,
   kind: UpgradeKind
 ): { lines: LinesMap; upgrades: UpgradeState } | null {
+  if (isUpgradeMaxed(upgrades, target, kind)) return null;
   const level = getLevel(upgrades, target, kind);
   const cost = purchaseCost(target, level);
   if (!canAffordUpgrade(lines, target, level)) return null;
@@ -358,9 +419,15 @@ export function tryBuyMaxUpgrade(
   target: 'global' | GenRef,
   kind: UpgradeKind
 ): { lines: LinesMap; upgrades: UpgradeState; quote: MaxUpgradeQuote } | null {
+  if (isUpgradeMaxed(upgrades, target, kind)) return null;
   const level = getLevel(upgrades, target, kind);
   const firstCost = purchaseCost(target, level);
-  const quote = maxUpgradeQuote(upgradeBudget(lines, target), firstCost);
+  const remaining = remainingUpgradeLevels(upgrades, target, kind);
+  const quote = maxUpgradeQuote(
+    upgradeBudget(lines, target),
+    firstCost,
+    remaining ?? 1_000_000
+  );
   if (quote.count === 0) return null;
 
   const nextUpgrades: UpgradeState = {

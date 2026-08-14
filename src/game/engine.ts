@@ -12,6 +12,8 @@ import type { LineId } from './lines';
 import { mandateBalance, mandateCostOf, spendMandate, type MandatePurchaseLog, type MandateState } from './mandate';
 import {
   applyBonusOutput,
+  applyUpgradeLevel,
+  AUTO_UPGRADE_LEVEL_CAP,
   bonusAmountFraction,
   bonusChance,
   bonusRoll,
@@ -19,7 +21,10 @@ import {
   cycleSpeedFactor,
   discountedGenCost,
   emptyUpgrades,
+  getLevel,
+  pickCheapestUpgrade,
   productionFactor,
+  purchaseCost,
   type UpgradeState,
 } from './upgrades';
 
@@ -315,6 +320,60 @@ function stepAutoBuy(
   return m;
 }
 
+/** Custo do gerador que o automático PREFERE neste passo (desbloquear o
+    próximo, ou empilhar o mais alto). A pesquisa só gasta se for mais
+    barata que isso — senão o saldo explode em ciclos e a economia vai a
+    Infinity. */
+function autoBuyPreferredCost(
+  w: WorkLine,
+  upgrades: UpgradeState
+): Decimal | null {
+  const last = w.gens.length - 1;
+  if (last < 0) return null;
+  return genPurchaseCost(last, w.gens[last].bought, w.eco, w.id, upgrades);
+}
+
+/** Pesquisa automática com o saldo que sobrou: no gerador mais alto
+    desbloqueado, a pesquisa de menor nível — só se custar menos que o
+    gerador que o automático está tentando comprar. */
+function stepAutoUpgradeLine(
+  w: WorkLine,
+  upgrades: UpgradeState,
+  genCost: Decimal
+): boolean {
+  for (let i = w.gens.length - 1; i >= 0; i--) {
+    if (w.gens[i].bought === 0) continue;
+    const target = { lineId: w.id, index: i };
+    const kind = pickCheapestUpgrade(upgrades, target, AUTO_UPGRADE_LEVEL_CAP);
+    if (!kind) continue;
+    const level = getLevel(upgrades, target, kind);
+    const cost = purchaseCost(target, level);
+    if (w.base.lt(cost) || cost.gte(genCost)) continue;
+    w.base = w.base.sub(cost);
+    applyUpgradeLevel(upgrades, target, kind, level + 1);
+    return true;
+  }
+  return false;
+}
+
+/** Uma pesquisa global por passo, se todas as linhas do reino estão no
+    lote e o preço for menor que o gerador preferido mais barato. */
+function stepAutoUpgradeGlobal(
+  work: WorkLine[],
+  upgrades: UpgradeState,
+  defCount: number,
+  minGenCost: Decimal | null
+): void {
+  if (work.length !== defCount || !minGenCost) return;
+  const kind = pickCheapestUpgrade(upgrades, 'global', AUTO_UPGRADE_LEVEL_CAP);
+  if (!kind) return;
+  const level = getLevel(upgrades, 'global', kind);
+  const cost = purchaseCost('global', level);
+  if (cost.gte(minGenCost) || work.some((w) => w.base.lt(cost))) return;
+  for (const w of work) w.base = w.base.sub(cost);
+  applyUpgradeLevel(upgrades, 'global', kind, level + 1);
+}
+
 /** Executa nSteps passos fixos em TODAS as linhas, step-major: a cada passo
     global, cada linha (em ordem fixa) produz e tenta o auto-buy. Assim o
     mandato — recurso COMPARTILHADO — é ganho e disputado passo a passo,
@@ -327,8 +386,12 @@ export function advanceKingdom(
   upgrades: UpgradeState = emptyUpgrades(),
   mandate: MandateState = { spent: 0 },
   mandatePurchases: readonly MandatePurchaseLog[] = []
-): { lines: Partial<Record<LineId, Line>>; mandate: MandateState } {
-  if (nSteps <= 0) return { lines, mandate };
+): {
+  lines: Partial<Record<LineId, Line>>;
+  mandate: MandateState;
+  upgrades: UpgradeState;
+} {
+  if (nSteps <= 0) return { lines, mandate, upgrades };
 
   const work: WorkLine[] = [];
   for (const d of defs) {
@@ -349,15 +412,28 @@ export function advanceKingdom(
     });
   }
   let m = mandate;
+  const anyAuto = work.some((w) => w.mode === 'auto');
+  let u = upgrades;
+  if (anyAuto) {
+    u = { global: { ...upgrades.global }, gen: { ...upgrades.gen } };
+  }
 
   for (let s = 0; s < nSteps; s++) {
+    let minGenCost: Decimal | null = null;
     for (const w of work) {
-      stepProduction(w, s, upgrades);
+      stepProduction(w, s, u);
       if (w.mode === 'auto') {
+        const genCost = autoBuyPreferredCost(w, u);
         // Mandato ganho até ESTE passo global — nunca o lote inteiro.
-        m = stepAutoBuy(w, w.startSteps + s + 1, upgrades, m, mandatePurchases);
+        m = stepAutoBuy(w, w.startSteps + s + 1, u, m, mandatePurchases);
+        if (genCost) {
+          stepAutoUpgradeLine(w, u, genCost);
+          minGenCost =
+            minGenCost === null || genCost.lt(minGenCost) ? genCost : minGenCost;
+        }
       }
     }
+    if (anyAuto) stepAutoUpgradeGlobal(work, u, defs.length, minGenCost);
   }
 
   const out: Partial<Record<LineId, Line>> = { ...lines };
@@ -371,7 +447,7 @@ export function advanceKingdom(
       steps: w.startSteps + nSteps,
     };
   }
-  return { lines: out, mandate: m };
+  return { lines: out, mandate: m, upgrades: u };
 }
 
 /** Compra manual de 1 unidade do gerador i (respeitando o teto). Pura. */

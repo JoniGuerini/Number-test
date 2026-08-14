@@ -36,6 +36,7 @@ import {
   replayValue,
   type LiveSnap,
 } from './liveReplay';
+import { VirtualItem, VirtualList } from '../VirtualList/VirtualList';
 
 interface ProductionLineProps {
   line: Line;
@@ -129,9 +130,16 @@ export default function ProductionLine({
   };
   useEffect(() => {
     updateEdges();
+    const el = listRef.current;
     window.addEventListener('resize', updateEdges);
-    return () => window.removeEventListener('resize', updateEdges);
-     
+    // A virtualização troca card ↔ fantasma sem evento de scroll; o RO
+    // mantém as setinhas honestas quando a altura do conteúdo muda.
+    const ro = el ? new ResizeObserver(updateEdges) : null;
+    if (el) ro!.observe(el);
+    return () => {
+      window.removeEventListener('resize', updateEdges);
+      ro?.disconnect();
+    };
   }, [genCount]);
 
   const isAuto = line.mode === 'auto';
@@ -306,163 +314,178 @@ export default function ProductionLine({
           </button>
         )}
 
-        <div className={styles.list} ref={listRef} onScroll={updateEdges}>
-          {line.gens.map((gen, i) => {
-            const cost = genPurchaseCost(i, gen.bought, eco, lineId, upgrades);
-            const target = i === 0 ? baseName : genName(i - 1);
+        <VirtualList className={styles.list} ref={listRef} onScroll={updateEdges}>
+          {line.gens.map((gen, i) => (
+            <VirtualItem
+              key={i}
+              estimateHeight={
+                gen.bought === 0 ? 52 : showCycleBars ? 84 : 68
+              }
+            >
+              {() => {
+                const cost = genPurchaseCost(
+                  i,
+                  gen.bought,
+                  eco,
+                  lineId,
+                  upgrades
+                );
+                const target = i === 0 ? baseName : genName(i - 1);
 
-            if (gen.bought === 0) {
-              const progress = Math.min(line.base.div(cost).toNumber(), 1);
-              const canUnlock = progress >= 1 && canBuyGen(cost);
-              return (
-                <HoldActionButton
-                  key={i}
-                  className={`btn-primary ${styles.progressBtn} ${styles.unlockBtn}`}
-                  disabled={!canUnlock}
-                  onAction={() => onBuy(i)}
-                >
-                  {/* width escrito pelo rAF local (60fps, base ao vivo) —
-                      sem style no JSX para o React nunca disputar o nó. */}
-                  <span
-                    className={styles.progressFill}
-                    ref={(el) => {
-                      fillRefs.current[i] = el;
-                    }}
-                    aria-hidden="true"
-                  />
-                  <span className={styles.progressLabel}>
-                    {genName(i)} · {fmtCost(cost)}
-                  </span>
-                </HoldActionButton>
-              );
-            }
-
-            const maxQuote = maxPurchaseQuote(
-              line.base,
-              cost,
-              Math.floor(mandate / mandateCost)
-            );
-
-            const cycleS = cycleSecondsNeed(i);
-            // Abaixo disto o countdown só pisca — o rótulo fixo basta.
-            const hideCountdown = cycleS <= 0.1;
-
-            return (
-              <div
-                key={i}
-                className={styles.row}
-                style={{ gridTemplateColumns: NAMED_ROW_COLS }}
-              >
-                <span className={rn.genName}>{genName(i)}</span>
-
-                <div className={styles.statsRow}>
-                  <div className={styles.stat}>
-                    <span className={styles.statLabel}>{t('gen.owns')}</span>
-                    {/* Texto escrito pelo rAF local (60fps) — sem conteúdo
-                        no JSX para o React nunca disputar o nó. */}
-                    <span
-                      className={styles.statValue}
-                      ref={(el) => {
-                        amtRefs.current[i] = el;
-                      }}
-                    />
-                  </div>
-
-                  <div className={styles.stat}>
-                    <span className={styles.statLabel}>
-                      {t('gen.produces', { target })}
-                    </span>
-                    {/* Texto escrito pelo rAF local (60fps) — sem conteúdo
-                        no JSX para o React nunca disputar o nó. */}
-                    <span
-                      className={styles.statValue}
-                      ref={(el) => {
-                        prodRefs.current[i] = el;
-                      }}
-                    />
-                  </div>
-
-                  <div className={styles.stat}>
-                    <span className={styles.statLabel}>
-                      {t('cyc.cycleEvery', {
-                        time: fmtSecondsShort(cycleS),
-                      })}
-                    </span>
-                    {/* Ciclos ≤ 0.1s: o rótulo fixo basta, o countdown
-                        só piscava. */}
-                    {!hideCountdown && (
+                if (gen.bought === 0) {
+                  const progress = Math.min(line.base.div(cost).toNumber(), 1);
+                  const canUnlock = progress >= 1 && canBuyGen(cost);
+                  return (
+                    <HoldActionButton
+                      className={`btn-primary ${styles.progressBtn} ${styles.unlockBtn}`}
+                      disabled={!canUnlock}
+                      onAction={() => onBuy(i)}
+                    >
+                      {/* width escrito pelo rAF local (60fps, base ao vivo) —
+                          sem style no JSX para o React nunca disputar o nó. */}
                       <span
-                        className={styles.statValue}
+                        className={styles.progressFill}
                         ref={(el) => {
-                          remRefs.current[i] = el;
+                          fillRefs.current[i] = el;
                         }}
+                        aria-hidden="true"
                       />
+                      <span className={styles.progressLabel}>
+                        {genName(i)} · {fmtCost(cost)}
+                      </span>
+                    </HoldActionButton>
+                  );
+                }
+
+                const maxQuote = maxPurchaseQuote(
+                  line.base,
+                  cost,
+                  Math.floor(mandate / mandateCost)
+                );
+
+                const cycleS = cycleSecondsNeed(i);
+                // Abaixo disto o countdown só pisca — o rótulo fixo basta.
+                const hideCountdown = cycleS <= 0.1;
+
+                return (
+                  <div
+                    className={styles.row}
+                    style={{ gridTemplateColumns: NAMED_ROW_COLS }}
+                  >
+                    <span className={rn.genName}>{genName(i)}</span>
+
+                    <div className={styles.statsRow}>
+                      <div className={styles.stat}>
+                        <span className={styles.statLabel}>{t('gen.owns')}</span>
+                        {/* Texto escrito pelo rAF local (60fps) — sem conteúdo
+                            no JSX para o React nunca disputar o nó. */}
+                        <span
+                          className={styles.statValue}
+                          ref={(el) => {
+                            amtRefs.current[i] = el;
+                          }}
+                        />
+                      </div>
+
+                      <div className={styles.stat}>
+                        <span className={styles.statLabel}>
+                          {t('gen.produces', { target })}
+                        </span>
+                        {/* Texto escrito pelo rAF local (60fps) — sem conteúdo
+                            no JSX para o React nunca disputar o nó. */}
+                        <span
+                          className={styles.statValue}
+                          ref={(el) => {
+                            prodRefs.current[i] = el;
+                          }}
+                        />
+                      </div>
+
+                      <div className={styles.stat}>
+                        <span className={styles.statLabel}>
+                          {t('cyc.cycleEvery', {
+                            time: fmtSecondsShort(cycleS),
+                          })}
+                        </span>
+                        {/* Ciclos ≤ 0.1s: o rótulo fixo basta, o countdown
+                            só piscava. */}
+                        {!hideCountdown && (
+                          <span
+                            className={styles.statValue}
+                            ref={(el) => {
+                              remRefs.current[i] = el;
+                            }}
+                          />
+                        )}
+                      </div>
+
+                      <div className={styles.stat}>
+                        <span className={styles.statLabel}>
+                          {t('gen.bonusChance')}
+                        </span>
+                        <span className={styles.statValue}>
+                          {Math.round(bonusChance(upgrades, lineId, i) * 100)}%
+                        </span>
+                      </div>
+
+                      <div className={styles.stat}>
+                        <span className={styles.statLabel}>
+                          {t('gen.bonusAmount')}
+                        </span>
+                        <span className={styles.statValue}>
+                          +{Math.round(bonusAmountFraction(upgrades, lineId, i) * 100)}%
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className={styles.purchaseActions}>
+                      <HoldActionButton
+                        className="btn-primary"
+                        disabled={!canBuyGen(cost)}
+                        onAction={() => onBuy(i)}
+                      >
+                        {fmtCost(cost)}
+                      </HoldActionButton>
+                      <Tooltip
+                        className={styles.buyMaxWrap}
+                        text={t('gen.buyMaxTitle', { count: maxQuote.count })}
+                      >
+                        <button
+                          className="btn-primary"
+                          disabled={maxQuote.count === 0}
+                          onClick={() => onBuyMax(i)}
+                          aria-label={t('gen.buyMaxTitle', {
+                            count: maxQuote.count,
+                          })}
+                        >
+                          {fmtCost(
+                            maxQuote.count > 0 ? maxQuote.totalCost : cost
+                          )}
+                        </button>
+                      </Tooltip>
+                    </div>
+
+                    {showCycleBars && (
+                      <div className={cyc.cycleTrack} aria-hidden="true">
+                        <div className={cyc.cycleGroove} />
+                        {/* transform do inner escrito pelo rAF local — sem
+                            style no JSX para o React nunca disputar o atributo. */}
+                        <div className={cyc.cycleFill}>
+                          <div
+                            className={cyc.cycleFillInner}
+                            ref={(el) => {
+                              barRefs.current[i] = el;
+                            }}
+                          />
+                        </div>
+                      </div>
                     )}
                   </div>
-
-                  <div className={styles.stat}>
-                    <span className={styles.statLabel}>
-                      {t('gen.bonusChance')}
-                    </span>
-                    <span className={styles.statValue}>
-                      {Math.round(bonusChance(upgrades, lineId, i) * 100)}%
-                    </span>
-                  </div>
-
-                  <div className={styles.stat}>
-                    <span className={styles.statLabel}>
-                      {t('gen.bonusAmount')}
-                    </span>
-                    <span className={styles.statValue}>
-                      +{Math.round(bonusAmountFraction(upgrades, lineId, i) * 100)}%
-                    </span>
-                  </div>
-                </div>
-
-                <div className={styles.purchaseActions}>
-                  <HoldActionButton
-                    className="btn-primary"
-                    disabled={!canBuyGen(cost)}
-                    onAction={() => onBuy(i)}
-                  >
-                    {fmtCost(cost)}
-                  </HoldActionButton>
-                  <Tooltip
-                    className={styles.buyMaxWrap}
-                    text={t('gen.buyMaxTitle', { count: maxQuote.count })}
-                  >
-                    <button
-                      className="btn-primary"
-                      disabled={maxQuote.count === 0}
-                      onClick={() => onBuyMax(i)}
-                      aria-label={t('gen.buyMaxTitle', { count: maxQuote.count })}
-                    >
-                      {fmtCost(
-                        maxQuote.count > 0 ? maxQuote.totalCost : cost
-                      )}
-                    </button>
-                  </Tooltip>
-                </div>
-
-                {showCycleBars && (
-                  <div className={cyc.cycleTrack} aria-hidden="true">
-                    <div className={cyc.cycleGroove} />
-                    {/* transform do inner escrito pelo rAF local — sem style
-                        no JSX para o React nunca disputar o atributo. */}
-                    <div className={cyc.cycleFill}>
-                      <div
-                        className={cyc.cycleFillInner}
-                        ref={(el) => {
-                          barRefs.current[i] = el;
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                );
+              }}
+            </VirtualItem>
+          ))}
+        </VirtualList>
 
         {edges.below && (
           <button

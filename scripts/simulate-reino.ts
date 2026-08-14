@@ -32,6 +32,7 @@ function unlockPace(def: LineDef): number[] {
 
   let lines: Partial<Record<LineId, Line>> = { [def.id]: fresh };
   let mandate = { spent: 0 };
+  let upgrades = emptyUpgrades();
   const total = Math.floor(HORIZON_S / SIM_STEP_S);
 
   for (let done = 0; done < total; done += CHUNK_STEPS) {
@@ -39,12 +40,13 @@ function unlockPace(def: LineDef): number[] {
       lines,
       [def],
       Math.min(CHUNK_STEPS, total - done),
-      emptyUpgrades(),
+      upgrades,
       mandate,
       []
     );
     lines = r.lines;
     mandate = r.mandate;
+    upgrades = r.upgrades;
     const l = lines[def.id]!;
     // Cadeia completa: os 20 desbloqueados — nada mais a medir.
     if (l.gens.length === def.genCount && l.gens[def.genCount - 1].bought > 0) {

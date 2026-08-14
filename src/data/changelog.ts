@@ -32,6 +32,19 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.26.4',
+    date: '14/08/2026',
+    time: '19:21',
+    title: 'Smarter auto and lighter lists',
+    summary:
+      'Automatic mode now researches upgrades, Bonus chance stops at 100%, and long generator/research lists only mount what is on screen.',
+    qol: [
+      'Automatic mode still buys the next generator first, then spends leftover stock on research cheaper than that generator \u2014 up to 40 levels per kind. Global research uses the same leftover rule.',
+      'Bonus chance research now stops at 100% (global + generator). The card reads Max level and cannot be bought past the cap.',
+      'Generator cards and per-generator research groups off-screen become same-height ghosts, so the React tree and live counters only run for what you can see.',
+    ],
+  },
+  {
     version: 'v0.26.3',
     date: '14/08/2026',
     time: '13:28',
