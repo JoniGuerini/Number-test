@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import Decimal from 'break_eternity.js';
+import { fmtWhole } from '../lib/format';
 import { generatorBaseCost, generatorCostExponent } from './costs';
 import {
   buyMaxGen,
@@ -11,6 +12,7 @@ import { ENABLED_LINES, lineDefOf } from './lines';
 import { emptyUpgrades, maxUpgradeQuote, purchaseCost, tryBuyMaxUpgrade, tryBuyUpgrade } from './upgrades';
 import {
   emptyMandateExchange,
+  exchangeCost,
   maxExchangeQuote,
   tryExchangeMaxMandate,
 } from './mandateExchange';
@@ -180,6 +182,17 @@ describe('teto da chance bônus', () => {
     const lot = tryBuyMaxUpgrade(lines, nearCap, 'global', 'bonus');
     expect(lot?.quote.count).toBe(3);
     expect(lot?.upgrades.global.bonus).toBe(100);
+  });
+});
+
+describe('custo de troca em Decimal', () => {
+  it('nível alto não vira Infinity de number', () => {
+    const cost = exchangeCost('comida', 192);
+    expect(cost.eq(0)).toBe(false);
+    expect(cost.eq(Infinity)).toBe(false);
+    // 500 × 100^192 = 5 × 10^386
+    expect(cost.log10().floor().toNumber()).toBe(386);
+    expect(fmtWhole(cost)).not.toBe('Infinity');
   });
 });
 

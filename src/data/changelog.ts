@@ -32,6 +32,17 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.26.5',
+    date: '15/08/2026',
+    time: '01:05',
+    title: 'Mandate exchange costs stay finite',
+    summary:
+      'Exchange costs at high levels use Decimal instead of overflowing to Infinity.',
+    fixes: [
+      'High-level mandate exchanges no longer show the word Infinity in the requirement and buttons.',
+    ],
+  },
+  {
     version: 'v0.26.4',
     date: '14/08/2026',
     time: '19:21',

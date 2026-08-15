@@ -14,8 +14,24 @@ import {
 export const EXCHANGE_BASE = 500;
 export const EXCHANGE_GROWTH = 100;
 
-const exchangeAmountAt = (level: number): number =>
-  Math.round(EXCHANGE_BASE * EXCHANGE_GROWTH ** level);
+/** Potência inteira por multiplicação — `100 ** level` em number vira
+    Infinity cedo (~nível 154); `Decimal.pow` usa ln/exp e deixa resíduo. */
+const decimalPowInt = (base: Decimal, exp: number): Decimal => {
+  let result = new Decimal(1);
+  let b = new Decimal(base);
+  let e = Math.max(0, Math.floor(exp));
+  while (e > 0) {
+    if (e % 2 === 1) result = result.mul(b);
+    b = b.mul(b);
+    e = Math.floor(e / 2);
+  }
+  return result;
+};
+
+const exchangeAmountAt = (level: number): Decimal =>
+  new Decimal(EXCHANGE_BASE).mul(
+    decimalPowInt(new Decimal(EXCHANGE_GROWTH), level)
+  );
 
 export interface MandatePurchase {
   step: number;
@@ -77,12 +93,12 @@ export const exchangeLevel = (
 ): number => state.levels[lineId] ?? 0;
 
 /** Estoque mínimo e custo da troca do nível `level` (mesmo valor). */
-export const unlockThreshold = (_lineId: LineId, level: number): number =>
+export const unlockThreshold = (_lineId: LineId, level: number): Decimal =>
   exchangeAmountAt(level);
 
 /** Recurso debitado na troca do nível `level`. */
 export const exchangeCost = (_lineId: LineId, level: number): Decimal =>
-  new Decimal(exchangeAmountAt(level));
+  exchangeAmountAt(level);
 
 export const bonusRateFromExchange = (
   state: MandateExchangeState

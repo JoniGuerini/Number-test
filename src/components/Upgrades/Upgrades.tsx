@@ -220,7 +220,7 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
         const unlock = unlockThreshold(def.id, level);
         const line = lines[def.id];
         const stock = line?.base;
-        const need = cost.gte(unlock) ? cost : new Decimal(unlock);
+        const need = cost.gte(unlock) ? cost : unlock;
         const progress =
           line?.started && stock
             ? Math.min(stock.div(need).toNumber(), 1)
@@ -302,7 +302,7 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
     lineId: LineId,
     level: number,
     cost: Decimal,
-    unlock: number,
+    unlock: Decimal,
     progress: number,
     canAfford: boolean,
     maxQuote: MaxExchangeQuote
