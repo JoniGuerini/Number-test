@@ -23,7 +23,12 @@ import {
   type Line,
 } from './engine';
 import { ENABLED_LINES, lineDefOf, type LineId } from './lines';
-import { emptyUpgrades, serializeUpgrades, type UpgradeState } from './upgrades';
+import {
+  AUTO_UPGRADE_LEVEL_CAP,
+  emptyUpgrades,
+  serializeUpgrades,
+  type UpgradeState,
+} from './upgrades';
 import { buildLiveSnap, replayValue } from '../components/Reino/liveReplay';
 
 type Lines = Partial<Record<LineId, Line>>;
@@ -127,29 +132,67 @@ describe('determinismo do motor', () => {
     expect(serializeUpgrades(u)).toEqual(serializeUpgrades(oneShot.upgrades));
   }, 30_000);
 
-  it('modo automático pesquisa melhorias mais baratas que o gerador-alvo', () => {
+  it('Preço baixo automático só no gerador mais alto da linha', () => {
     const lines = startedLines('auto');
+    const upgrades: UpgradeState = emptyUpgrades();
     for (const def of ENABLED_LINES) {
       const l = lines[def.id]!;
-      // g0–g3 desbloqueados, g4 trancado (1M). Saldo não compra g3 nem g4,
-      // mas cabe a pesquisa do g0 (200) — mais barata que o gerador-alvo.
+      // g0–g3 desbloqueados, g4 trancado (1M). No g3 as outras pesquisas
+      // já têm 1 nível — a mais barata é Preço baixo (200K).
       for (let i = 1; i <= 3; i++) l.gens.push(newGen());
       for (let i = 0; i < 4; i++) {
         l.gens[i].bought = 1;
         l.gens[i].amount = new Decimal(1);
       }
       l.gens.push(newGen());
-      l.base = new Decimal(500);
+      l.base = new Decimal(300_000);
+      for (const kind of ['cycle', 'production', 'bonus', 'bonusAmount'] as const) {
+        upgrades.gen[`${def.id}:3:${kind}`] = 1;
+      }
     }
     const result = advanceKingdom(
       lines,
       ENABLED_LINES,
       1,
-      emptyUpgrades(),
+      upgrades,
+      { spent: 0 },
+      []
+    );
+    expect(result.upgrades.gen['comida:3:cost']).toBe(1);
+    expect(result.upgrades.gen['comida:0:cost']).toBeUndefined();
+    expect(result.upgrades.gen['comida:1:cost']).toBeUndefined();
+    expect(result.upgrades.gen['comida:2:cost']).toBeUndefined();
+  });
+
+  it('Preço baixo automático não desce para geradores mais baixos', () => {
+    const lines = startedLines('auto');
+    const upgrades: UpgradeState = emptyUpgrades();
+    for (const def of ENABLED_LINES) {
+      const l = lines[def.id]!;
+      for (let i = 1; i <= 3; i++) l.gens.push(newGen());
+      for (let i = 0; i < 4; i++) {
+        l.gens[i].bought = 1;
+        l.gens[i].amount = new Decimal(1);
+      }
+      l.gens.push(newGen());
+      // g3 no teto automático: a pesquisa desce, mas Preço baixo não.
+      l.base = new Decimal(500);
+      for (const kind of ['cycle', 'production', 'bonus', 'bonusAmount', 'cost'] as const) {
+        upgrades.gen[`${def.id}:3:${kind}`] = AUTO_UPGRADE_LEVEL_CAP;
+      }
+    }
+    const result = advanceKingdom(
+      lines,
+      ENABLED_LINES,
+      1,
+      upgrades,
       { spent: 0 },
       []
     );
     expect(result.upgrades.gen['comida:0:cycle']).toBe(1);
+    expect(result.upgrades.gen['comida:0:cost']).toBeUndefined();
+    expect(result.upgrades.gen['comida:1:cost']).toBeUndefined();
+    expect(result.upgrades.gen['comida:2:cost']).toBeUndefined();
   });
 
   it('round-trip do save: serializar e recarregar preserva o estado', () => {

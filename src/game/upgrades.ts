@@ -201,11 +201,13 @@ export const isUpgradeMaxed = (
 export const pickCheapestUpgrade = (
   upgrades: UpgradeState,
   target: 'global' | GenRef,
-  maxLevel = Infinity
+  maxLevel = Infinity,
+  skip: readonly UpgradeKind[] = []
 ): UpgradeKind | null => {
   let best: UpgradeKind | null = null;
   let bestLevel = Infinity;
   for (const kind of UPGRADE_KINDS) {
+    if (skip.includes(kind)) continue;
     if (isUpgradeMaxed(upgrades, target, kind)) continue;
     const level = getLevel(upgrades, target, kind);
     if (level >= maxLevel) continue;

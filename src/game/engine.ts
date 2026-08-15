@@ -25,6 +25,7 @@ import {
   pickCheapestUpgrade,
   productionFactor,
   purchaseCost,
+  type UpgradeKind,
   type UpgradeState,
 } from './upgrades';
 
@@ -333,18 +334,34 @@ function autoBuyPreferredCost(
   return genPurchaseCost(last, w.gens[last].bought, w.eco, w.id, upgrades);
 }
 
-/** Pesquisa automática com o saldo que sobrou: no gerador mais alto
-    desbloqueado, a pesquisa de menor nível — só se custar menos que o
-    gerador que o automático está tentando comprar. */
+/** Pesquisa automática com o saldo que sobrou: começa no gerador mais alto
+    desbloqueado. Preço baixo só nesse gerador — nunca nos de baixo. As
+    outras pesquisas, se a do topo não couber, ainda podem descer. Só gasta
+    se custar menos que o gerador que o automático está tentando comprar. */
 function stepAutoUpgradeLine(
   w: WorkLine,
   upgrades: UpgradeState,
   genCost: Decimal
 ): boolean {
-  for (let i = w.gens.length - 1; i >= 0; i--) {
+  let highest = -1;
+  for (let k = w.gens.length - 1; k >= 0; k--) {
+    if (w.gens[k].bought > 0) {
+      highest = k;
+      break;
+    }
+  }
+  if (highest < 0) return false;
+
+  for (let i = highest; i >= 0; i--) {
     if (w.gens[i].bought === 0) continue;
     const target = { lineId: w.id, index: i };
-    const kind = pickCheapestUpgrade(upgrades, target, AUTO_UPGRADE_LEVEL_CAP);
+    const skip: readonly UpgradeKind[] = i === highest ? [] : ['cost'];
+    const kind = pickCheapestUpgrade(
+      upgrades,
+      target,
+      AUTO_UPGRADE_LEVEL_CAP,
+      skip
+    );
     if (!kind) continue;
     const level = getLevel(upgrades, target, kind);
     const cost = purchaseCost(target, level);

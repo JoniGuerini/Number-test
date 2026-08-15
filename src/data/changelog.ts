@@ -32,6 +32,17 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.26.6',
+    date: '15/08/2026',
+    time: '15:01',
+    title: 'Auto cheapens only the top generator',
+    summary:
+      'Automatic mode buys Lower prices only on the highest unlocked generator of each line.',
+    qol: [
+      'Auto no longer spends leftover stock on Lower prices research for lower generators on that line. Cycle, yield and bonus can still fall through if the top generator\u2019s upgrade does not fit.',
+    ],
+  },
+  {
     version: 'v0.26.5',
     date: '15/08/2026',
     time: '01:05',
