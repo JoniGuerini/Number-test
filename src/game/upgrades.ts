@@ -297,20 +297,6 @@ export interface MaxUpgradeQuote {
   totalCost: Decimal;
 }
 
-/** Potência inteira por multiplicação — `Decimal.pow(2, n)` usa ln/exp e
-    deixa resíduo (7.999… em vez de 8). */
-const decimalPowInt = (base: Decimal, exp: number): Decimal => {
-  let result = new Decimal(1);
-  let b = new Decimal(base);
-  let e = Math.max(0, Math.floor(exp));
-  while (e > 0) {
-    if (e % 2 === 1) result = result.mul(b);
-    b = b.mul(b);
-    e = Math.floor(e / 2);
-  }
-  return result;
-};
-
 /** Soma geométrica das próximas `count` pesquisas (preço ×2 por nível). */
 const repeatedUpgradeTotal = (firstCost: Decimal, count: number): Decimal => {
   if (count <= 0) return new Decimal(0);
