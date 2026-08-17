@@ -336,7 +336,7 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
             style={{ width: `${progress * 100}%` }}
             aria-hidden="true"
           />
-          <span className={pl.progressLabel}>
+          <span className={`${pl.progressLabel} ${styles.buyLabel}`}>
             {t('upg.mandate.exchange', {
               cost: fmtWhole(cost),
               resource,

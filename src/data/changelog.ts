@@ -32,6 +32,17 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.26.8',
+    date: '17/08/2026',
+    time: '19:31',
+    title: 'Research buttons stay on one line',
+    summary:
+      'Upgrade and exchange buttons keep a fixed width and ellipsize instead of wrapping.',
+    qol: [
+      'Research card buttons no longer wrap cost and resource onto two lines. Overflow is cut with an ellipsis.',
+    ],
+  },
+  {
     version: 'v0.26.7',
     date: '17/08/2026',
     time: '19:23',

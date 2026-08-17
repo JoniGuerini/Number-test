@@ -159,41 +159,57 @@
 
 .buyActions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 6px;
   margin-top: auto;
   width: 100%;
 }
 
 .buyActionsMaxed {
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .buy {
   width: 100%;
   min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   font-size: 11px;
   letter-spacing: 0.02em;
-  white-space: normal;
-  line-height: 1.35;
+  line-height: 1.2;
   padding: 10px 6px;
+}
+
+.buyLabel {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .buyMaxWrap {
   min-width: 0;
   width: 100%;
+  overflow: hidden;
 }
 .buyMaxWrap :global(button) {
   width: 100%;
+  min-width: 0;
 }
 
 .exchangeBtn {
   width: 100%;
+  min-width: 0;
+  overflow: hidden;
   margin-top: auto;
   font-size: 11px;
   letter-spacing: 0.02em;
-  white-space: normal;
-  line-height: 1.35;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 1.2;
   padding: 10px 8px;
 }
 
