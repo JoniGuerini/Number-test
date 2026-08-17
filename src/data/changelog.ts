@@ -32,6 +32,17 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.26.7',
+    date: '17/08/2026',
+    time: '19:23',
+    title: 'Fast cycles stay finite',
+    summary:
+      'Cycle speed uses Decimal, so high Fast cycles levels no longer overflow to Infinity.',
+    fixes: [
+      'Herb stock and per-cycle output no longer show the word Infinity after enough Fast cycles research. A save already stuck on Infinity is cleared on load.',
+    ],
+  },
+  {
     version: 'v0.26.6',
     date: '15/08/2026',
     time: '15:01',

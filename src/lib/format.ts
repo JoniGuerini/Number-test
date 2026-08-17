@@ -46,7 +46,10 @@ export function fmt(n: Decimal | number): string {
 
   const exp = d.log10().toNumber();
   // Além do alcance de expoente legível, delega pro toString do Decimal ("ee42"...)
-  if (!Number.isFinite(exp) || exp >= 1e15) return d.toString();
+  if (!Number.isFinite(exp) || exp >= 1e15) {
+    const s = d.toString();
+    return s === 'Infinity' || s === '-Infinity' || s === 'NaN' ? '0' : s;
+  }
 
   const tier = Math.floor(exp / 3);
   const scaled = d.div(Decimal.pow(10, tier * 3)).toNumber();
@@ -63,7 +66,10 @@ export function fmtWhole(n: Decimal | number): string {
   if (d.lt(1000)) return Math.floor(d.toNumber() + 1e-9).toString();
 
   const exp = d.log10().toNumber();
-  if (!Number.isFinite(exp) || exp >= 1e15) return d.toString();
+  if (!Number.isFinite(exp) || exp >= 1e15) {
+    const s = d.toString();
+    return s === 'Infinity' || s === '-Infinity' || s === 'NaN' ? '0' : s;
+  }
 
   const tier = Math.floor(exp / 3);
   const scaled = d.div(Decimal.pow(10, tier * 3)).toNumber();
@@ -102,7 +108,10 @@ export function fmtLive(n: Decimal | number): string {
   if (d.lt(1000)) return truncTo(d.toNumber(), 1);
 
   const exp = d.log10().toNumber();
-  if (!Number.isFinite(exp) || exp >= 1e15) return d.toString();
+  if (!Number.isFinite(exp) || exp >= 1e15) {
+    const s = d.toString();
+    return s === 'Infinity' || s === '-Infinity' || s === 'NaN' ? '0' : s;
+  }
 
   const tier = Math.floor(exp / 3);
   const scaled = d.div(Decimal.pow(10, tier * 3)).toNumber();
@@ -110,6 +119,22 @@ export function fmtLive(n: Decimal | number): string {
   const suffix =
     tier < SUFFIXES.length ? SUFFIXES[tier] : letterSuffix(tier - SUFFIXES.length);
   return body + suffix;
+}
+
+/** Converte Decimal para number finito (UI de ciclo/countdown). Valores
+    fora do alcance de number — ciclo instantâneo ou absurdo — viram o
+    fallback, nunca Infinity. */
+export function decimalToFiniteNumber(d: Decimal, fallback = 0): number {
+  if (d.eq(0)) return 0;
+  const n = d.toNumber();
+  return Number.isFinite(n) ? n : fallback;
+}
+
+/** Duração de ciclo a partir de Decimal (Ciclos rápidos sem teto). */
+export function fmtCycleSeconds(seconds: Decimal | number): string {
+  const d = seconds instanceof Decimal ? seconds : new Decimal(seconds);
+  if (d.lte(0)) return fmtSecondsShort(0);
+  return fmtSecondsShort(decimalToFiniteNumber(d, 0));
 }
 
 /** Duração curta com até 2 casas quando fracionária ("0.51s", "0.6s", "12s")

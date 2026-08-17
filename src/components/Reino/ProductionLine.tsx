@@ -8,7 +8,13 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import HoldActionButton from '../HoldActionButton';
 import Tooltip from '../Tooltip/Tooltip';
 import Decimal from 'break_eternity.js';
-import { fmt, fmtCost, fmtCountdown, fmtSecondsShort } from '../../lib/format';
+import {
+  decimalToFiniteNumber,
+  fmt,
+  fmtCost,
+  fmtCountdown,
+  fmtCycleSeconds,
+} from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
 import { getVideoPrefs, subscribeVideoPrefs } from '../../lib/prefs';
 import styles from '../../styles/productionList.module.css';
@@ -144,7 +150,7 @@ export default function ProductionLine({
 
   const isAuto = line.mode === 'auto';
 
-  const cycleSecondsNeed = (i: number): number =>
+  const cycleSecondsNeed = (i: number): Decimal =>
     cycleSecondsWithUpgrades(cycleSecondsOf(i, eco), upgrades, lineId, i);
 
   // ===== Animação das barras de ciclo (60fps, fora do React) =====
@@ -236,22 +242,25 @@ export default function ProductionLine({
           // Última entrega antes do commit: pós-entrega o resto é < v e o
           // motor só soma v por passo, então floor(c/v) = passos decorridos.
           let cc = gen.cycleStep;
-          let tPrev = -Math.floor(cc / v);
+          let tPrev = -decimalToFiniteNumber(cc.div(v).floor());
           const replay = Math.min(Math.floor(t), 256);
           for (let s = 1; s <= replay; s++) {
-            cc += v;
-            if (cc >= n) {
-              cc -= Math.floor(cc / n) * n;
+            cc = cc.add(v);
+            if (cc.gte(n)) {
+              cc = cc.sub(cc.div(n).floor().mul(n));
               tPrev = s;
             }
           }
-          const tNext = replay + Math.max(Math.ceil((n - cc) / v), 1);
+          const remainSteps = decimalToFiniteNumber(n.sub(cc).div(v), 1);
+          const tNext = replay + Math.max(Math.ceil(remainSteps), 1);
           p = a.steady[i]
             ? 1
             : Math.min(Math.max((t - tPrev) / (tNext - tPrev), 0), 1);
           remainingS = Math.max((tNext - t) * SIM_STEP_S, 0);
         } else {
-          remainingS = (a.needs[i] / a.speeds[i]) * SIM_STEP_S;
+          remainingS = decimalToFiniteNumber(
+            a.needs[i].div(a.speeds[i]).mul(SIM_STEP_S)
+          );
         }
         // Desliza o inner: -100% = vazio, 0 = cheio (recorte no wrapper).
         if (barEl) barEl.style.transform = `translateX(${(p - 1) * 100}%)`;
@@ -365,7 +374,7 @@ export default function ProductionLine({
 
                 const cycleS = cycleSecondsNeed(i);
                 // Abaixo disto o countdown só pisca — o rótulo fixo basta.
-                const hideCountdown = cycleS <= 0.1;
+                const hideCountdown = cycleS.lte(0.1);
 
                 return (
                   <div
@@ -404,7 +413,7 @@ export default function ProductionLine({
                       <div className={styles.stat}>
                         <span className={styles.statLabel}>
                           {t('cyc.cycleEvery', {
-                            time: fmtSecondsShort(cycleS),
+                            time: fmtCycleSeconds(cycleS),
                           })}
                         </span>
                         {/* Ciclos ≤ 0.1s: o rótulo fixo basta, o countdown

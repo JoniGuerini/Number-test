@@ -9,6 +9,7 @@
 
 import Decimal from 'break_eternity.js';
 import { generatorBaseCost } from './costs';
+import { decimalPowInt } from './decimalPow';
 import { ENABLED_LINES, type LineId } from './lines';
 import type { Line } from './engine';
 
@@ -120,17 +121,19 @@ export const totalEffectPct = (level: number): number => level * EFFECT_PCT;
 /** Cada nível de Ciclos rápidos corta 10% do tempo ATUAL: 2s → 1,8s → 1,62s…
     (tempo × 0.9 por nível, composto). Sem piso — igual ao Rendimento. */
 export const CYCLE_DECAY = 0.9;
+/** 1 / 0.9 em Decimal (10/9) — `1 / 0.9` em number já arredonda. */
+const CYCLE_SPEED_BASE = new Decimal(10).div(9);
 
 /** Fator de velocidade para `levels` níveis somados (global + gen):
-    (1/0.9)^níveis. */
-export const cycleFactorFor = (levels: number): number =>
-  Math.pow(1 / CYCLE_DECAY, levels);
+    (10/9)^níveis. Decimal: `Math.pow(1/0.9, n)` vira Infinity ~nível 6730. */
+export const cycleFactorFor = (levels: number): Decimal =>
+  decimalPowInt(CYCLE_SPEED_BASE, levels);
 
 export const cycleSpeedFactor = (
   upgrades: UpgradeState,
   lineId: LineId,
   genIndex: number
-): number => {
+): Decimal => {
   const g = getLevel(upgrades, 'global', 'cycle');
   const gn = getLevel(upgrades, { lineId, index: genIndex }, 'cycle');
   return cycleFactorFor(g + gn);
@@ -143,8 +146,12 @@ export const cycleSecondsWithUpgrades = (
   upgrades: UpgradeState,
   lineId: LineId,
   genIndex: number
-): number =>
-  baseSeconds / cycleSpeedFactor(upgrades, lineId, genIndex);
+): Decimal =>
+  new Decimal(baseSeconds).div(cycleSpeedFactor(upgrades, lineId, genIndex));
+
+/** 1 + 10%·nível, em Decimal — `1 + level * 0.1` em number vira Infinity. */
+export const linearFactor = (level: number): Decimal =>
+  new Decimal(1).add(new Decimal(level).mul(0.1));
 
 /** Produção: multiplica entrega por (1 + 10%·nível). */
 export const productionFactor = (
@@ -154,7 +161,7 @@ export const productionFactor = (
 ): Decimal => {
   const g = getLevel(upgrades, 'global', 'production');
   const gn = getLevel(upgrades, { lineId, index: genIndex }, 'production');
-  return new Decimal(1 + g * 0.1).mul(1 + gn * 0.1);
+  return linearFactor(g).mul(linearFactor(gn));
 };
 
 /** Compra de gerador: divide custo por (1 + 10%·nível) — global e gen acumulam. */
@@ -162,10 +169,10 @@ export const costDiscountFactor = (
   upgrades: UpgradeState,
   lineId: LineId,
   genIndex: number
-): number => {
+): Decimal => {
   const g = getLevel(upgrades, 'global', 'cost');
   const gn = getLevel(upgrades, { lineId, index: genIndex }, 'cost');
-  return (1 + g * 0.1) * (1 + gn * 0.1);
+  return linearFactor(g).mul(linearFactor(gn));
 };
 
 export const discountedGenCost = (

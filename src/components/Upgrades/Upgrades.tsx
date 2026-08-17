@@ -2,7 +2,7 @@
 
 import { useMemo, useState, Fragment } from 'react';
 import Decimal from 'break_eternity.js';
-import { fmt, fmtCost, fmtSecondsShort, fmtWhole } from '../../lib/format';
+import { fmt, fmtCost, fmtCycleSeconds, fmtWhole } from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
 import { useGameStore } from '../../store/gameStore';
 import {
@@ -21,8 +21,8 @@ import {
 import {
   UPGRADE_KINDS,
   BONUS_AMOUNT_BASE_PCT,
-  CYCLE_DECAY,
   cycleFactorFor,
+  linearFactor,
   canAffordUpgrade,
   getLevel,
   isUpgradeMaxed,
@@ -70,18 +70,18 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
     if (target === 'global') {
       if (kind === 'cycle')
         return t('upg.valG.cycle', {
-          from: Math.pow(1 / CYCLE_DECAY, g).toFixed(2),
-          to: Math.pow(1 / CYCLE_DECAY, g + 1).toFixed(2),
+          from: fmt(cycleFactorFor(g)),
+          to: fmt(cycleFactorFor(g + 1)),
         });
       if (kind === 'production')
         return t('upg.valG.production', {
-          from: (1 + g * 0.1).toFixed(1),
-          to: (1 + (g + 1) * 0.1).toFixed(1),
+          from: fmt(linearFactor(g)),
+          to: fmt(linearFactor(g + 1)),
         });
       if (kind === 'cost')
         return t('upg.valG.cost', {
-          from: (1 + g * 0.1).toFixed(1),
-          to: (1 + (g + 1) * 0.1).toFixed(1),
+          from: fmt(linearFactor(g)),
+          to: fmt(linearFactor(g + 1)),
         });
       if (kind === 'bonus') {
         if (isUpgradeMaxed(upgrades, target, 'bonus'))
@@ -100,16 +100,15 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
     const gen = lines[lineId]?.gens[index];
 
     if (kind === 'cycle') {
-      const baseS = cycleSecondsOf(index, eco);
-      const from = baseS / cycleFactorFor(g + gn);
+      const baseS = new Decimal(cycleSecondsOf(index, eco));
       return t('upg.val.cycle', {
-        from: fmtSecondsShort(from),
-        to: fmtSecondsShort(baseS / cycleFactorFor(g + gn + 1)),
+        from: fmtCycleSeconds(baseS.div(cycleFactorFor(g + gn))),
+        to: fmtCycleSeconds(baseS.div(cycleFactorFor(g + gn + 1))),
       });
     }
     if (kind === 'production') {
       const per = (gen?.amount ?? new Decimal(0)).mul(prodPerCycleOf(index, eco));
-      const factor = (lvl: number) => (1 + g * 0.1) * (1 + lvl * 0.1);
+      const factor = (lvl: number) => linearFactor(g).mul(linearFactor(lvl));
       return t('upg.val.production', {
         from: fmt(per.mul(factor(gn))),
         to: fmt(per.mul(factor(gn + 1))),
@@ -117,7 +116,7 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
     }
     if (kind === 'cost') {
       const base = costOf(index, gen?.bought ?? 0, eco);
-      const factor = (lvl: number) => (1 + g * 0.1) * (1 + lvl * 0.1);
+      const factor = (lvl: number) => linearFactor(g).mul(linearFactor(lvl));
       return t('upg.val.cost', {
         from: fmtCost(base.div(factor(gn))),
         to: fmtCost(base.div(factor(gn + 1))),

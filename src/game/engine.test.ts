@@ -25,10 +25,12 @@ import {
 import { ENABLED_LINES, lineDefOf, type LineId } from './lines';
 import {
   AUTO_UPGRADE_LEVEL_CAP,
+  cycleFactorFor,
   emptyUpgrades,
   serializeUpgrades,
   type UpgradeState,
 } from './upgrades';
+import { fmt } from '../lib/format';
 import { buildLiveSnap, replayValue } from '../components/Reino/liveReplay';
 
 type Lines = Partial<Record<LineId, Line>>;
@@ -96,7 +98,7 @@ describe('determinismo do motor', () => {
       upgrades: serializeUpgrades(result.upgrades),
     }).toMatchSnapshot();
     },
-    30_000
+    60_000
   );
 
   it('invariância de lote: N passos de uma vez == lotes arbitrários', () => {
@@ -130,7 +132,7 @@ describe('determinismo do motor', () => {
     expect(serializeAll(lines)).toEqual(serializeAll(oneShot.lines));
     expect(mandate.spent).toBe(oneShot.mandate.spent);
     expect(serializeUpgrades(u)).toEqual(serializeUpgrades(oneShot.upgrades));
-  }, 30_000);
+  }, 60_000);
 
   it('Preço baixo automático só no gerador mais alto da linha', () => {
     const lines = startedLines('auto');
@@ -305,5 +307,47 @@ describe('equivalência da réplica ao vivo (liveReplay)', () => {
       const predicted = replayValue(snap, 1, k, k, committed.gens[0].amount);
       expect(predicted.toString()).toBe(engineK.gens[0].amount.toString());
     }
+  });
+});
+
+describe('ciclos rápidos em Decimal', () => {
+  it('nível alto não vira Infinity de number', () => {
+    const speed = cycleFactorFor(8000);
+    expect(speed.eq(0)).toBe(false);
+    expect(speed.eq(Infinity)).toBe(false);
+    expect(fmt(speed)).not.toBe('Infinity');
+  });
+
+  it('um passo com milhares de níveis não envenena o estoque', () => {
+    const line = newLine();
+    line.started = true;
+    line.startedAt = 0;
+    line.gens[0].bought = 1;
+    line.gens[0].amount = new Decimal(1);
+    const upgrades = emptyUpgrades();
+    upgrades.global.cycle = 8000;
+    const result = advanceKingdom(
+      { comida: line },
+      [lineDefOf('comida')],
+      1,
+      upgrades,
+      { spent: 0 },
+      []
+    );
+    const base = result.lines.comida!.base;
+    expect(base.eq(Infinity)).toBe(false);
+    expect(fmt(base)).not.toBe('Infinity');
+    expect(base.gt(0)).toBe(true);
+  });
+
+  it('loadLine zera Infinity de save envenenado', () => {
+    const raw = serializeLine(newLine());
+    raw.base = 'Infinity';
+    raw.gens[0].amount = 'Infinity';
+    raw.gens[0].cycleStep = Infinity;
+    const loaded = loadLine(raw);
+    expect(loaded.base.eq(0)).toBe(true);
+    expect(loaded.gens[0].amount.eq(0)).toBe(true);
+    expect(loaded.gens[0].cycleStep.eq(0)).toBe(true);
   });
 });

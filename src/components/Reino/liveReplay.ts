@@ -40,9 +40,9 @@ export interface LiveSnap {
   lineId: LineId;
   gens: Gen[];
   /** Duração-base do ciclo de cada gerador, em passos. */
-  needs: number[];
+  needs: Decimal[];
   /** Fator de velocidade (melhorias) acumulado por passo. */
-  speeds: number[];
+  speeds: Decimal[];
   /** Ciclo efetivo < 1s → interpola entregas dentro do passo corrente. */
   steady: boolean[];
   /** Entrega por ciclo de cada gerador (amount × entrega × fator). */
@@ -65,14 +65,14 @@ export function buildLiveSnap(
   return {
     lineId,
     gens: line.gens,
-    needs: line.gens.map((_, i) => cycleStepsOf(i, eco)),
+    needs: line.gens.map((_, i) => new Decimal(cycleStepsOf(i, eco))),
     speeds: line.gens.map((_, i) =>
       cycleSpeedFactor(upgrades, lineId, i)
     ),
-    steady: line.gens.map(
-      (_, i) =>
-        cycleSecondsWithUpgrades(cycleSecondsOf(i, eco), upgrades, lineId, i) <
+    steady: line.gens.map((_, i) =>
+      cycleSecondsWithUpgrades(cycleSecondsOf(i, eco), upgrades, lineId, i).lt(
         STEADY_CYCLE_S
+      )
     ),
     outs: line.gens.map((gen, i) =>
       gen.amount
@@ -122,10 +122,10 @@ export function replayValue(
   const v = a.speeds[u];
   let cc = up.cycleStep;
   for (let s = 1; s <= replaySteps; s++) {
-    cc += v;
-    if (cc >= n) {
-      const cycles = Math.floor(cc / n);
-      cc -= cycles * n;
+    cc = cc.add(v);
+    if (cc.gte(n)) {
+      const cycles = cc.div(n).floor();
+      cc = cc.sub(cycles.mul(n));
       let out = a.outs[u].mul(cycles);
       if (
         a.chances[u] > 0 &&
@@ -141,8 +141,8 @@ export function replayValue(
   }
   if (a.steady[u]) {
     const fraction = Math.min(Math.max(t - replaySteps, 0), 1);
-    const crossed = Math.floor((cc + v * fraction) / n);
-    if (crossed > 0) {
+    const crossed = cc.add(v.mul(fraction)).div(n).floor();
+    if (crossed.gt(0)) {
       let out = a.outs[u].mul(crossed);
       if (
         a.chances[u] > 0 &&

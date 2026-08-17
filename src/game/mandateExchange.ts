@@ -3,6 +3,7 @@
     para ganho determinístico quando a taxa muda no meio do save. */
 
 import Decimal from 'break_eternity.js';
+import { decimalPowInt } from './decimalPow';
 import { ENABLED_LINES, type LineId } from './lines';
 import type { Line } from './engine';
 import {
@@ -13,20 +14,6 @@ import {
 /** 1ª troca: 500 do recurso; cada nível seguinte ×100 (500 → 50K → 5M …). Igual em todas as linhas. */
 export const EXCHANGE_BASE = 500;
 export const EXCHANGE_GROWTH = 100;
-
-/** Potência inteira por multiplicação — `100 ** level` em number vira
-    Infinity cedo (~nível 154); `Decimal.pow` usa ln/exp e deixa resíduo. */
-const decimalPowInt = (base: Decimal, exp: number): Decimal => {
-  let result = new Decimal(1);
-  let b = new Decimal(base);
-  let e = Math.max(0, Math.floor(exp));
-  while (e > 0) {
-    if (e % 2 === 1) result = result.mul(b);
-    b = b.mul(b);
-    e = Math.floor(e / 2);
-  }
-  return result;
-};
 
 const exchangeAmountAt = (level: number): Decimal =>
   new Decimal(EXCHANGE_BASE).mul(

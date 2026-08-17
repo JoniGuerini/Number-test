@@ -8,6 +8,7 @@
 
 import Decimal from 'break_eternity.js';
 import { generatorBaseCost } from './costs';
+import { finiteDecimal } from './decimalPow';
 import type { LineId } from './lines';
 import { mandateBalance, mandateCostOf, spendMandate, type MandatePurchaseLog, type MandateState } from './mandate';
 import {
@@ -67,8 +68,8 @@ export interface Gen {
   bought: number;
   /** Tempo de jogo (s) em que a primeira unidade foi comprada. */
   unlockedAt?: number;
-  /** Passos já cumpridos do ciclo atual. */
-  cycleStep: number;
+  /** Passos já cumpridos do ciclo atual (Decimal: a velocidade estoura number). */
+  cycleStep: Decimal;
 }
 
 export interface Line {
@@ -91,7 +92,12 @@ export interface Line {
 export interface LineSave {
   base: string;
   totalProduced: string;
-  gens: { amount: string; bought: number; unlockedAt?: number; cycleStep: number }[];
+  gens: {
+    amount: string;
+    bought: number;
+    unlockedAt?: number;
+    cycleStep: number | string;
+  }[];
   mode: Mode;
   started: boolean;
   startedAt?: number;
@@ -184,7 +190,11 @@ export function maxPurchaseQuote(
   return { count: low, totalCost: repeatedPurchaseTotal(firstCost, low) };
 }
 
-export const newGen = (): Gen => ({ amount: new Decimal(0), bought: 0, cycleStep: 0 });
+export const newGen = (): Gen => ({
+  amount: new Decimal(0),
+  bought: 0,
+  cycleStep: new Decimal(0),
+});
 
 export const newLine = (): Line => ({
   base: START_BASE,
@@ -199,13 +209,13 @@ export const newLine = (): Line => ({
 export function loadLine(s: LineSave | undefined): Line {
   if (!s || !s.gens || s.gens.length === 0) return newLine();
   return {
-    base: new Decimal(s.base),
-    totalProduced: new Decimal(s.totalProduced ?? s.base),
+    base: finiteDecimal(s.base),
+    totalProduced: finiteDecimal(s.totalProduced ?? s.base),
     gens: s.gens.map((g) => ({
-      amount: new Decimal(g.amount),
+      amount: finiteDecimal(g.amount),
       bought: g.bought,
       unlockedAt: g.unlockedAt,
-      cycleStep: g.cycleStep ?? 0,
+      cycleStep: finiteDecimal(g.cycleStep),
     })),
     mode: s.mode ?? 'manual',
     started: s.started ?? false,
@@ -223,7 +233,7 @@ export function serializeLine(g: Line): LineSave {
       amount: x.amount.toString(),
       bought: x.bought,
       unlockedAt: x.unlockedAt,
-      cycleStep: x.cycleStep,
+      cycleStep: x.cycleStep.toString(),
     })),
     mode: g.mode,
     started: g.started,
@@ -264,11 +274,11 @@ function stepProduction(w: WorkLine, s: number, upgrades: UpgradeState): void {
     const gen = w.gens[i];
     if (gen.amount.lte(0)) continue;
 
-    gen.cycleStep += cycleSpeedFactor(upgrades, w.id, i);
-    const need = cycleStepsOf(i, w.eco);
-    if (gen.cycleStep >= need) {
-      const cycles = Math.floor(gen.cycleStep / need);
-      gen.cycleStep -= cycles * need;
+    gen.cycleStep = gen.cycleStep.add(cycleSpeedFactor(upgrades, w.id, i));
+    const need = new Decimal(cycleStepsOf(i, w.eco));
+    if (gen.cycleStep.gte(need)) {
+      const cycles = gen.cycleStep.div(need).floor();
+      gen.cycleStep = gen.cycleStep.sub(cycles.mul(need));
       let out = gen.amount
         .mul(prodPerCycleOf(i, w.eco))
         .mul(productionFactor(upgrades, w.id, i))
