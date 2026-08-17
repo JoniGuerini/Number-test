@@ -32,6 +32,17 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.26.9',
+    date: '17/08/2026',
+    time: '19:33',
+    title: 'Compact research levels',
+    summary:
+      'Research levels and max-buy tooltips use the same short number format as costs.',
+    qol: [
+      'Level labels, bonus volume percents and max-buy tooltips no longer print raw six-digit integers.',
+    ],
+  },
+  {
     version: 'v0.26.8',
     date: '17/08/2026',
     time: '19:31',

@@ -89,8 +89,8 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
         return t('upg.val.bonus', { from: g, to: g + 1 });
       }
       return t('upg.val.bonusAmount', {
-        from: BONUS_AMOUNT_BASE_PCT + g,
-        to: BONUS_AMOUNT_BASE_PCT + g + 1,
+        from: fmtWhole(BONUS_AMOUNT_BASE_PCT + g),
+        to: fmtWhole(BONUS_AMOUNT_BASE_PCT + g + 1),
       });
     }
 
@@ -131,8 +131,8 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
       });
     }
     return t('upg.val.bonusAmount', {
-      from: BONUS_AMOUNT_BASE_PCT + g + gn,
-      to: BONUS_AMOUNT_BASE_PCT + g + gn + 1,
+      from: fmtWhole(BONUS_AMOUNT_BASE_PCT + g + gn),
+      to: fmtWhole(BONUS_AMOUNT_BASE_PCT + g + gn + 1),
     });
   };
 
@@ -249,14 +249,16 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
             cost: amount,
             resource: t(`reino.base.${line}` as TKey),
           });
-    const maxTitle = t('upg.buyMaxTitle', { count: maxQuote.count });
+    const maxTitle = t('upg.buyMaxTitle', { count: fmtWhole(maxQuote.count) });
 
     return (
     <article className={styles.card}>
       <h3 className={styles.cardTitle}>{t(`upg.${kind}.name` as TKey)}</h3>
       <p className={styles.cardHint}>{t(`upg.${kind}.hint` as TKey)}</p>
       <div className={styles.cardMeta}>
-        <span className={styles.metaLevel}>{t('upg.level', { n: level })}</span>
+        <span className={styles.metaLevel}>
+          {t('upg.level', { n: fmtWhole(level) })}
+        </span>
         <span className={styles.metaEffect}>{effectLabel(target, kind)}</span>
       </div>
       <div className={`${styles.buyActions} ${maxed ? styles.buyActionsMaxed : ''}`}>
@@ -308,7 +310,7 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
   ) => {
     const resource = t(`reino.base.${lineId}` as TKey);
     const maxTitle = t('upg.mandate.exchangeMaxTitle', {
-      count: maxQuote.count,
+      count: fmtWhole(maxQuote.count),
     });
 
     return (
@@ -316,9 +318,11 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
       <h3 className={styles.cardTitle}>{resource}</h3>
       <p className={styles.cardHint}>{t('upg.mandate.cardHint')}</p>
       <div className={styles.cardMeta}>
-        <span className={styles.metaLevel}>{t('upg.level', { n: level })}</span>
+        <span className={styles.metaLevel}>
+          {t('upg.level', { n: fmtWhole(level) })}
+        </span>
         <span className={styles.metaEffect}>
-          {t('upg.mandate.effect', { n: level })}
+          {t('upg.mandate.effect', { n: fmtWhole(level) })}
         </span>
       </div>
       <p className={styles.cardUnlock}>

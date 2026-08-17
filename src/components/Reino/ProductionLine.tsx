@@ -14,6 +14,7 @@ import {
   fmtCost,
   fmtCountdown,
   fmtCycleSeconds,
+  fmtWhole,
 } from '../../lib/format';
 import { useI18n, type TKey } from '../../lib/locale';
 import { getVideoPrefs, subscribeVideoPrefs } from '../../lib/prefs';
@@ -457,14 +458,16 @@ export default function ProductionLine({
                       </HoldActionButton>
                       <Tooltip
                         className={styles.buyMaxWrap}
-                        text={t('gen.buyMaxTitle', { count: maxQuote.count })}
+                        text={t('gen.buyMaxTitle', {
+                          count: fmtWhole(maxQuote.count),
+                        })}
                       >
                         <button
                           className="btn-primary"
                           disabled={maxQuote.count === 0}
                           onClick={() => onBuyMax(i)}
                           aria-label={t('gen.buyMaxTitle', {
-                            count: maxQuote.count,
+                            count: fmtWhole(maxQuote.count),
                           })}
                         >
                           {fmtCost(
