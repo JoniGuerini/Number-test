@@ -66,7 +66,7 @@ interface ProductionLineProps {
 /** Colunas do card do gerador nomeado: nome largo + 5 stats + botão.
     Inline porque precisa vencer o grid padrão de `.row` de forma confiável
     entre navegadores (o mobile cai para flex-column e ignora isto). */
-const NAMED_ROW_COLS = '150px 80px 150px 130px 100px 100px 260px';
+const NAMED_ROW_COLS = '150px 80px 180px 130px 100px 90px 260px';
 
 export default function ProductionLine({
   line,
@@ -277,7 +277,7 @@ export default function ProductionLine({
             if (amtEl.textContent !== text) amtEl.textContent = text;
           }
           if (prodEl) {
-            const text = `+${fmt(amount.mul(a.unitOuts[i]))} ${a.perCycleSuffix}`;
+            const text = `+${fmt(amount.mul(a.unitOuts[i]))}\u00a0${a.perCycleSuffix}`;
             if (prodEl.textContent !== text) prodEl.textContent = text;
           }
         }
@@ -456,7 +456,9 @@ export default function ProductionLine({
                           {t('gen.bonusAmount')}
                         </span>
                         <span className={styles.statValue}>
-                          +{Math.round(bonusAmountFraction(upgrades, lineId, i) * 100)}%
+                          +{fmtWhole(
+                            bonusAmountFraction(upgrades, lineId, i) * 100
+                          )}%
                         </span>
                       </div>
                     </div>

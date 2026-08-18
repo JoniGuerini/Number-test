@@ -32,6 +32,19 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.26.14',
+    date: '18/08/2026',
+    time: '11:57',
+    title: 'Portraits stay square',
+    summary:
+      'Food portraits are a fixed square again, and generator stats stay on one line.',
+    fixes: [
+      'Food portraits no longer collapse to an empty strip. They are a 76\u00d776 square on Production and Research.',
+      'Generator stat columns no longer wrap to a second line, so rows keep an even height.',
+      'Bonus yield on each generator uses the same compact number format as the other stats.',
+    ],
+  },
+  {
     version: 'v0.26.13',
     date: '18/08/2026',
     time: '11:50',

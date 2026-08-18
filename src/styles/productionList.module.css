@@ -202,23 +202,21 @@
 .genBundle {
   display: flex;
   flex-direction: row;
-  align-items: stretch;
+  align-items: center;
   gap: 8px;
   width: 100%;
   min-width: 0;
   flex: 0 0 auto;
 }
 
-/* Largura fixa: o PNG 1024px não pode definir o min-content da linha
-   (senão o item da lista virtual vira um fantasma de 1024px vazio). */
+/* Quadrado com largura E altura explícitas — stretch/aspect-ratio
+   colapsava a altura pra 0 e o retrato sumia. */
 .portraitCard {
   position: relative;
+  box-sizing: border-box;
   flex: 0 0 76px;
   width: 76px;
-  min-width: 76px;
-  max-width: 76px;
-  min-height: 0;
-  align-self: stretch;
+  height: 76px;
   overflow: hidden;
   background: var(--paper);
   border-radius: 4px;
@@ -226,14 +224,13 @@
 }
 
 .portraitCard img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  display: block;
+  width: 76px;
+  height: 76px;
   object-fit: cover;
 }
 
-.genBundle .row {
+.genBundle > :last-child {
   flex: 1 1 0;
   min-width: 0;
 }
@@ -315,6 +312,16 @@
   align-items: center;
   text-align: center;
   gap: 2px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.statLabel,
+.statValue {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .statLabel {
@@ -322,8 +329,6 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-faint);
-  /* Nunca quebra linha — senão o card fica mais alto que os irmãos */
-  white-space: nowrap;
 }
 
 .statValue {
@@ -378,10 +383,12 @@
     align-items: start;
   }
   .portraitCard {
-    flex-basis: 72px;
+    flex: 0 0 72px;
     width: 72px;
-    min-width: 72px;
-    max-width: 72px;
+    height: 72px;
+  }
+  .portraitCard img {
+    width: 72px;
     height: 72px;
   }
 
