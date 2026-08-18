@@ -32,6 +32,17 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.26.10',
+    date: '17/08/2026',
+    time: '22:12',
+    title: 'Portraits on the Food line',
+    summary:
+      'Every Food generator now has a square portrait beside its production card and research group.',
+    qol: [
+      'Campon\u00eas through Dinastia show a matching painting on Production and on Research, in a square card as tall as the ficha beside it.',
+    ],
+  },
+  {
     version: 'v0.26.9',
     date: '17/08/2026',
     time: '19:33',

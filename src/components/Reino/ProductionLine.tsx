@@ -21,6 +21,7 @@ import { getVideoPrefs, subscribeVideoPrefs } from '../../lib/prefs';
 import styles from '../../styles/productionList.module.css';
 import cyc from '../../styles/cycleBars.module.css';
 import rn from './Reino.module.css';
+import { COMIDA_PORTRAITS } from '../../assets/portraits/comida';
 import {
   SIM_STEP_S,
   cycleSecondsOf,
@@ -66,7 +67,6 @@ interface ProductionLineProps {
     Inline porque precisa vencer o grid padrão de `.row` de forma confiável
     entre navegadores (o mobile cai para flex-column e ignora isto). */
 const NAMED_ROW_COLS = '150px 80px 150px 130px 100px 100px 260px';
-
 
 export default function ProductionLine({
   line,
@@ -376,12 +376,20 @@ export default function ProductionLine({
                 const cycleS = cycleSecondsNeed(i);
                 // Abaixo disto o countdown só pisca — o rótulo fixo basta.
                 const hideCountdown = cycleS.lte(0.1);
+                const portrait =
+                  lineId === 'comida' ? COMIDA_PORTRAITS[i] : undefined;
 
                 return (
-                  <div
-                    className={styles.row}
-                    style={{ gridTemplateColumns: NAMED_ROW_COLS }}
-                  >
+                  <div className={portrait ? styles.genBundle : undefined}>
+                    {portrait && (
+                      <div className={styles.portraitCard}>
+                        <img src={portrait} alt={genName(i)} />
+                      </div>
+                    )}
+                    <div
+                      className={styles.row}
+                      style={{ gridTemplateColumns: NAMED_ROW_COLS }}
+                    >
                     <span className={rn.genName}>{genName(i)}</span>
 
                     <div className={styles.statsRow}>
@@ -492,6 +500,7 @@ export default function ProductionLine({
                         </div>
                       </div>
                     )}
+                    </div>
                   </div>
                 );
               }}

@@ -39,6 +39,7 @@ import HoldActionButton from '../HoldActionButton';
 import Tooltip from '../Tooltip/Tooltip';
 import { LiveBaseRate, LiveBaseValue } from '../Reino/LiveValues';
 import { VirtualItem, VirtualList } from '../VirtualList/VirtualList';
+import { COMIDA_PORTRAITS } from '../../assets/portraits/comida';
 import styles from './Upgrades.module.css';
 import pl from '../../styles/productionList.module.css';
 
@@ -505,39 +506,53 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
                 estimateHeight={240}
                 className={styles.genGroup}
               >
-                {() => (
-                  <>
-                    <h2 className={styles.genName}>
-                      {t(`reino.gen.${gen.lineId}.${gen.index + 1}` as TKey)}
-                    </h2>
-                    <div className={styles.cardRow}>
-                      {cards.map(
-                        ({
-                          kind,
-                          level,
-                          line,
-                          cost,
-                          canAfford,
-                          maxQuote,
-                          maxed,
-                        }) => (
-                          <Fragment key={kind}>
-                            {renderCard(
-                              gen,
+                {() => {
+                  const genLabel = t(
+                    `reino.gen.${gen.lineId}.${gen.index + 1}` as TKey
+                  );
+                  const portrait =
+                    gen.lineId === 'comida'
+                      ? COMIDA_PORTRAITS[gen.index]
+                      : undefined;
+                  return (
+                    <>
+                      <h2 className={styles.genName}>{genLabel}</h2>
+                      <div className={portrait ? pl.genBundle : undefined}>
+                        {portrait && (
+                          <div className={pl.portraitCard}>
+                            <img src={portrait} alt={genLabel} />
+                          </div>
+                        )}
+                        <div className={styles.cardRow}>
+                          {cards.map(
+                            ({
                               kind,
                               level,
                               line,
                               cost,
                               canAfford,
                               maxQuote,
-                              maxed
-                            )}
-                          </Fragment>
-                        )
-                      )}
-                    </div>
-                  </>
-                )}
+                              maxed,
+                            }) => (
+                              <Fragment key={kind}>
+                                {renderCard(
+                                  gen,
+                                  kind,
+                                  level,
+                                  line,
+                                  cost,
+                                  canAfford,
+                                  maxQuote,
+                                  maxed
+                                )}
+                              </Fragment>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  );
+                }}
               </VirtualItem>
             ))
           )}
