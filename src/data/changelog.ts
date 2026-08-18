@@ -32,6 +32,18 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.26.12',
+    date: '18/08/2026',
+    time: '11:40',
+    title: 'No more jumping cards',
+    summary:
+      'Generator rows no longer leave empty gaps when you scroll, and portraits stay beside a full-width card.',
+    fixes: [
+      'Scrolling the Food list no longer makes cards jump or leave a blank hole in the middle of the list.',
+      'A generator row with a portrait again spans the full width instead of sitting in a narrow column.',
+    ],
+  },
+  {
     version: 'v0.26.11',
     date: '17/08/2026',
     time: '22:46',

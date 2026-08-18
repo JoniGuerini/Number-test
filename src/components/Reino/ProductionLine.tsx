@@ -383,7 +383,12 @@ export default function ProductionLine({
                   <div className={portrait ? styles.genBundle : undefined}>
                     {portrait && (
                       <div className={styles.portraitCard}>
-                        <img src={portrait} alt={genName(i)} />
+                        <img
+                          src={portrait}
+                          alt={genName(i)}
+                          width={76}
+                          height={76}
+                        />
                       </div>
                     )}
                     <div

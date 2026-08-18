@@ -158,6 +158,7 @@
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  overflow-anchor: none;
   scrollbar-width: none;
   display: flex;
   flex-direction: column;
@@ -199,8 +200,8 @@
 }
 
 .genBundle {
-  display: grid;
-  grid-template-columns: auto 1fr;
+  display: flex;
+  flex-direction: row;
   align-items: stretch;
   gap: 8px;
   width: 100%;
@@ -208,10 +209,16 @@
   flex: 0 0 auto;
 }
 
+/* Largura fixa: o PNG 1024px não pode definir o min-content da linha
+   (senão o item da lista virtual vira um fantasma de 1024px vazio). */
 .portraitCard {
   position: relative;
-  height: 100%;
-  aspect-ratio: 1;
+  flex: 0 0 76px;
+  width: 76px;
+  min-width: 76px;
+  max-width: 76px;
+  min-height: 0;
+  align-self: stretch;
   overflow: hidden;
   background: var(--paper);
   border-radius: 4px;
@@ -227,6 +234,7 @@
 }
 
 .genBundle .row {
+  flex: 1 1 0;
   min-width: 0;
 }
 
@@ -367,12 +375,14 @@
   }
 
   .genBundle {
-    grid-template-columns: 72px 1fr;
     align-items: start;
   }
   .portraitCard {
-    height: 72px;
+    flex-basis: 72px;
     width: 72px;
+    min-width: 72px;
+    max-width: 72px;
+    height: 72px;
   }
 
   /* Card do gerador vertical: número no topo, stats empilhados
