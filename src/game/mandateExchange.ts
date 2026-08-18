@@ -23,6 +23,7 @@ const exchangeAmountAt = (level: number): Decimal =>
 export interface MandatePurchase {
   step: number;
   lineId: LineId;
+  count?: number;
 }
 
 export interface MandateExchangeState {
@@ -59,10 +60,14 @@ export const loadMandateExchange = (
     }
   }
   if (raw.purchases?.length) {
-    base.purchases = raw.purchases.map((p) => ({
-      step: Math.max(0, Math.floor(p.step)),
-      lineId: p.lineId,
-    }));
+    base.purchases = raw.purchases.map((p) => {
+      const count = p.count !== undefined ? Math.max(1, Math.floor(p.count)) : undefined;
+      return {
+        step: Math.max(0, Math.floor(p.step)),
+        lineId: p.lineId,
+        ...(count && count > 1 ? { count } : {}),
+      };
+    });
   }
   return base;
 };
@@ -107,25 +112,43 @@ export interface MaxExchangeQuote {
   totalCost: Decimal;
 }
 
-/** Maior número de trocas cujo gasto total cabe no saldo. O custo ×100 por
-    nível, então o lote é curto — soma direta, sem busca. */
+/** Soma das próximas `count` trocas (custo ×100 por nível).
+    `Decimal.div` deixa resíduo; o custo é sempre inteiro, então arredonda. */
+const repeatedExchangeTotal = (firstCost: Decimal, count: number): Decimal => {
+  if (count <= 0) return new Decimal(0);
+  const growth = new Decimal(EXCHANGE_GROWTH);
+  return firstCost
+    .mul(decimalPowInt(growth, count).sub(1))
+    .div(growth.sub(1))
+    .round();
+};
+
+/** Maior número de trocas cujo gasto total cabe no saldo. Busca binária —
+    o custo ×100 por nível, então o lote explode rápido (sem teto de 64). */
 export function maxExchangeQuote(
   balance: Decimal,
-  firstCost: Decimal
+  firstCost: Decimal,
+  maxCount = 1_000_000
 ): MaxExchangeQuote {
-  if (firstCost.lte(0) || balance.lt(firstCost)) {
+  const LIMIT = Math.max(0, Math.floor(maxCount));
+  if (LIMIT === 0 || firstCost.lte(0) || balance.lt(firstCost)) {
     return { count: 0, totalCost: new Decimal(0) };
   }
-  let count = 0;
-  let total = new Decimal(0);
-  let next = firstCost;
-  const LIMIT = 64;
-  while (count < LIMIT && total.add(next).lte(balance)) {
-    total = total.add(next);
-    count++;
-    next = next.mul(EXCHANGE_GROWTH);
+  let low = 1;
+  let high = 1;
+  while (high < LIMIT && repeatedExchangeTotal(firstCost, high).lte(balance)) {
+    low = high;
+    high = Math.min(high * 2, LIMIT);
   }
-  return { count, totalCost: total };
+  if (repeatedExchangeTotal(firstCost, high).lte(balance)) {
+    return { count: high, totalCost: repeatedExchangeTotal(firstCost, high) };
+  }
+  while (low + 1 < high) {
+    const mid = Math.floor((low + high) / 2);
+    if (repeatedExchangeTotal(firstCost, mid).lte(balance)) low = mid;
+    else high = mid;
+  }
+  return { count: low, totalCost: repeatedExchangeTotal(firstCost, low) };
 }
 
 export const canExchangeMandate = (
@@ -185,10 +208,9 @@ export function tryExchangeMaxMandate(
   const nextLevels = { ...state.levels, [lineId]: level + quote.count };
   const nextPurchases = [
     ...state.purchases,
-    ...Array.from({ length: quote.count }, () => ({
-      step: globalSteps,
-      lineId,
-    })),
+    quote.count === 1
+      ? { step: globalSteps, lineId }
+      : { step: globalSteps, lineId, count: quote.count },
   ];
   return {
     lines: nextLines,

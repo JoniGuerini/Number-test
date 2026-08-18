@@ -29,6 +29,8 @@ export const mandateEarned = (steps: number): number =>
 /** Registro mínimo para integral de taxa (passo global da âncora). */
 export interface MandatePurchaseLog {
   step: number;
+  /** Trocas no mesmo passo (lote máximo). Ausente = 1. */
+  count?: number;
 }
 
 /** Mandatos ganhos até `steps` — lote a cada ciclo completo (1 s). */
@@ -46,7 +48,8 @@ export const mandateEarnedAtSteps = (
     if (p.step > steps) break;
     const segSteps = p.step - segStart;
     total += Math.floor(segSteps / MANDATE_STEPS_PER_UNIT) * rate;
-    rate += bonusPerPurchase;
+    const n = Math.max(1, Math.floor(p.count ?? 1));
+    rate += bonusPerPurchase * n;
     segStart = p.step;
   }
   const tail = steps - segStart;

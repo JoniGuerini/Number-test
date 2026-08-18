@@ -24,7 +24,6 @@ import {
 } from './engine';
 import { ENABLED_LINES, lineDefOf, type LineId } from './lines';
 import {
-  AUTO_UPGRADE_LEVEL_CAP,
   cycleFactorFor,
   emptyUpgrades,
   serializeUpgrades,
@@ -177,10 +176,11 @@ describe('determinismo do motor', () => {
         l.gens[i].amount = new Decimal(1);
       }
       l.gens.push(newGen());
-      // g3 no teto automático: a pesquisa desce, mas Preço baixo não.
+      // g3 já empilhado: 500 de saldo não paga o próximo nível lá, então a
+      // pesquisa desce — mas Preço baixo continua só no mais alto.
       l.base = new Decimal(500);
       for (const kind of ['cycle', 'production', 'bonus', 'bonusAmount', 'cost'] as const) {
-        upgrades.gen[`${def.id}:3:${kind}`] = AUTO_UPGRADE_LEVEL_CAP;
+        upgrades.gen[`${def.id}:3:${kind}`] = 40;
       }
     }
     const result = advanceKingdom(

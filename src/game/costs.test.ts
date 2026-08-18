@@ -217,9 +217,14 @@ describe('troca máxima de mandato', () => {
     expect(result?.quote.count).toBe(2);
     expect(result?.exchange.levels.comida).toBe(2);
     expect(result?.exchange.purchases).toEqual([
-      { step: 12, lineId: 'comida' },
-      { step: 12, lineId: 'comida' },
+      { step: 12, lineId: 'comida', count: 2 },
     ]);
     expect(result?.lines.comida?.base.toString()).toBe('5000');
+  });
+
+  it('não para em 64 trocas quando o saldo cabe mais', () => {
+    // 64 níveis ×100 ainda cabem fácil num saldo enorme.
+    const quote = maxExchangeQuote(new Decimal('1e400'), new Decimal(500));
+    expect(quote.count).toBeGreaterThan(64);
   });
 });

@@ -32,6 +32,18 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.26.11',
+    date: '17/08/2026',
+    time: '22:46',
+    title: 'No artificial auto caps',
+    summary:
+      'Max mandate trade and automatic research no longer stop at hardcoded level caps.',
+    fixes: [
+      'Max mandate trade no longer stops at 64; it spends as many levels as the stock can cover.',
+      'Automatic research no longer stops at 40 levels per upgrade; it keeps buying while leftover stock is cheaper than the next generator.',
+    ],
+  },
+  {
     version: 'v0.26.10',
     date: '17/08/2026',
     time: '22:12',

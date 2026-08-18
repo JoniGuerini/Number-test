@@ -14,7 +14,6 @@ import { mandateBalance, mandateCostOf, spendMandate, type MandatePurchaseLog, t
 import {
   applyBonusOutput,
   applyUpgradeLevel,
-  AUTO_UPGRADE_LEVEL_CAP,
   bonusAmountFraction,
   bonusChance,
   bonusRoll,
@@ -333,8 +332,8 @@ function stepAutoBuy(
 
 /** Custo do gerador que o automático PREFERE neste passo (desbloquear o
     próximo, ou empilhar o mais alto). A pesquisa só gasta se for mais
-    barata que isso — senão o saldo explode em ciclos e a economia vai a
-    Infinity. */
+    barata que isso — senão o saldo fica preso em ciclos em vez de
+    avançar a linha. */
 function autoBuyPreferredCost(
   w: WorkLine,
   upgrades: UpgradeState
@@ -366,12 +365,7 @@ function stepAutoUpgradeLine(
     if (w.gens[i].bought === 0) continue;
     const target = { lineId: w.id, index: i };
     const skip: readonly UpgradeKind[] = i === highest ? [] : ['cost'];
-    const kind = pickCheapestUpgrade(
-      upgrades,
-      target,
-      AUTO_UPGRADE_LEVEL_CAP,
-      skip
-    );
+    const kind = pickCheapestUpgrade(upgrades, target, skip);
     if (!kind) continue;
     const level = getLevel(upgrades, target, kind);
     const cost = purchaseCost(target, level);
@@ -392,7 +386,7 @@ function stepAutoUpgradeGlobal(
   minGenCost: Decimal | null
 ): void {
   if (work.length !== defCount || !minGenCost) return;
-  const kind = pickCheapestUpgrade(upgrades, 'global', AUTO_UPGRADE_LEVEL_CAP);
+  const kind = pickCheapestUpgrade(upgrades, 'global');
   if (!kind) return;
   const level = getLevel(upgrades, 'global', kind);
   const cost = purchaseCost('global', level);

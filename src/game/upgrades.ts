@@ -36,11 +36,6 @@ export const BONUS_AMOUNT_BASE_PCT = 10;
 export const BONUS_AMOUNT_PCT = 1;
 /** Cada nível DOBRA o preço da melhoria. */
 export const LEVEL_GROWTH = 2;
-/** Teto da pesquisa automática por tipo e alvo (global ou gerador).
-    Sem isso o automático, na espera de mandato, empilha Ciclos rápidos
-    até a economia ir a Infinity. Compra manual continua sem teto
-    (exceto chance bônus em 100%). */
-export const AUTO_UPGRADE_LEVEL_CAP = 40;
 /** Chance bônus: +1% por nível, teto 100% (níveis além disso não fazem nada). */
 export const BONUS_CHANCE_CAP = 100;
 
@@ -208,7 +203,6 @@ export const isUpgradeMaxed = (
 export const pickCheapestUpgrade = (
   upgrades: UpgradeState,
   target: 'global' | GenRef,
-  maxLevel = Infinity,
   skip: readonly UpgradeKind[] = []
 ): UpgradeKind | null => {
   let best: UpgradeKind | null = null;
@@ -217,7 +211,6 @@ export const pickCheapestUpgrade = (
     if (skip.includes(kind)) continue;
     if (isUpgradeMaxed(upgrades, target, kind)) continue;
     const level = getLevel(upgrades, target, kind);
-    if (level >= maxLevel) continue;
     if (level < bestLevel) {
       bestLevel = level;
       best = kind;
