@@ -36,6 +36,9 @@ export const BONUS_AMOUNT_BASE_PCT = 10;
 export const BONUS_AMOUNT_PCT = 1;
 /** Cada nível DOBRA o preço da melhoria. */
 export const LEVEL_GROWTH = 2;
+/** Teto do lote = o máximo que `number` guarda com precisão. Sem teto
+    artificial de 1M por clique. Chance bônus continua limitada a 100%. */
+export const MAX_BUY_LOT = Number.MAX_SAFE_INTEGER;
 /** Chance bônus: +1% por nível, teto 100% (níveis além disso não fazem nada). */
 export const BONUS_CHANCE_CAP = 100;
 
@@ -326,9 +329,9 @@ export function upgradeBudget(
 export function maxUpgradeQuote(
   balance: Decimal,
   firstCost: Decimal,
-  maxCount = 1_000_000
+  maxCount = MAX_BUY_LOT
 ): MaxUpgradeQuote {
-  const LIMIT = Math.max(0, Math.floor(maxCount));
+  const LIMIT = Math.min(MAX_BUY_LOT, Math.max(0, Math.floor(maxCount)));
   if (LIMIT <= 0 || firstCost.lte(0) || balance.lt(firstCost)) {
     return { count: 0, totalCost: new Decimal(0) };
   }
@@ -414,7 +417,7 @@ export function tryBuyMaxUpgrade(
   const quote = maxUpgradeQuote(
     upgradeBudget(lines, target),
     firstCost,
-    remaining ?? 1_000_000
+    remaining ?? MAX_BUY_LOT
   );
   if (quote.count === 0) return null;
 

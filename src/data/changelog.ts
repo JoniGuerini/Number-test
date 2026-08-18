@@ -32,6 +32,17 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.26.13',
+    date: '18/08/2026',
+    time: '11:50',
+    title: 'Max-buy without the 1M cap',
+    summary:
+      'Max research and mandate trade no longer stop at 1 million levels per click.',
+    fixes: [
+      'One click now buys as many research levels (and mandate trades) as the stock can cover. Bonus chance still stops at 100%.',
+    ],
+  },
+  {
     version: 'v0.26.12',
     date: '18/08/2026',
     time: '11:40',

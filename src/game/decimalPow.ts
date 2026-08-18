@@ -4,9 +4,10 @@
 import Decimal from 'break_eternity.js';
 
 export const decimalPowInt = (base: Decimal, exp: number): Decimal => {
+  let e = Math.max(0, Math.floor(exp));
+  if (!Number.isFinite(e)) return new Decimal(0);
   let result = new Decimal(1);
   let b = new Decimal(base);
-  let e = Math.max(0, Math.floor(exp));
   while (e > 0) {
     if (e % 2 === 1) result = result.mul(b);
     b = b.mul(b);

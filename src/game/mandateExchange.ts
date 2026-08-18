@@ -128,9 +128,12 @@ const repeatedExchangeTotal = (firstCost: Decimal, count: number): Decimal => {
 export function maxExchangeQuote(
   balance: Decimal,
   firstCost: Decimal,
-  maxCount = 1_000_000
+  maxCount = Number.MAX_SAFE_INTEGER
 ): MaxExchangeQuote {
-  const LIMIT = Math.max(0, Math.floor(maxCount));
+  const LIMIT = Math.min(
+    Number.MAX_SAFE_INTEGER,
+    Math.max(0, Math.floor(maxCount))
+  );
   if (LIMIT === 0 || firstCost.lte(0) || balance.lt(firstCost)) {
     return { count: 0, totalCost: new Decimal(0) };
   }

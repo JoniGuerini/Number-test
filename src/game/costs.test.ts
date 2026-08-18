@@ -118,6 +118,12 @@ describe('compra máxima de melhorias', () => {
     ).toBe(2);
   });
 
+  it('não para em 1M níveis quando o saldo cabe mais', () => {
+    // 2^n ≈ 10^(n·log10 2); 1.000.001 níveis de custo 1 cabem em 1e301100.
+    const quote = maxUpgradeQuote(new Decimal('1e301100'), new Decimal(1));
+    expect(quote.count).toBeGreaterThan(1_000_000);
+  });
+
   it('compra atomicamente nas cinco linhas (global) e no gerador', () => {
     const lines: Partial<Record<string, ReturnType<typeof newLine>>> = {};
     for (const def of ENABLED_LINES) {

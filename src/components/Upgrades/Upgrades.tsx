@@ -27,6 +27,7 @@ import {
   getLevel,
   isUpgradeMaxed,
   maxUpgradeQuote,
+  MAX_BUY_LOT,
   purchaseCost,
   remainingUpgradeLevels,
   unlockedGenIndices,
@@ -174,7 +175,7 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
         const maxQuote = maxUpgradeQuote(
           upgradeBudget(lines, 'global'),
           cost,
-          remaining ?? 1_000_000
+          remaining ?? MAX_BUY_LOT
         );
         const maxed = isUpgradeMaxed(upgrades, 'global', kind);
         return { kind, level, cost, canAfford: !maxed && canAfford, maxQuote, maxed };
@@ -196,7 +197,7 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
         const maxQuote = maxUpgradeQuote(
           upgradeBudget(lines, gen),
           cost,
-          remaining ?? 1_000_000
+          remaining ?? MAX_BUY_LOT
         );
         const maxed = isUpgradeMaxed(upgrades, gen, kind);
         return {
