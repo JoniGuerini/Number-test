@@ -32,6 +32,17 @@ export interface PatchNote {
 /** Da mais recente para a mais antiga. */
 export const CHANGELOG: PatchNote[] = [
   {
+    version: 'v0.26.15',
+    date: '18/08/2026',
+    time: '12:05',
+    title: 'Larger portraits on Research',
+    summary:
+      'Food portraits on Research match the height of the upgrade cards beside them; Production stays a small square.',
+    qol: [
+      'On Research, each Food portrait is a square as tall as the row of cards next to it. Production still uses the 76\u00d776 square.',
+    ],
+  },
+  {
     version: 'v0.26.14',
     date: '18/08/2026',
     time: '11:57',

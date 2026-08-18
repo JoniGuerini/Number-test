@@ -113,6 +113,41 @@
   min-width: 0;
 }
 
+/* Retrato da Comida nas melhorias: quadrado da altura dos cards ao lado.
+   Produção continua 76×76 em productionList — não reutilizar aquela classe. */
+.artRow {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.art {
+  position: relative;
+  flex: 0 0 auto;
+  align-self: stretch;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: var(--paper);
+  border-radius: 4px;
+  box-shadow: var(--card-edge);
+}
+
+.art img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.artRow .cardRow {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
 .card {
   min-width: 0;
   height: 100%;
@@ -294,6 +329,15 @@
 @media (max-width: 640px) {
   .cardRow {
     grid-template-columns: 1fr;
+  }
+  .artRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .art {
+    width: min(100%, 200px);
+    height: auto;
+    align-self: start;
   }
   .tab {
     padding: 9px 4px;

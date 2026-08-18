@@ -518,15 +518,10 @@ export default function Upgrades({ onNavigate }: UpgradesProps) {
                   return (
                     <>
                       <h2 className={styles.genName}>{genLabel}</h2>
-                      <div className={portrait ? pl.genBundle : undefined}>
+                      <div className={portrait ? styles.artRow : undefined}>
                         {portrait && (
-                          <div className={pl.portraitCard}>
-                            <img
-                              src={portrait}
-                              alt={genLabel}
-                              width={76}
-                              height={76}
-                            />
+                          <div className={styles.art}>
+                            <img src={portrait} alt={genLabel} />
                           </div>
                         )}
                         <div className={styles.cardRow}>
